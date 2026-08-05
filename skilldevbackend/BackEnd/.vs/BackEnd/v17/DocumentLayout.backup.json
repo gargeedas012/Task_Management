@@ -1,0 +1,188 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|c:\\capsitech\\skill_basedmacro_job\\skilldevbackend\\backend\\backend\\services\\todoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|solutionrelative:backend\\services\\todoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|c:\\capsitech\\skill_basedmacro_job\\skilldevbackend\\backend\\backend\\dtos\\createtododto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|solutionrelative:backend\\dtos\\createtododto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|c:\\capsitech\\skill_basedmacro_job\\skilldevbackend\\backend\\backend\\controllers\\todocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|solutionrelative:backend\\controllers\\todocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|c:\\capsitech\\skill_basedmacro_job\\skilldevbackend\\backend\\backend\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|solutionrelative:backend\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|c:\\capsitech\\skill_basedmacro_job\\skilldevbackend\\backend\\backend\\repositories\\todorepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|solutionrelative:backend\\repositories\\todorepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|c:\\capsitech\\skill_basedmacro_job\\skilldevbackend\\backend\\backend\\dtos\\updatetododto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|solutionrelative:backend\\dtos\\updatetododto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|c:\\capsitech\\skill_basedmacro_job\\skilldevbackend\\backend\\backend\\models\\todo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|solutionrelative:backend\\models\\todo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|c:\\capsitech\\skill_basedmacro_job\\skilldevbackend\\backend\\backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|solutionrelative:backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|c:\\capsitech\\skill_basedmacro_job\\skilldevbackend\\backend\\backend\\interfaces\\itodoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|solutionrelative:backend\\interfaces\\itodoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|c:\\capsitech\\skill_basedmacro_job\\skilldevbackend\\backend\\backend\\interfaces\\itodorepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D66F14A-3726-4F40-AB8E-FF4B58ABBC27}|BackEnd\\BackEnd.csproj|solutionrelative:backend\\interfaces\\itodorepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "UpdateTodoDto.cs",
+              "DocumentMoniker": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\DTOs\\UpdateTodoDto.cs",
+              "RelativeDocumentMoniker": "BackEnd\\DTOs\\UpdateTodoDto.cs",
+              "ToolTip": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\DTOs\\UpdateTodoDto.cs",
+              "RelativeToolTip": "BackEnd\\DTOs\\UpdateTodoDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAA1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-04T07:04:43.368Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "ITodoService.cs",
+              "DocumentMoniker": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\Interfaces\\ITodoService.cs",
+              "RelativeDocumentMoniker": "BackEnd\\Interfaces\\ITodoService.cs",
+              "ToolTip": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\Interfaces\\ITodoService.cs",
+              "RelativeToolTip": "BackEnd\\Interfaces\\ITodoService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAgAAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-04T06:55:38.163Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "TodoController.cs",
+              "DocumentMoniker": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\Controllers\\TodoController.cs",
+              "RelativeDocumentMoniker": "BackEnd\\Controllers\\TodoController.cs",
+              "ToolTip": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\Controllers\\TodoController.cs",
+              "RelativeToolTip": "BackEnd\\Controllers\\TodoController.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAxwA8AAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-04T06:51:24.548Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "CreateTodoDto.cs",
+              "DocumentMoniker": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\DTOs\\CreateTodoDto.cs",
+              "RelativeDocumentMoniker": "BackEnd\\DTOs\\CreateTodoDto.cs",
+              "ToolTip": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\DTOs\\CreateTodoDto.cs",
+              "RelativeToolTip": "BackEnd\\DTOs\\CreateTodoDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-04T06:47:47.036Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "TodoService.cs",
+              "DocumentMoniker": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\Services\\TodoService.cs",
+              "RelativeDocumentMoniker": "BackEnd\\Services\\TodoService.cs",
+              "ToolTip": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\Services\\TodoService.cs",
+              "RelativeToolTip": "BackEnd\\Services\\TodoService.cs",
+              "ViewState": "AgIAABsAAAAAAAAAAAAowC0AAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-04T06:39:57.79Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "ITodoRepository.cs",
+              "DocumentMoniker": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\Interfaces\\ITodoRepository.cs",
+              "RelativeDocumentMoniker": "BackEnd\\Interfaces\\ITodoRepository.cs",
+              "ToolTip": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\Interfaces\\ITodoRepository.cs",
+              "RelativeToolTip": "BackEnd\\Interfaces\\ITodoRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-04T06:38:15.401Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\appsettings.json",
+              "RelativeDocumentMoniker": "BackEnd\\appsettings.json",
+              "ToolTip": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\appsettings.json",
+              "RelativeToolTip": "BackEnd\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAABNAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-08-04T06:14:57.49Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "TodoRepository.cs",
+              "DocumentMoniker": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\Repositories\\TodoRepository.cs",
+              "RelativeDocumentMoniker": "BackEnd\\Repositories\\TodoRepository.cs",
+              "ToolTip": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\Repositories\\TodoRepository.cs",
+              "RelativeToolTip": "BackEnd\\Repositories\\TodoRepository.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAA1wBwAAAA6AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-04T06:12:36.862Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Todo.cs",
+              "DocumentMoniker": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\Models\\Todo.cs",
+              "RelativeDocumentMoniker": "BackEnd\\Models\\Todo.cs",
+              "ToolTip": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\Models\\Todo.cs",
+              "RelativeToolTip": "BackEnd\\Models\\Todo.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwA8AAAA1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-04T05:57:27.955Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\Program.cs",
+              "RelativeDocumentMoniker": "BackEnd\\Program.cs",
+              "ToolTip": "C:\\Capsitech\\skill_basedMacro_job\\skilldevbackend\\BackEnd\\BackEnd\\Program.cs",
+              "RelativeToolTip": "BackEnd\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-04T05:42:04.418Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
