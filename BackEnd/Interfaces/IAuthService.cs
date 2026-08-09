@@ -9,5 +9,6 @@ namespace BackEnd.Interfaces
         Task<TokenResponseDto> RefreshTokenAsync();
 
         Task<TokenResponseDto> GetCurrentUserAsync();
+        Task LogoutAsync();
     }
 }

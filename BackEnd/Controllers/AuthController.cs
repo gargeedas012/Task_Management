@@ -99,5 +99,26 @@ namespace BackEnd.Controllers
             return response;
         }
 
+        [HttpPost("logout")]
+        public async Task<ApiResponse<string>> Logout()
+        {
+            var response = new ApiResponse<string>();
+
+            try
+            {
+                await _authService.LogoutAsync();
+                response.Result = "Logged out successfully";
+            }
+            catch (Exception ex)
+            {
+                response.Errors.Add(new ApiError
+                {
+                    Code = "500",
+                    Message = ex.Message
+                });
+            }
+
+            return response;
+        }
     }
 }

@@ -222,5 +222,57 @@ namespace BackEnd.Services
                 Role = user.Role
             };
         }
+
+        public async Task LogoutAsync()
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+
+            if (httpContext == null)
+            {
+                throw new Exception("HTTP context not available");
+            }
+
+            // Get refresh token from cookie
+            var refreshToken = httpContext.Request.Cookies["refreshToken"];
+
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                // Find user using refresh token
+                var user = await _userService.GetByRefreshTokenAsync(refreshToken);
+
+                if (user != null)
+                {
+                    // Find stored refresh token
+                    var storedToken = user.RefreshTokens
+                        .FirstOrDefault(x => x.Token == refreshToken);
+
+                    if (storedToken != null)
+                    {
+                        // Revoke refresh token
+                        storedToken.IsRevoked = true;
+
+                        await _userService.UpdateAsync(user.Id, user);
+                    }
+                }
+            }
+
+            // Delete access token cookie
+            httpContext.Response.Cookies.Delete(
+                "accessToken",
+                new CookieOptions
+                {
+                    Secure = true,
+                    SameSite = SameSiteMode.None
+                });
+
+            // Delete refresh token cookie
+            httpContext.Response.Cookies.Delete(
+                "refreshToken",
+                new CookieOptions
+                {
+                    Secure = true,
+                    SameSite = SameSiteMode.None
+                });
+        }
     }
 }

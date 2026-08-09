@@ -1,12 +1,13 @@
 import { useAppDispatch, useAppSelector } from "../app/hooks"
-import { logout } from "../features/auth/authSlice";
 import { Button, Card, Text, Title2 } from "@fluentui/react-components";
+import { logout } from "../features/auth/authActions";
 
 export function Dashboard() {
     const dispatch = useAppDispatch();
     const user = useAppSelector(state => state.auth.user);
     const Handlelogout = () => {
-        dispatch(logout())
+        dispatch(logout());
+        window.location.reload();
     }
     return (
         <div style={{ padding: "40px" }}>

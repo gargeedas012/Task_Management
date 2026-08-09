@@ -17,3 +17,6 @@ export const getCurrentUser = async (): Promise<ApiResponse<TokenResponseDto>> =
     const response = await api.get("/me");
     return response.data;
 };
+export const logoutUser = async (): Promise<void> => {
+    await api.post("/logout");
+};  
