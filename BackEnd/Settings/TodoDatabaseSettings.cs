@@ -6,5 +6,6 @@ namespace BackEnd.Settings
         public string DatabaseName { get; set; } = null!;
         public string TodoCollectionName { get; set; } = null!;
         public string UserCollectionName { get; set; } = null!;
+        public string ProjectCollectionName { get; set; } = null!;
     }
 }
