@@ -32,6 +32,7 @@ function AuthInitializer({
                 dispatch(
                     loginSuccess({
                         username: user.result.username,
+                        userId:user.result.userId,
                         email: user.result.email,
                         role: user.result.role,
                     })
@@ -45,6 +46,7 @@ function AuthInitializer({
                     dispatch(
                         loginSuccess({
                             username: user.result.username,
+                            userId:user.result.userId,
                             email: user.result.email,
                             role: user.result.role,
                         })

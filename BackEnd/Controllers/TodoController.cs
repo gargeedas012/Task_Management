@@ -241,6 +241,37 @@ namespace BackEnd.Controllers
             }
             return response;            
         }
-        
+        [HttpGet("SearchByUserId")]
+        public async Task<ApiResponse<List<Todo>>> GetTodosByUserIdAsync(string userId)
+        {
+            var response = new ApiResponse<List<Todo>>();
+            try
+            {
+                var task=await _todoService.GetTodosByUserIdAsync(userId);
+                if(task == null)
+                {
+                    response.Errors.Add(new ApiError
+                    {
+                        Code = "404",
+                        Message = "Task not found"
+                    });
+                    return response;
+                }
+                else
+                {
+                    response.Result = task;
+                }
+            }catch(Exception ex)
+            {
+                response.Errors.Add(new ApiError
+                {
+                    Code = "500",
+                    Message = ex.Message
+                });
+            }
+            return response;
+        }
+
+
     }
 }

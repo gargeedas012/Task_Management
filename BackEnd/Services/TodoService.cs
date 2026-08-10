@@ -18,6 +18,7 @@ namespace BackEnd.Services
             var todo = new Todo
             {
                 Title = createTodoDto.Title,
+                UserId = createTodoDto.UserId,
                 Description = createTodoDto.Description,
                 Priority = createTodoDto.Priority,
                 DueDate = createTodoDto.DueDate,
@@ -32,6 +33,7 @@ namespace BackEnd.Services
         {
             await _repository.DeleteAsync(id);
         }
+
 
         public async Task<List<Todo>> GetAllAsync()
         {
@@ -49,6 +51,7 @@ namespace BackEnd.Services
             {
                 Id = id,
                 Title = updateTodoDto.Title,
+                UserId = updateTodoDto.UserId,
                 Description = updateTodoDto.Description,
                 Priority = updateTodoDto.Priority,
                 DueDate = updateTodoDto.DueDate,
@@ -70,6 +73,11 @@ namespace BackEnd.Services
         public Task<List<Todo>> SearchAsync(string SearchText)
         {
             return _repository.SearchAsync(SearchText);
+        }
+
+        public Task<List<Todo>> GetTodosByUserIdAsync(string userId)
+        {
+            return _repository.GetTodosByUserIdAsync(userId);
         }
     }
 }

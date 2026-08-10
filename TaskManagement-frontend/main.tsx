@@ -1,4 +1,3 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import { Provider } from 'react-redux'
@@ -7,7 +6,6 @@ import { FluentProvider, webLightTheme } from "@fluentui/react-components";
 import AuthInitializer from './src/components/AuthInitializer.tsx'
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
     <Provider store={store}>
       <FluentProvider theme={webLightTheme}>
         <AuthInitializer>
@@ -15,5 +13,4 @@ createRoot(document.getElementById('root')!).render(
         </AuthInitializer>
       </FluentProvider>
     </Provider>
-  </StrictMode>,
 )

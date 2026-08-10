@@ -38,6 +38,14 @@ namespace BackEnd.Repositories
             await _todoCollection.DeleteOneAsync(x => x.Id == id);
         }
 
+        public async Task<List<Todo>> GetTodosByUserIdAsync(string userId)
+        {
+            var sort = Builders<Todo>.Sort.Descending(x => x.CreatedDate);
+            return await _todoCollection
+                .Find(x => x.UserId == userId)
+                .Sort(sort)
+                .ToListAsync();
+        }
         public async Task<List<InCompleteTodoResponseDto>> GetIncompleteTodos(bool isCompleted)
         {
             var pipeline = new[]

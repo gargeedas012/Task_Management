@@ -3,6 +3,7 @@ namespace BackEnd.DTOs
     public class UpdateTodoDto
     {
         public string Title { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Priority { get; set; } = null!;
         public DateTime DueDate { get; set; }

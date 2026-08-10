@@ -13,5 +13,6 @@ namespace BackEnd.Interfaces
         Task<List<InCompleteTodoResponseDto>> GetIncompleteTodos(bool isCompleted);
         Task<List<PriorityCountDto>> GetPriorityCount();
         Task<List<Todo>> SearchAsync(string SearchText);
+        Task<List<Todo>> GetTodosByUserIdAsync(string userId);
     }
 }

@@ -70,6 +70,7 @@ namespace BackEnd.Services
             return new TokenResponseDto
             {
                 Username=user.Username,
+                UserId=user.Id.ToString(),
                 Email=user.Email,
                 Role=user.Role
             };
@@ -140,7 +141,8 @@ namespace BackEnd.Services
             return new TokenResponseDto
             {
                 Username=user.Username,
-                Email=user.Email,
+                UserId = user.Id.ToString(),
+                Email =user.Email,
                 Role=user.Role
             };
         }
@@ -218,6 +220,7 @@ namespace BackEnd.Services
             return new TokenResponseDto
             {
                 Username = user.Username,
+                UserId = user.Id.ToString(),
                 Email = user.Email,
                 Role = user.Role
             };

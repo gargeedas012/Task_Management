@@ -3,12 +3,10 @@ export interface RegisterRequest {
   email: string;
   password: string;
 }
-
 export interface LoginRequest {
   email: string;
   password: string;
 }
-
 export interface RefreshToken {
   token: string;
   expiryDate: string;
@@ -16,7 +14,6 @@ export interface RefreshToken {
   createdAt: string;
   ipAddress: string;
 }
-
 export interface User {
   id: string;
   username: string;
@@ -24,9 +21,9 @@ export interface User {
   role: string;
   refreshTokens: RefreshToken[];
 }
-
 export interface TokenResponseDto {
   username: string;
+  userId : string;
   email: string;
   role: string;
 }

@@ -11,6 +11,7 @@ export const login = (data: LoginRequest) => async (dispatch: AppDispatch) => {
             loginSuccess(
                 {
                     username: response.result.username,
+                    userId:response.result.userId,
                     email: response.result.email,
                     role: response.result.role
                 }
