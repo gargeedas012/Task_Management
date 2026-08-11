@@ -12,25 +12,28 @@ import {
 } from "@fluentui/react-components";
 
 import type { Todo } from "../types/todo";
-import { getTodos, deleteTodo, updateTodo } from "../api/authApi";
+import { getTodos, deleteTodo, updateTodo, getTodosByProject } from "../api/authApi";
 import { useAppSelector } from "../app/hooks";
 import TodoForm from "./TodoForm";
 
-const TodoList = () => {
+interface AddTodoListProps {
+    projectid:string;
+}
+
+const TodoList = ({projectid}:AddTodoListProps) => {
     const [todos, setTodos] = useState<Todo[]>([]);
     const [loading, setLoading] = useState(false);
     const [openTodoDialog , setOpenTodoDialog]=useState(false);
     const [SelectedTodo, setSelectedTodo]=useState<Todo>();
     const user = useAppSelector(state => state.auth.user)
+    
 
     // GET TODOS
     const fetchTodos = async () => {
         try {
             setLoading(true);
-
             if (!user?.userId) return;
-            const response = await getTodos(user.userId);
-
+            const response = await getTodosByProject(projectid);
             setTodos(response.result);
         } catch (error) {
             console.error("Failed to fetch todos:", error);
@@ -41,6 +44,7 @@ const TodoList = () => {
 
     // GET API WHEN COMPONENT LOADS
     useEffect(() => {
+        console.log("call")
         fetchTodos();
     }, []);
 
@@ -173,6 +177,7 @@ const TodoList = () => {
     setSelectedTodo(undefined);
     fetchTodos();
   }}
+  projectid={projectid}
   todo={SelectedTodo}
 />
    </>

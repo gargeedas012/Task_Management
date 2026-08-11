@@ -19,7 +19,7 @@ namespace BackEnd.Controllers
         }
 
         [HttpGet]
-        public async Task<ApiResponse<List<Project>>> GetAllAsync()
+        public async Task<ActionResult<ApiResponse<List<Project>>>> GetAllAsync()
         {
             var response = new ApiResponse<List<Project>>();
             _logger.LogInformation("Get all projects API called");
@@ -33,85 +33,94 @@ namespace BackEnd.Controllers
                         Code = "404",
                         Message = "Projects not found"
                     });
+                    return NotFound();
                 }
                 else
                 {
                     response.Result = projects;
+                    return Ok(response);
                 }
             }
             catch (Exception ex)
             {
+                response.Status = false;
                 response.Errors.Add(new ApiError
                 {
                     Code = "500",
                     Message = ex.Message
                 });
+                return Unauthorized(response);
             }
-            return response;
         }
 
         [HttpPost]
-        public async Task<ApiResponse<string>> CreateAsync(Project project)
+        public async Task<ActionResult<ApiResponse<string>>> CreateAsync(Project project)
         {
             var response = new ApiResponse<string>();
             try
             {
                 await _projectService.CreateProjectAsync(project);
                 response.Result = "Project Created";
+                return Ok(response);
             }
             catch (Exception ex)
             {
+                response.Status = false;
                 response.Errors.Add(new ApiError
                 {
                     Code = "500",
                     Message = ex.Message
                 });
+                return Unauthorized(response);
             }
-            return response;
         }
 
         [HttpPut("{id}")]
-        public async Task<ApiResponse<string>> Update(string id, Project project)
+        public async Task<ActionResult<ApiResponse<string>>> Update(string id, Project project)
         {
             var response = new ApiResponse<string>();
             try
             {
                 await _projectService.UpdateProjectAsync(id, project);
                 response.Result = "Project Updated";
+                return Ok(response);
             }
             catch (Exception ex)
             {
+                response.Status = false;
                 response.Errors.Add(new ApiError
                 {
                     Code = "500",
                     Message = ex.Message
                 });
+                return Unauthorized(response);
             }
-            return response;
         }
 
         [HttpDelete("{id}")]
-        public async Task<ApiResponse<string>> Delete(string id)
+        public async Task<ActionResult<ApiResponse<string>>> Delete(string id)
         {
             var response = new ApiResponse<string>();
             try
             {
                 await _projectService.DeleteProjectAsync(id);
                 response.Result = "Project Deleted";
+                return Ok(response);
             }
             catch (Exception ex)
             {
+                response.Status=false;
                 response.Errors.Add(new ApiError
                 {
                     Code = "500",
                     Message = ex.Message
                 });
+                return Unauthorized(response);
             }
-            return response;
         }
 
         [HttpGet("SearchByUserId")]
-        public async Task<ApiResponse<List<Project>>> GetProjectsByUserIdAsync(string userId)
+        public async Task<ActionResult<ApiResponse<List<Project>>>> GetProjectsByUserIdAsync(string userId)
         {
             var response = new ApiResponse<List<Project>>();
             try
@@ -124,21 +133,24 @@ namespace BackEnd.Controllers
                         Code = "404",
                         Message = "Projects not found"
                     });
+                    return NotFound();
                 }
                 else
                 {
                     response.Result = projects;
+                    return Ok(response);
                 }
             }
             catch (Exception ex)
             {
+                response.Status = false;
                 response.Errors.Add(new ApiError
                 {
                     Code = "500",
                     Message = ex.Message
                 });
+                return Unauthorized(response);
             }
-            return response;
         }
     }
 }

@@ -2,11 +2,38 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { useState } from "react";
 import { login } from '../features/auth/authActions';
-import { Button, Card, Field, Input, Text, Title3 } from "@fluentui/react-components";
+import { Button, Card, Field, Input, Text, Title3, Toast, ToastBody, ToastTitle, useToastController } from "@fluentui/react-components";
+import { getApiErrorMessage } from "../api/apiError";
 
 export function Login() {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const { dispatchToast  }= useToastController("app-toaster")
+
+    const HandleError = (message: string) => {
+        dispatchToast(
+            <Toast>
+                <ToastTitle>Login Failed</ToastTitle>
+                <ToastBody>{message}</ToastBody>
+            </Toast>,
+            {
+                intent: "error",
+                timeout: 3000,
+            }
+        );
+    };
+    const HandleSuccess = (message: string) => {
+        dispatchToast(
+            <Toast>
+                <ToastTitle>Success</ToastTitle>
+                <ToastBody>{message}</ToastBody>
+            </Toast>,
+            {
+                intent: "success",
+                timeout: 3000,
+            }
+        );
+    };
 
     const loading = useAppSelector(state => state.auth.loading);
     const [logindata, setlogindata] = useState({
@@ -20,12 +47,16 @@ export function Login() {
         seterror("");
         try {
             await dispatch(login(logindata));
-            navigate("/dashboard");
+            HandleSuccess("You Successfully Login")
+            setTimeout(()=>{
+                navigate("/dashboard");
+            },3000)
         } catch (error: any) {
-            seterror(
-                error?.response?.data?.message ||
-                "Invalid email or password"
-            );
+            HandleError(getApiErrorMessage(error))
+            // seterror(
+            //     error?.response?.data?.message ||
+            //     "Invalid email or password"
+            // );
         }
     };
     return (

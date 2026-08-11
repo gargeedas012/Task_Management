@@ -139,5 +139,11 @@ namespace BackEnd.Services
             await VerifyAuthAsync();
             return await _repository.GetTodosByUserIdAsync(userId);
         }
+
+        public async Task<List<Todo>> GetTodosByProjectIdAsync(string projectId)
+        {
+            await VerifyAuthAsync();
+            return await _repository.GetTodosByProjectIdAsync(projectId);
+        }
     }
 }

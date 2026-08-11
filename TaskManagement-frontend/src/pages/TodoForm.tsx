@@ -22,15 +22,17 @@ import { createTodo, updateTodo } from "../api/authApi";
 interface AddTodoProps {
     open: boolean;
     todo?: Todo;
+    projectid:string;
     onClose: () => void;
 }
-const TodoForm = ({ open, onClose , todo }: AddTodoProps) => {
+const TodoForm = ({ open, onClose ,projectid, todo }: AddTodoProps) => {
     const user = useAppSelector(state => state.auth.user)
     const formik = useFormik({
         enableReinitialize: true,
         initialValues: {
             title: todo?.title ?? "",
             userId: todo?.userId ?? user?.userId ?? "",
+            projectId: (todo?.projectId ?? projectid ?? "") as Todo["projectId"],
             description: todo?.description ?? "",
             priority: todo?.priority ?? "Low",
             dueDate:todo?.dueDate ?? "",

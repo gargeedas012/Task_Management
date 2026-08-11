@@ -16,47 +16,50 @@ namespace BackEnd.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ApiResponse<string>> Register(RegisterDto register)
-        {
-            var response = new ApiResponse<string>();
-            try
-            {
-                await _authService.RegisterAsync(register);
-                response.Result = "User registered successfully";
-            }
-            catch (Exception ex)
-            {
-                response.Errors.Add(new ApiError
-                {
-                    Code = "500",
-                    Message = ex.Message
-                });
-            }
-            return response;
-        }
-
-        [HttpPost("login")]
-        public async Task<ApiResponse<TokenResponseDto>> Login(LoginDto login)
+        public async Task<ActionResult<ApiResponse<TokenResponseDto>>> Register(RegisterDto register)
         {
             var response = new ApiResponse<TokenResponseDto>();
             try
             {
-               var result= await _authService.LoginAsync(login);
+               var result= await _authService.RegisterAsync(register);
                 response.Result = result;
+                return Ok(response);
             }
             catch (Exception ex)
             {
+                response.Status = false;
                 response.Errors.Add(new ApiError
                 {
                     Code = "500",
                     Message = ex.Message
                 });
-
+                return Unauthorized(response);
             }
-            return response;
+        }
+
+        [HttpPost("login")]
+        public async Task<ActionResult<ApiResponse<TokenResponseDto>>> Login(LoginDto login)
+        {
+            var response = new ApiResponse<TokenResponseDto>();
+            try
+            {
+                var result = await _authService.LoginAsync(login);
+                response.Result = result;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.Status = false;
+                response.Errors.Add(new ApiError
+                {
+                    Code = "401",
+                    Message = ex.Message
+                });
+                return Unauthorized(response);
+            }
         }
         [HttpPost("refresh")]
-        public async Task<ApiResponse<TokenResponseDto>> Refresh()
+        public async Task<ActionResult<ApiResponse<TokenResponseDto>>> Refresh()
         {
             var response = new ApiResponse<TokenResponseDto>();
 
@@ -65,21 +68,22 @@ namespace BackEnd.Controllers
                 var result = await _authService.RefreshTokenAsync();
 
                 response.Result = result;
+                return Ok(response);
             }
             catch (Exception ex)
             {
+                response.Status = false;
                 response.Errors.Add(new ApiError
                 {
                     Code = "500",
                     Message = ex.Message
                 });
+                return Unauthorized(response);
             }
-
-            return response;
         }
 
         [HttpGet("me")]
-        public async Task<ApiResponse<TokenResponseDto>> GetCurrentUser()
+        public async Task<ActionResult<ApiResponse<TokenResponseDto>>> GetCurrentUser()
         {
             var response= new ApiResponse<TokenResponseDto>();
             try
@@ -87,38 +91,40 @@ namespace BackEnd.Controllers
                 var user = await _authService.GetCurrentUserAsync();
 
                 response.Result = user;
+                return Ok(response);
             }
             catch (Exception ex)
             {
+                response.Status = false;
                 response.Errors.Add(new ApiError
                 {
                     Code = "401",
                     Message = ex.Message
                 });
+                return Unauthorized(response);
             }
-            return response;
         }
 
         [HttpPost("logout")]
-        public async Task<ApiResponse<string>> Logout()
+        public async Task<ActionResult<ApiResponse<string>>> Logout()
         {
             var response = new ApiResponse<string>();
-
             try
             {
                 await _authService.LogoutAsync();
                 response.Result = "Logged out successfully";
+                return Ok(response);
             }
             catch (Exception ex)
             {
+                response.Status = false;
                 response.Errors.Add(new ApiError
                 {
                     Code = "500",
                     Message = ex.Message
                 });
+                return Unauthorized(response);
             }
-
-            return response;
         }
     }
 }

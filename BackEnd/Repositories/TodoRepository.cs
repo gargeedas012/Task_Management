@@ -46,6 +46,11 @@ namespace BackEnd.Repositories
                 .Sort(sort)
                 .ToListAsync();
         }
+        public async Task<List<Todo>> GetTodosByProjectIdAsync(string projectId)
+        {
+            var sort=Builders<Todo>.Sort.Descending(x=>x.CreatedDate);
+            return await _todoCollection.Find(x=>x.ProjectId == projectId).Sort(sort).ToListAsync();
+        }
         public async Task<List<InCompleteTodoResponseDto>> GetIncompleteTodos(bool isCompleted)
         {
             var pipeline = new[]

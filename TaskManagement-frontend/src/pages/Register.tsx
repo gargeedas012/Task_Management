@@ -6,10 +6,17 @@ import {
     Input,
     Text,
     Title3,
+    Toast,
+    ToastBody,
+    ToastTitle,
+    useToastController,
 } from "@fluentui/react-components";
 import { Link, useNavigate } from "react-router-dom";
 
 import { registerUser } from "../api/authApi";
+import { getApiErrorMessage } from "../api/apiError";
+import { useAppDispatch } from "../app/hooks";
+import { login } from "../features/auth/authActions";
 
 function Register() {
     const navigate = useNavigate();
@@ -18,34 +25,57 @@ function Register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(false);
-
+    const { dispatchToast  }= useToastController("app-toaster")
+    const dispatch=useAppDispatch()
+    const HandleError = (message: string) => {
+        dispatchToast(
+            <Toast>
+                <ToastTitle>Register Failed</ToastTitle>
+                <ToastBody>{message}</ToastBody>
+            </Toast>,
+            {
+                intent: "error",
+                timeout: 3000,
+            }
+        );
+    };
+    const HandleSuccess = (message: string) => {
+        dispatchToast(
+            <Toast>
+                <ToastTitle>Success</ToastTitle>
+                <ToastBody>{message}</ToastBody>
+            </Toast>,
+            {
+                intent: "success",
+                timeout: 3000,
+            }
+        );
+    };
     const handleRegister = async (
         e: React.FormEvent
     ) => {
         e.preventDefault();
 
-        setError("");
         setSuccess("");
 
         try {
             setLoading(true);
 
-            await registerUser({
+            const response=await registerUser({
                 username,
                 email,
                 password,
             });
             setSuccess("Registration successful!");
-            window.location.reload();
-            navigate("/dashboard")
+            HandleSuccess("You Have Successfully Register")
+            await dispatch(login({ 
+                email: response.result.email,
+                password: password
+            }))
         } catch (error: any) {
-            setError(
-                error?.response?.data?.message ||
-                "Registration failed"
-            );
+            HandleError(getApiErrorMessage(error))
         } finally {
             setLoading(false);
         }
@@ -123,12 +153,6 @@ function Register() {
                     </Field>
 
                     <br />
-
-                    {error && (
-                        <Text>
-                            {error}
-                        </Text>
-                    )}
 
                     {success && (
                         <Text>

@@ -1,3 +1,4 @@
+import { getApiErrorMessage } from "../../api/apiError";
 import { loginUser, logoutUser } from "../../api/authApi";
 import type { AppDispatch } from "../../app/store";
 import type { LoginRequest } from "../../types/auth";
@@ -18,6 +19,8 @@ export const login = (data: LoginRequest) => async (dispatch: AppDispatch) => {
             )
         );
     } catch (err) {
+        const message = getApiErrorMessage(err);
+        console.log("errorr",message);
         dispatch(loginFailure())
         throw err;
     }

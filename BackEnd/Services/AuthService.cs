@@ -29,7 +29,7 @@ namespace BackEnd.Services
                 );
             if(!passwordMatch)
             {
-                throw new Exception("Invalid email or password");
+                throw new Exception("Invalid  password");
             }
             var token = _jwtService.GenerateToken(user);
             var ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
@@ -147,7 +147,7 @@ namespace BackEnd.Services
             };
         }
 
-        public async Task RegisterAsync(RegisterDto register)
+        public async Task<TokenResponseDto> RegisterAsync(RegisterDto register)
         {
             var existing = await _userService.GetByEmailAsync(register.Email);
             if (existing != null)
@@ -166,12 +166,20 @@ namespace BackEnd.Services
                 Role = "User"
             };
             await _userService.CreateAsync(user);
-            var login = new LoginDto
+            var finduser= await _userService.GetByEmailAsync(register.Email);
+            return new TokenResponseDto
             {
-                Email = register.Email,
-                Password = register.Password
+                Username = finduser.Username,
+                UserId = finduser.Id.ToString(),
+                Email = finduser.Email,
+                Role = finduser.Role
             };
-            await LoginAsync(login);
+            //var login = new LoginDto
+            //{
+            //    Email = register.Email,
+            //    Password = register.Password
+            //};
+            //await LoginAsync(login);
         }
 
         public async Task<TokenResponseDto> GetCurrentUserAsync()
