@@ -9,6 +9,7 @@ import { useLocation } from "react-router-dom";
 
 function ProjectBoard() {
     const [openTodoDialog, setOpenTodoDialog] = useState(false);
+    const [refreshList, setRefreshList] = useState(0);
     const location=useLocation();
     const project=location.state?.project as Project
     console.log("project come",project);
@@ -17,6 +18,9 @@ function ProjectBoard() {
     };
     const handleCloseTodo = () => {
         setOpenTodoDialog(false);
+    };
+    const handleSuccessTodo = () => {
+        setRefreshList(prev => prev + 1);
     };
     return (
         <div
@@ -52,7 +56,7 @@ function ProjectBoard() {
                 </div>
 
                 {/* Todo List */}
-                <TodoList projectid={project.id ?? ""} />
+                <TodoList projectid={project.id ?? ""} refreshTrigger={refreshList} />
 
             </Card>
 
@@ -61,6 +65,7 @@ function ProjectBoard() {
                 open={openTodoDialog}
                 projectid={project.id ?? ""}
                 onClose={handleCloseTodo}
+                onSuccess={handleSuccessTodo}
             />
 
         </div>

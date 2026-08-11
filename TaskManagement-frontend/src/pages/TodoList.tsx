@@ -17,16 +17,17 @@ import { useAppSelector } from "../app/hooks";
 import TodoForm from "./TodoForm";
 
 interface AddTodoListProps {
-    projectid:string;
+    projectid: string;
+    refreshTrigger?: number;
 }
 
-const TodoList = ({projectid}:AddTodoListProps) => {
+const TodoList = ({ projectid, refreshTrigger }: AddTodoListProps) => {
     const [todos, setTodos] = useState<Todo[]>([]);
     const [loading, setLoading] = useState(false);
-    const [openTodoDialog , setOpenTodoDialog]=useState(false);
-    const [SelectedTodo, setSelectedTodo]=useState<Todo>();
+    const [openTodoDialog, setOpenTodoDialog] = useState(false);
+    const [SelectedTodo, setSelectedTodo] = useState<Todo>();
     const user = useAppSelector(state => state.auth.user)
-    
+
 
     // GET TODOS
     const fetchTodos = async () => {
@@ -46,7 +47,7 @@ const TodoList = ({projectid}:AddTodoListProps) => {
     useEffect(() => {
         console.log("call")
         fetchTodos();
-    }, []);
+    }, [refreshTrigger]);
 
     // DELETE TODO
     const handleDelete = async (id?: string) => {
@@ -65,15 +66,15 @@ const TodoList = ({projectid}:AddTodoListProps) => {
     };
 
     // EDIT TODO
-      const handleEdit = async (todo: Todo) => {
+    const handleEdit = async (todo: Todo) => {
         try {
-            console.log("updated item",todo);
-              setSelectedTodo(todo);
-              setOpenTodoDialog(true);
+            console.log("updated item", todo);
+            setSelectedTodo(todo);
+            setOpenTodoDialog(true);
         } catch (error) {
-          console.error("Failed to update todo:", error);
+            console.error("Failed to update todo:", error);
         }
-      };
+    };
     const formatDate = (date: string) => {
         return new Date(date).toLocaleDateString("en-IN", {
             day: "2-digit",
@@ -87,100 +88,102 @@ const TodoList = ({projectid}:AddTodoListProps) => {
     }
 
     return (
-         <>
-        <Table aria-label="Todo list">
+        <>
+            <Table aria-label="Todo list">
 
-            <TableHeader>
-                <TableRow>
-                    <TableHeaderCell>Title</TableHeaderCell>
-                    <TableHeaderCell>Description</TableHeaderCell>
-                    <TableHeaderCell>Status</TableHeaderCell>
-                    <TableHeaderCell>Priority</TableHeaderCell>
-                    <TableHeaderCell>Due Date</TableHeaderCell>
-                    <TableHeaderCell>Category</TableHeaderCell>
-                    <TableHeaderCell>Actions</TableHeaderCell>
-                </TableRow>
-            </TableHeader>
-
-            <TableBody>
-
-                {todos.length === 0 ? (
+                <TableHeader>
                     <TableRow>
-                        <TableCell colSpan={7}>
-                            No todos found
-                        </TableCell>
+                        <TableHeaderCell>Title</TableHeaderCell>
+                        <TableHeaderCell>Description</TableHeaderCell>
+                        <TableHeaderCell>Status</TableHeaderCell>
+                        <TableHeaderCell>Priority</TableHeaderCell>
+                        <TableHeaderCell>Due Date</TableHeaderCell>
+                        <TableHeaderCell>Category</TableHeaderCell>
+                        <TableHeaderCell>Actions</TableHeaderCell>
                     </TableRow>
-                ) : (
-                    todos.map((todo) => (
-                        <TableRow key={todo.id}>
+                </TableHeader>
 
-                            <TableCell>
-                                {todo.title}
+                <TableBody>
+
+                    {todos.length === 0 ? (
+                        <TableRow>
+                            <TableCell colSpan={7}>
+                                No todos found
                             </TableCell>
-
-                            <TableCell>
-                                {todo.description}
-                            </TableCell>
-
-                            <TableCell>
-                                {todo.isCompleted ? (
-                                    <Badge appearance="filled">
-                                        Completed
-                                    </Badge>
-                                ) : (
-                                    <Badge appearance="outline">
-                                        Pending
-                                    </Badge>
-                                )}
-                            </TableCell>
-
-                            <TableCell>
-                                {todo.priority}
-                            </TableCell>
-
-                            <TableCell>
-                                {formatDate(todo.dueDate)}
-                            </TableCell>
-
-                            <TableCell>
-                                {todo.category}
-                            </TableCell>
-
-                            <TableCell>
-                                <Button
-                                    appearance="primary"
-                                    size="small"
-                                  onClick={() => handleEdit(todo)}
-                                >
-                                    Edit
-                                </Button>
-
-                                <Button
-                                    appearance="secondary"
-                                    size="small"
-                                    onClick={() => handleDelete(todo.id)}
-                                >
-                                    Delete
-                                </Button>
-                            </TableCell>
-
                         </TableRow>
-                    ))
-                )}
+                    ) : (
+                        todos.map((todo) => (
+                            <TableRow key={todo.id}>
 
-            </TableBody>
-        </Table>
-<TodoForm
-  open={openTodoDialog}
-  onClose={() => {
-    setOpenTodoDialog(false);
-    setSelectedTodo(undefined);
-    fetchTodos();
-  }}
-  projectid={projectid}
-  todo={SelectedTodo}
-/>
-   </>
+                                <TableCell>
+                                    {todo.title}
+                                </TableCell>
+
+                                <TableCell>
+                                    {todo.description}
+                                </TableCell>
+
+                                <TableCell>
+                                    {todo.isCompleted ? (
+                                        <Badge appearance="filled">
+                                            Completed
+                                        </Badge>
+                                    ) : (
+                                        <Badge appearance="outline">
+                                            Pending
+                                        </Badge>
+                                    )}
+                                </TableCell>
+
+                                <TableCell>
+                                    {todo.priority}
+                                </TableCell>
+
+                                <TableCell>
+                                    {formatDate(todo.dueDate)}
+                                </TableCell>
+
+                                <TableCell>
+                                    {todo.category}
+                                </TableCell>
+
+                                <TableCell>
+                                    <Button
+                                        appearance="primary"
+                                        size="small"
+                                        onClick={() => handleEdit(todo)}
+                                    >
+                                        Edit
+                                    </Button>
+
+                                    <Button
+                                        appearance="secondary"
+                                        size="small"
+                                        onClick={() => handleDelete(todo.id)}
+                                    >
+                                        Delete
+                                    </Button>
+                                </TableCell>
+
+                            </TableRow>
+                        ))
+                    )}
+
+                </TableBody>
+            </Table>
+            <TodoForm
+                open={openTodoDialog}
+                onClose={() => {
+                    setOpenTodoDialog(false);
+                    setSelectedTodo(undefined);
+                }}
+                onSuccess={() => {
+                    fetchTodos();
+                }}
+                projectid={projectid}
+                todo={SelectedTodo}
+            />
+        </>
     );
 };
 

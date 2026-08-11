@@ -24,8 +24,9 @@ interface AddTodoProps {
     todo?: Todo;
     projectid:string;
     onClose: () => void;
+    onSuccess?: () => void;
 }
-const TodoForm = ({ open, onClose ,projectid, todo }: AddTodoProps) => {
+const TodoForm = ({ open, onClose ,projectid, todo, onSuccess }: AddTodoProps) => {
     const user = useAppSelector(state => state.auth.user)
     const formik = useFormik({
         enableReinitialize: true,
@@ -71,6 +72,7 @@ const TodoForm = ({ open, onClose ,projectid, todo }: AddTodoProps) => {
             }
             
             formik.resetForm();
+            if (onSuccess) onSuccess();
             onClose();
             console.log(values);
         },
