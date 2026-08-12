@@ -1,3 +1,4 @@
+using BackEnd.Models;
 using MongoDB.Bson.Serialization.Attributes;
 namespace BackEnd.DTOs
 {
@@ -40,5 +41,11 @@ namespace BackEnd.DTOs
     {
         public string Id { get; set; }
         public int Total { get; set; }
+    }
+    [BsonIgnoreExtraElements]
+    public class TodoByDateDto
+    {
+        public string Id { get; set; } = string.Empty;
+        public List<Todo> Tasks { get; set; } = new();
     }
 }

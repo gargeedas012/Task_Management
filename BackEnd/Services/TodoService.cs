@@ -145,5 +145,17 @@ namespace BackEnd.Services
             await VerifyAuthAsync();
             return await _repository.GetTodosByProjectIdAsync(projectId);
         }
+
+        public async Task<List<Todo>> GetTodosByProjectIdWithLimit(string projectId, int page, int pageSize)
+        {
+            await VerifyAuthAsync();
+            return await _repository.GetTodosByProjectIdWithLimit(projectId, page, pageSize);
+        }
+
+        public async Task<List<TodoByDateDto>> GetTodosByDateAsync(string projectId, DateTime startDate)
+        {
+            await VerifyAuthAsync();
+            return await _repository.GetTodosByDateAsync(projectId, startDate);
+        }
     }
 }

@@ -23,7 +23,6 @@ function ProjectList() {
                 const response = await getAllProjects(user?.userId??"");
                 setprojects(response.result);
             };
-
         loadProjects();
     }, []);
     const handleView = (project: Project) => {

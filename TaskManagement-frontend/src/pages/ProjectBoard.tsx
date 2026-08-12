@@ -57,9 +57,7 @@ function ProjectBoard() {
 
                 {/* Todo List */}
                 <TodoList projectid={project.id ?? ""} refreshTrigger={refreshList} />
-
             </Card>
-
             {/* Todo Form Dialog */}
             <TodoForm
                 open={openTodoDialog}

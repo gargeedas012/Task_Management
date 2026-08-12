@@ -11,6 +11,10 @@ import {
     Dropdown,
     Option,
     Checkbox,
+    useToastController,
+    Toast,
+    ToastTitle,
+    ToastBody,
 } from "@fluentui/react-components";
 
 import { useFormik } from "formik";
@@ -18,15 +22,41 @@ import * as Yup from "yup";
 import { useAppSelector } from "../app/hooks";
 import type { Todo } from "../types/todo";
 import { createTodo, updateTodo } from "../api/authApi";
+import { getApiErrorMessage } from "../api/apiError";
 
 interface AddTodoProps {
     open: boolean;
     todo?: Todo;
-    projectid:string;
+    projectid: string;
     onClose: () => void;
     onSuccess?: () => void;
 }
-const TodoForm = ({ open, onClose ,projectid, todo, onSuccess }: AddTodoProps) => {
+const TodoForm = ({ open, onClose, projectid, todo, onSuccess }: AddTodoProps) => {
+    const HandleError = (message: string) => {
+        dispatchToast(
+            <Toast>
+                <ToastTitle>Login Failed</ToastTitle>
+                <ToastBody>{message}</ToastBody>
+            </Toast>,
+            {
+                intent: "error",
+                timeout: 3000,
+            }
+        );
+    };
+    const HandleSuccess = (message: string) => {
+        dispatchToast(
+            <Toast>
+                <ToastTitle>Success</ToastTitle>
+                <ToastBody>{message}</ToastBody>
+            </Toast>,
+            {
+                intent: "success",
+                timeout: 3000,
+            }
+        );
+    };
+    const { dispatchToast } = useToastController("app-toaster")
     const user = useAppSelector(state => state.auth.user)
     const formik = useFormik({
         enableReinitialize: true,
@@ -36,9 +66,9 @@ const TodoForm = ({ open, onClose ,projectid, todo, onSuccess }: AddTodoProps) =
             projectId: (todo?.projectId ?? projectid ?? "") as Todo["projectId"],
             description: todo?.description ?? "",
             priority: todo?.priority ?? "Low",
-            dueDate:todo?.dueDate ?? "",
-            category:todo?.category ??  "",
-            isCompleted:todo?.isCompleted ?? false,
+            dueDate: todo?.dueDate ?? "",
+            category: todo?.category ?? "",
+            isCompleted: todo?.isCompleted ?? false,
         },
 
         validationSchema: Yup.object({
@@ -60,17 +90,27 @@ const TodoForm = ({ open, onClose ,projectid, todo, onSuccess }: AddTodoProps) =
         }),
 
         onSubmit: async (values: Todo) => {
-            if(todo)
-            {
-                const updatedTodo: Todo={
+            if (todo) {
+                const updatedTodo: Todo = {
                     ...values,
-                    id:todo.id
+                    id: todo.id
                 }
-                await updateTodo(updatedTodo);
-            }else{
-                await createTodo(values);
+                try{
+                    await updateTodo(updatedTodo);
+                    HandleSuccess("Task is Updated Successfully")
+                }catch(err)
+                {
+                    HandleError(getApiErrorMessage(err))
+                }
+            } else {
+                try{
+                    await createTodo(values);
+                    HandleSuccess("Task is created Successfully")
+                }catch(err)
+                {
+                    HandleError(getApiErrorMessage(err))
+                }
             }
-            
             formik.resetForm();
             if (onSuccess) onSuccess();
             onClose();
@@ -285,19 +325,19 @@ const TodoForm = ({ open, onClose ,projectid, todo, onSuccess }: AddTodoProps) =
                                 Cancel
                             </Button>
                             {
-                                todo?( <Button
-                                appearance="primary"
-                                type="submit"
-                            >
-                                Update Todo
-                            </Button>):(
-                                 <Button
-                                appearance="primary"
-                                type="submit"
-                            >
-                                Add Todo
-                            </Button>
-                            )
+                                todo ? (<Button
+                                    appearance="primary"
+                                    type="submit"
+                                >
+                                    Update Todo
+                                </Button>) : (
+                                    <Button
+                                        appearance="primary"
+                                        type="submit"
+                                    >
+                                        Add Todo
+                                    </Button>
+                                )
                             }
 
 

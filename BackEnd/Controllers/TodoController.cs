@@ -3,6 +3,7 @@ using BackEnd.DTOs;
 using BackEnd.Interfaces;
 using BackEnd.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BackEnd.Controllers
 {
@@ -51,7 +52,7 @@ namespace BackEnd.Controllers
             return response;
         }
         [HttpGet("{id}")]
-        public async Task<ApiResponse<Todo>> GetByIdAsync(string id)
+        public async Task<ActionResult<ApiResponse<Todo>>> GetByIdAsync(string id)
         {
             var response = new ApiResponse<Todo>();
             _logger.LogWarning("No Todo Record Found");
@@ -65,71 +66,70 @@ namespace BackEnd.Controllers
                         Code = "404",
                         Message = "Task not found"
                     });
-                    return response;
+                    return NotFound();
                 }
                 else
                 {
                     response.Result = task;
+                    return Ok(response);
                 }
             }
             catch (Exception ex)
             {
+                response.Status = false;
                 _logger.LogError(ex, "Error While Getting all todos");
                 response.Errors.Add(new ApiError
                 {
                     Code = "500",
                     Message = ex.Message
                 });
+                return BadRequest(response);
             }
-            return response;
-            //var result= await _todoService.GetByIdAsync(id);
-            //if(result==null)
-            //    return NotFound();
-            //return Ok(result);
         }
         [HttpPost]
-        public async Task<ApiResponse<string>> CreateAsync(CreateTodoDto dto)
+        public async Task<ActionResult<ApiResponse<string>>> CreateAsync(CreateTodoDto dto)
         {
             var response = new ApiResponse<string>();
-
             try
             {
                 await _todoService.CreateAsync(dto);
-
                 response.Result = "Todo Created";
+                return Ok(response);
             }
             catch (Exception ex)
             {
+                response.Status = false;
                 response.Errors.Add(new ApiError
                 {
                     Code = "500",
                     Message = ex.Message
                 });
+                return BadRequest(response);
             }
-
-            return response;
         }
         [HttpPut("{id}")]
-        public async Task<ApiResponse<string>> Update(string id, UpdateTodoDto dto)
+        public async Task<ActionResult<ApiResponse<string>>> Update(string id, UpdateTodoDto dto)
         {
             var response = new ApiResponse<string>();
             try
             {
                 await _todoService.UpdateAsync(id, dto);
                 response.Result = "Todo Updated";
+                return Ok(response);
             }
             catch (Exception ex)
             {
+                response.Status = false;
                 response.Errors.Add(new ApiError
                 {
                     Code = "500",
                     Message = ex.Message
                 });
+                return BadRequest(response);
             }
-            return response;
         }
         [HttpDelete("{id}")]
-        public async Task<ApiResponse<string>> Delete(string id)
+        public async Task<ActionResult<ApiResponse<string>>> Delete(string id)
         {
             var response = new ApiResponse<string>();
             try
@@ -244,7 +244,7 @@ namespace BackEnd.Controllers
         }
 
         [HttpGet("Search")]
-        public async Task<ApiResponse<List<Todo>>> Search(string searchText)
+        public async Task<ActionResult<ApiResponse<List<Todo>>>> Search(string searchText)
         {
            var response= new ApiResponse<List<Todo>>();
             try
@@ -275,7 +275,7 @@ namespace BackEnd.Controllers
             return response;            
         }
         [HttpGet("SearchByUserId")]
-        public async Task<ApiResponse<List<Todo>>> GetTodosByUserIdAsync(string userId)
+        public async Task<ActionResult<ApiResponse<List<Todo>>>> GetTodosByUserIdAsync(string userId)
         {
             var response = new ApiResponse<List<Todo>>();
             try
@@ -303,6 +303,70 @@ namespace BackEnd.Controllers
                 });
             }
             return response;
+        }
+        [HttpGet("TodosByProjectIdWithLimit")]
+        public async Task<ActionResult<ApiResponse<List<Todo>>>> GetTodosByProjectIdWithLimit(string projectId, int page, int pageSize)
+        {
+            var response=new ApiResponse<List<Todo>>();
+            try
+            {
+                var task=await _todoService.GetTodosByProjectIdWithLimit(projectId, page, pageSize);
+                if(task == null)
+                {
+                    response.Errors.Add(new ApiError
+                    {
+                        Code = "404",
+                        Message = "Task not found"
+                    });
+                    return NotFound();
+                }
+                else
+                {
+                    response.Result = task;
+                    return Ok(response);
+                }
+            }catch(Exception ex)
+            {
+                response.Errors.Add(new ApiError
+                {
+                    Code = "500",
+                    Message = ex.Message
+                });
+                return BadRequest(response);
+            }
+            
+        }
+        [HttpGet("TodosByDate")]
+        public async Task<ActionResult<ApiResponse<List<TodoByDateDto>>>> GetTodosByDateAsync(string projectId, DateTime startDate)
+        {
+            var response = new ApiResponse<List<TodoByDateDto>>();
+            try
+            {
+                var task = await _todoService.GetTodosByDateAsync(projectId, startDate);
+                if( task == null)
+                {
+                    response.Errors.Add(new ApiError
+                    {
+                        Code = "404",
+                        Message = "Task not found"
+                    });
+                    return NotFound();
+                }
+                else
+                {
+                    response.Result = task;
+                    return Ok(response);
+                }
+            }
+            catch(Exception ex)
+            {
+                response.Errors.Add(new ApiError
+                {
+                    Code = "500",
+                    Message = ex.Message
+                });
+                return BadRequest(response);
+            }
         }
 
 

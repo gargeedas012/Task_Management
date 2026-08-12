@@ -65,6 +65,24 @@ export const getTodosByProject = async (
 
     return response.data;
 };
+export const getTodosByProjectIdWithLimit = async (
+    projectId: string,
+    page: number,
+    pageSize: number
+) => {
+    const response = await api.get(
+        "/Todo/TodosByProjectIdWithLimit",
+        {
+            params: {
+                projectId,
+                page,
+                pageSize
+            }
+        }
+    );
+
+    return response.data;
+};
 //project todo
 export const createProject= async (data:Project):Promise<ApiResponse<string>>=>{
     const response=await api.post("/Project",data);
@@ -72,5 +90,9 @@ export const createProject= async (data:Project):Promise<ApiResponse<string>>=>{
 }
 export const getAllProjects=async (data:string):Promise<ApiResponse<Project[]>>=>{
     const response=await api.get("Project/SearchByUserId",{ params: { userId: data } });
+    return response.data;
+}
+export const updateProject=async (data :Project):Promise<ApiResponse<string>> =>{
+    const response=await api.put(`/Project/${data.id}`,data);
     return response.data;
 }

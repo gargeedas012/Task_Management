@@ -4,6 +4,7 @@ using BackEnd.Models;
 using BackEnd.Settings;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 namespace BackEnd.Repositories
 {
@@ -46,10 +47,18 @@ namespace BackEnd.Repositories
                 .Sort(sort)
                 .ToListAsync();
         }
+        
+        
         public async Task<List<Todo>> GetTodosByProjectIdAsync(string projectId)
         {
             var sort=Builders<Todo>.Sort.Descending(x=>x.CreatedDate);
             return await _todoCollection.Find(x=>x.ProjectId == projectId).Sort(sort).ToListAsync();
+        }
+
+        public async Task<List<Todo>> GetTodosByProjectIdWithLimit(string projectId,int page,int pageSize)
+        {
+            var sort=Builders<Todo>.Sort.Descending(x=>x.CreatedDate);
+            return await _todoCollection.Find(x => x.ProjectId == projectId).Sort(sort).Skip((page - 1) * pageSize).Limit(pageSize).ToListAsync();
         }
         public async Task<List<InCompleteTodoResponseDto>> GetIncompleteTodos(bool isCompleted)
         {
@@ -98,6 +107,92 @@ namespace BackEnd.Repositories
                     );
             }
             return await _todoCollection.Find(filter).ToListAsync();
+        }
+
+        public async Task<List<TodoByDateDto>> GetTodosByDateAsync(string projectId,DateTime startDate)
+        {
+            var endDate = startDate.AddMonths(1);
+
+            // 1. Builder Filter
+            var filter = Builders<Todo>.Filter.And(
+                Builders<Todo>.Filter.Eq(
+                    x => x.ProjectId,
+                    projectId
+                ),
+
+                Builders<Todo>.Filter.Gte(
+                    x => x.CreatedDate,
+                    startDate
+                ),
+
+                Builders<Todo>.Filter.Lt(
+                    x => x.CreatedDate,
+                    endDate
+                )
+            );
+
+            // 2. Aggregation
+            var result = await _todoCollection
+                .Aggregate()
+
+                // $match
+                .Match(filter)
+
+                // $addFields
+                .AppendStage<Todo>(
+                    new BsonDocument("$addFields",
+                        new BsonDocument("TaskDate",
+                            new BsonDocument("$dateToString",
+                                new BsonDocument
+                                {
+                            { "format", "%Y-%m-%d" },
+                            { "date", "$CreatedDate" },
+                            { "timezone", "Asia/Kolkata" }
+                                }
+                            )
+                        )
+                    )
+                )
+
+                // $group
+                .AppendStage<BsonDocument>(
+                    new BsonDocument("$group",
+                        new BsonDocument
+                        {
+                    { "_id", "$TaskDate" },
+                    {
+                        "Tasks",
+                        new BsonDocument(
+                            "$push",
+                            "$$ROOT"
+                        )
+                    }
+                        }
+                    )
+                )
+
+                // $sort
+                .Sort(
+                    new BsonDocument("_id", 1)
+                )
+
+                .ToListAsync();
+
+            // 3. Convert MongoDB result to DTO
+            return result.Select(x => new TodoByDateDto
+            {
+                Id = x["_id"].AsString,
+
+                Tasks = x["Tasks"]
+                    .AsBsonArray
+                    .Select(task =>
+                        BsonSerializer.Deserialize<Todo>(
+                            task.AsBsonDocument
+                        )
+                    )
+                    .ToList()
+
+            }).ToList();
         }
     }
 }

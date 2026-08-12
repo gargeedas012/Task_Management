@@ -1,18 +1,7 @@
 import { useEffect, useState } from "react";
-import {
-    Button,
-    Table,
-    TableBody,
-    TableCell,
-    TableHeader,
-    TableHeaderCell,
-    TableRow,
-    Badge,
-    Spinner,
-} from "@fluentui/react-components";
-
+import { Button, Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow, Badge, Spinner, Dialog, DialogSurface, DialogBody, DialogTitle, DialogContent, DialogActions } from "@fluentui/react-components";
 import type { Todo } from "../types/todo";
-import { getTodos, deleteTodo, updateTodo, getTodosByProject } from "../api/authApi";
+import { deleteTodo, getTodosByProject, getTodosByProjectIdWithLimit } from "../api/authApi";
 import { useAppSelector } from "../app/hooks";
 import TodoForm from "./TodoForm";
 
@@ -27,14 +16,17 @@ const TodoList = ({ projectid, refreshTrigger }: AddTodoListProps) => {
     const [openTodoDialog, setOpenTodoDialog] = useState(false);
     const [SelectedTodo, setSelectedTodo] = useState<Todo>();
     const user = useAppSelector(state => state.auth.user)
-
+    const [openDialogBox, setopenDialogBox] = useState(false);
+    const [selectedTodoId, setselectedTodoId] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(5);
 
     // GET TODOS
     const fetchTodos = async () => {
         try {
             setLoading(true);
             if (!user?.userId) return;
-            const response = await getTodosByProject(projectid);
+            const response = await getTodosByProjectIdWithLimit(projectid, page, pageSize);
             setTodos(response.result);
         } catch (error) {
             console.error("Failed to fetch todos:", error);
@@ -47,7 +39,7 @@ const TodoList = ({ projectid, refreshTrigger }: AddTodoListProps) => {
     useEffect(() => {
         console.log("call")
         fetchTodos();
-    }, [refreshTrigger]);
+    }, [projectid, page, refreshTrigger]);
 
     // DELETE TODO
     const handleDelete = async (id?: string) => {
@@ -159,7 +151,10 @@ const TodoList = ({ projectid, refreshTrigger }: AddTodoListProps) => {
                                     <Button
                                         appearance="secondary"
                                         size="small"
-                                        onClick={() => handleDelete(todo.id)}
+                                        onClick={() => {
+                                            setopenDialogBox(true);
+                                            setselectedTodoId(todo.id ?? null);
+                                        }}
                                     >
                                         Delete
                                     </Button>
@@ -171,6 +166,31 @@ const TodoList = ({ projectid, refreshTrigger }: AddTodoListProps) => {
 
                 </TableBody>
             </Table>
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "10px",
+                    marginTop: "20px",
+                }}
+            >
+                <Button
+                    disabled={page === 1}
+                    onClick={() => setPage((prev) => prev - 1)}
+                >
+                    Previous
+                </Button>
+
+                <span>Page {page}</span>
+
+                <Button
+                    disabled={todos.length < pageSize}
+                    onClick={() => setPage((prev) => prev + 1)}
+                >
+                    Next
+                </Button>
+            </div>
             <TodoForm
                 open={openTodoDialog}
                 onClose={() => {
@@ -183,6 +203,45 @@ const TodoList = ({ projectid, refreshTrigger }: AddTodoListProps) => {
                 projectid={projectid}
                 todo={SelectedTodo}
             />
+            <Dialog open={openDialogBox} onOpenChange={(_, data) => {
+                setOpenTodoDialog(data.open)
+            }}>
+                <DialogSurface>
+                    <DialogBody>
+                        <DialogTitle>
+                            Delete Todo
+                        </DialogTitle>
+
+                        <DialogContent>
+                            Are you sure you want to delete this todo?
+                        </DialogContent>
+
+                        <DialogActions>
+
+                            <Button
+                                appearance="secondary"
+                                onClick={() => setopenDialogBox(false)}
+                            >
+                                No
+                            </Button>
+
+                            <Button
+                                appearance="primary"
+                                onClick={() => {
+                                    if (selectedTodoId) {
+                                        handleDelete(selectedTodoId);
+                                    }
+
+                                    setopenDialogBox(false);
+                                    setselectedTodoId(null);
+                                }}
+                            >
+                                Yes
+                            </Button>
+                        </DialogActions>
+                    </DialogBody>
+                </DialogSurface>
+            </Dialog>
         </>
     );
 };
