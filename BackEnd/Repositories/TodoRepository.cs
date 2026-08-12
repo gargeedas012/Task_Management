@@ -138,35 +138,26 @@ namespace BackEnd.Repositories
                 // $match
                 .Match(filter)
 
-                // $addFields
-                .AppendStage<Todo>(
-                    new BsonDocument("$addFields",
-                        new BsonDocument("TaskDate",
-                            new BsonDocument("$dateToString",
-                                new BsonDocument
-                                {
-                            { "format", "%Y-%m-%d" },
-                            { "date", "$CreatedDate" },
-                            { "timezone", "Asia/Kolkata" }
-                                }
-                            )
-                        )
-                    )
-                )
-
                 // $group
                 .AppendStage<BsonDocument>(
                     new BsonDocument("$group",
                         new BsonDocument
                         {
-                    { "_id", "$TaskDate" },
-                    {
-                        "Tasks",
-                        new BsonDocument(
-                            "$push",
-                            "$$ROOT"
-                        )
-                    }
+                            { "_id", new BsonDocument("$dateToString",
+                                new BsonDocument
+                                {
+                                    { "format", "%Y-%m-%d" },
+                                    { "date", "$CreatedDate" },
+                                    { "timezone", "Asia/Kolkata" }
+                                }
+                            ) },
+                            {
+                                "Tasks",
+                                new BsonDocument(
+                                    "$push",
+                                    "$$ROOT"
+                                )
+                            }
                         }
                     )
                 )
