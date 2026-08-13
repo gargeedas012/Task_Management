@@ -45,7 +45,15 @@ namespace BackEnd.DTOs
     [BsonIgnoreExtraElements]
     public class TodoByDateDto
     {
-        public string Id { get; set; } = string.Empty;
+        public string Date { get; set; } = string.Empty;
         public List<Todo> Tasks { get; set; } = new();
+        public long TotalTaskCount { get; set; }
+    }
+
+    [BsonIgnoreExtraElements]
+    public class TodoListResponse
+    {
+        public List<Todo> Todos { get; set; } = new();
+        public long TotalCount { get; set; }
     }
 }

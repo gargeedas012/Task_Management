@@ -30,9 +30,20 @@ namespace BackEnd.Repositories
         {
             await _todoCollection.InsertOneAsync(todo);
         }
-        public async Task UpdateAsync(string id,Todo todo)
+        public async Task UpdateAsync(string id, Todo todo)
         {
-            await _todoCollection.ReplaceOneAsync(x => x.Id == id,todo);
+            var update = Builders<Todo>.Update
+                .Set(x => x.Title, todo.Title)
+                .Set(x => x.Description, todo.Description)
+                .Set(x => x.IsCompleted, todo.IsCompleted)
+                .Set(x => x.Priority, todo.Priority)
+                .Set(x => x.DueDate, todo.DueDate)
+                .Set(x => x.Category, todo.Category);
+
+            await _todoCollection.UpdateOneAsync(
+                x => x.Id == id,
+                update
+            );
         }
         public async Task DeleteAsync(string id)
         {
@@ -55,10 +66,17 @@ namespace BackEnd.Repositories
             return await _todoCollection.Find(x=>x.ProjectId == projectId).Sort(sort).ToListAsync();
         }
 
-        public async Task<List<Todo>> GetTodosByProjectIdWithLimit(string projectId,int page,int pageSize)
+        public async Task<TodoListResponse> GetTodosByProjectIdWithLimit(string projectId,int page,int pageSize)
         {
+            var filter=Builders<Todo>.Filter.Eq(x=>x.ProjectId,projectId);
             var sort=Builders<Todo>.Sort.Descending(x=>x.CreatedDate);
-            return await _todoCollection.Find(x => x.ProjectId == projectId).Sort(sort).Skip((page - 1) * pageSize).Limit(pageSize).ToListAsync();
+            var totalCount=await _todoCollection.CountDocumentsAsync(filter);
+            var todos= await _todoCollection.Find(x => x.ProjectId == projectId).Sort(sort).Skip((page - 1) * pageSize).Limit(pageSize).ToListAsync();
+            return new TodoListResponse
+            {
+                Todos = todos,
+                TotalCount = totalCount
+            };
         }
         public async Task<List<InCompleteTodoResponseDto>> GetIncompleteTodos(bool isCompleted)
         {
@@ -109,11 +127,28 @@ namespace BackEnd.Repositories
             return await _todoCollection.Find(filter).ToListAsync();
         }
 
-        public async Task<List<TodoByDateDto>> GetTodosByDateAsync(string projectId,DateTime startDate)
+        public async Task<List<TodoByDateDto>> GetTodosByDateAsync(
+            string projectId,
+            DateTime startDate,
+            int page,
+            int pagesize,
+            string filterType)
         {
-            var endDate = startDate.AddMonths(1);
+            DateTime endDate;
 
-            // 1. Builder Filter
+            if (filterType.ToLower() == "month")
+            {
+                endDate = startDate.AddMonths(1);
+            }
+            else if (filterType.ToLower() == "day")
+            {
+                endDate = startDate.AddDays(1);
+            }
+            else
+            {
+                throw new ArgumentException("filterType must be 'month' or 'day'");
+            }
+
             var filter = Builders<Todo>.Filter.And(
                 Builders<Todo>.Filter.Eq(
                     x => x.ProjectId,
@@ -131,59 +166,62 @@ namespace BackEnd.Repositories
                 )
             );
 
-            // 2. Aggregation
             var result = await _todoCollection
                 .Aggregate()
-
-                // $match
                 .Match(filter)
-
-                // $group
                 .AppendStage<BsonDocument>(
                     new BsonDocument("$group",
                         new BsonDocument
                         {
-                            { "_id", new BsonDocument("$dateToString",
-                                new BsonDocument
-                                {
-                                    { "format", "%Y-%m-%d" },
-                                    { "date", "$CreatedDate" },
-                                    { "timezone", "Asia/Kolkata" }
-                                }
-                            ) },
+                    {
+                        "_id",
+                        new BsonDocument("$dateToString",
+                            new BsonDocument
                             {
-                                "Tasks",
-                                new BsonDocument(
-                                    "$push",
-                                    "$$ROOT"
-                                )
+                                { "format", "%Y-%m-%d" },
+                                { "date", "$CreatedDate" },
+                                { "timezone", "Asia/Kolkata" }
                             }
+                        )
+                    },
+                    {
+                        "Tasks",
+                        new BsonDocument(
+                            "$push",
+                            "$$ROOT"
+                        )
+                    }
                         }
                     )
                 )
-
-                // $sort
-                .Sort(
-                    new BsonDocument("_id", 1)
-                )
-
+                .Sort(new BsonDocument("_id", 1))
                 .ToListAsync();
 
-            // 3. Convert MongoDB result to DTO
-            return result.Select(x => new TodoByDateDto
-            {
-                Id = x["_id"].AsString,
+            // Number of dates
+            var count = result.Count;
 
-                Tasks = x["Tasks"]
-                    .AsBsonArray
-                    .Select(task =>
-                        BsonSerializer.Deserialize<Todo>(
-                            task.AsBsonDocument
+            // Convert + paginate dates
+            var response = result
+                .Select(x => new TodoByDateDto
+                {
+                    Date = x["_id"].AsString,
+
+                    Tasks = x["Tasks"]
+                        .AsBsonArray
+                        .Select(task =>
+                            BsonSerializer.Deserialize<Todo>(
+                                task.AsBsonDocument
+                            )
                         )
-                    )
-                    .ToList()
+                        .ToList(),
 
-            }).ToList();
+                    TotalTaskCount = count
+                })
+                .Skip((page - 1) * pagesize)
+                .Take(pagesize)
+                .ToList();
+
+            return response;
         }
     }
 }

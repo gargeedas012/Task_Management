@@ -15,7 +15,7 @@ namespace BackEnd.Interfaces
         Task<List<Todo>> SearchAsync(string SearchText);
         Task<List<Todo>> GetTodosByUserIdAsync(string userId);
         Task<List<Todo>> GetTodosByProjectIdAsync(string projectId);
-        Task<List<Todo>> GetTodosByProjectIdWithLimit(string projectId, int page, int pageSize);
-        Task<List<TodoByDateDto>> GetTodosByDateAsync(string projectId, DateTime startDate);
+        Task<TodoListResponse> GetTodosByProjectIdWithLimit(string projectId, int page, int pageSize);
+        Task<List<TodoByDateDto>> GetTodosByDateAsync(string projectId, DateTime startDate , int page, int pagesize , string filterType);
     }
 }

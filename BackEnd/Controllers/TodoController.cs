@@ -305,9 +305,9 @@ namespace BackEnd.Controllers
             return response;
         }
         [HttpGet("TodosByProjectIdWithLimit")]
-        public async Task<ActionResult<ApiResponse<List<Todo>>>> GetTodosByProjectIdWithLimit(string projectId, int page, int pageSize)
+        public async Task<ActionResult<ApiResponse<TodoListResponse>>> GetTodosByProjectIdWithLimit(string projectId, int page, int pageSize)
         {
-            var response=new ApiResponse<List<Todo>>();
+            var response=new ApiResponse<TodoListResponse>();
             try
             {
                 var task=await _todoService.GetTodosByProjectIdWithLimit(projectId, page, pageSize);
@@ -337,12 +337,12 @@ namespace BackEnd.Controllers
             
         }
         [HttpGet("TodosByDate")]
-        public async Task<ActionResult<ApiResponse<List<TodoByDateDto>>>> GetTodosByDateAsync(string projectId, DateTime startDate)
+        public async Task<ActionResult<ApiResponse<List<TodoByDateDto>>>> GetTodosByDateAsync(string projectId, DateTime startDate, int page, int pagesize, string filterType)
         {
             var response = new ApiResponse<List<TodoByDateDto>>();
             try
             {
-                var task = await _todoService.GetTodosByDateAsync(projectId, startDate);
+                var task = await _todoService.GetTodosByDateAsync(projectId, startDate , page ,pagesize, filterType);
                 if( task == null)
                 {
                     response.Errors.Add(new ApiError

@@ -1,7 +1,7 @@
 import type { ApiResponse } from '../types/api';
 import type { LoginRequest, RegisterRequest, TokenResponseDto } from '../types/auth'
 import type { Project } from '../types/project';
-import type { Todo } from '../types/todo';
+import type { Todo, TodoByDateDto, TodoListResponse } from '../types/todo';
 import api from './axios'
 
 
@@ -69,18 +69,33 @@ export const getTodosByProjectIdWithLimit = async (
     projectId: string,
     page: number,
     pageSize: number
-) => {
+):Promise<ApiResponse<TodoListResponse>> => {
     const response = await api.get(
         "/Todo/TodosByProjectIdWithLimit",
         {
             params: {
                 projectId,
                 page,
-                pageSize
+                pageSize 
             }
         }
     );
 
+    return response.data;
+};
+export const getTodosByProjectIdWithLimitByFilter = async (
+    projectId: string,
+    startDate:Date,
+    page: number,
+    pageSize: number,
+    filterType:string,    
+):Promise<ApiResponse<TodoByDateDto[]>> => {
+    const response = await api.get(
+        "/Todo/TodosByDate",
+        {
+            params: { projectId, startDate, page, pageSize, filterType }
+        }
+    );
     return response.data;
 };
 //project todo

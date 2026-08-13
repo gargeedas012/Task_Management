@@ -2,6 +2,7 @@ using BackEnd.DTOs;
 using BackEnd.Interfaces;
 using BackEnd.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
 
 namespace BackEnd.Services
@@ -146,16 +147,16 @@ namespace BackEnd.Services
             return await _repository.GetTodosByProjectIdAsync(projectId);
         }
 
-        public async Task<List<Todo>> GetTodosByProjectIdWithLimit(string projectId, int page, int pageSize)
+        public async Task<TodoListResponse> GetTodosByProjectIdWithLimit(string projectId, int page, int pageSize)
         {
             await VerifyAuthAsync();
             return await _repository.GetTodosByProjectIdWithLimit(projectId, page, pageSize);
         }
 
-        public async Task<List<TodoByDateDto>> GetTodosByDateAsync(string projectId, DateTime startDate)
+        public async Task<List<TodoByDateDto>> GetTodosByDateAsync(string projectId, DateTime startDate, int page, int pagesize , string filterType)
         {
             await VerifyAuthAsync();
-            return await _repository.GetTodosByDateAsync(projectId, startDate);
+            return await _repository.GetTodosByDateAsync(projectId, startDate ,  page,  pagesize , filterType);
         }
     }
 }

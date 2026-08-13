@@ -67,6 +67,7 @@ const TodoForm = ({ open, onClose, projectid, todo, onSuccess }: AddTodoProps) =
             description: todo?.description ?? "",
             priority: todo?.priority ?? "Low",
             dueDate: todo?.dueDate ?? "",
+            createdDate:todo?.createdDate ?? "",
             category: todo?.category ?? "",
             isCompleted: todo?.isCompleted ?? false,
         },
@@ -313,7 +314,6 @@ const TodoForm = ({ open, onClose, projectid, todo, onSuccess }: AddTodoProps) =
                                     )
                                 }
                             />
-
                         </div>
                         <DialogActions>
 
@@ -339,8 +339,6 @@ const TodoForm = ({ open, onClose, projectid, todo, onSuccess }: AddTodoProps) =
                                     </Button>
                                 )
                             }
-
-
                         </DialogActions>
 
                     </DialogBody>
