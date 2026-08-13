@@ -96,7 +96,7 @@ const TodoList = ({ projectid, refreshTrigger }: AddTodoListProps) => {
     const [page, setPage] = useState(1);
     const [pageSize] = useState(5);
     const datePageSize = 2;
-    const monthPageSize = 2;
+    const monthPageSize = 3;
 
     // GET TODOS
     const fetchTodos = async () => {
@@ -119,8 +119,10 @@ const TodoList = ({ projectid, refreshTrigger }: AddTodoListProps) => {
         console.log("call")
         if (filterBy === "All") {
             fetchTodos();
+        } else if (selectedDate) {
+            handleFilterChange(filterBy, selectedDate);
         }
-    }, [filterBy, projectid, page, refreshTrigger]);
+    }, [filterBy, projectid, page, refreshTrigger, selectedDate]);
 
     //Handle filter change
     const handleFilterChange = async (
@@ -134,10 +136,16 @@ const TodoList = ({ projectid, refreshTrigger }: AddTodoListProps) => {
         console.log("Filter Type:", type);
         console.log("Selected Value:", value);
         try {
-            const response = await getTodosByProjectIdWithLimitByFilter(projectid, new Date(value), page, pageSize, type);
+            // value is either "YYYY-MM" or "YYYY-MM-DD"
+            // Append time to force parsing as local time instead of UTC
+            const dateString = type === "month" ? `${value}-01T00:00:00` : `${value}T00:00:00`;
+            const dateToPass = new Date(dateString);
+            
+            const limit = type === "month" ? monthPageSize : pageSize;
+            const response = await getTodosByProjectIdWithLimitByFilter(projectid, dateToPass, page, limit, type);
             console.log(response.result);
             setTodosByDate(response.result);
-            //settotalcount(response.result)
+            settotalcount(response.result.length > 0 ? response.result[0].totalTaskCount : 0);
         } catch (err) {
             console.log(err)
         }
@@ -152,11 +160,12 @@ const TodoList = ({ projectid, refreshTrigger }: AddTodoListProps) => {
                 (todo) => todo.id !== id
             );
             // Remove deleted todo from UI
-            setTodos((previousTodos) =>
-                previousTodos.filter((todo) => todo.id !== id)
-            );
+            setTodos(updatedTodos);
             if (updatedTodos.length === 0 && page > 1) {
                 setPage((prev) => prev - 1);
+            }
+            if (filterBy !== "All" && selectedDate) {
+                handleFilterChange(filterBy, selectedDate);
             }
         } catch (error) {
             console.error("Failed to delete todo:", error);
@@ -212,7 +221,6 @@ const TodoList = ({ projectid, refreshTrigger }: AddTodoListProps) => {
                             value={selectedDate}
                             onChange={(e) => {
                                 setSelectedDate(e.target.value);
-                                handleFilterChange("month", e.target.value);
                                 setPage(1);
                             }} />
                     )
@@ -223,7 +231,6 @@ const TodoList = ({ projectid, refreshTrigger }: AddTodoListProps) => {
                         value={selectedDate}
                         onChange={(e) => {
                             setSelectedDate(e.target.value);
-                            handleFilterChange("day", e.target.value);
                             setPage(1);
                         }}
                     />
@@ -393,7 +400,7 @@ const TodoList = ({ projectid, refreshTrigger }: AddTodoListProps) => {
 
                                     {/* TASKS */}
 
-                                    {day.tasks.map((todo) => (
+                                    {currentTasks.map((todo) => (
                                         <TodoRow
                                             key={todo.id}
                                             todo={todo}
