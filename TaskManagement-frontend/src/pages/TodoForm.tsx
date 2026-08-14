@@ -302,7 +302,9 @@ const TodoForm = ({ open, onClose, projectid, todo, onSuccess }: AddTodoProps) =
                                     </span>
                                 )}
                             {/* Completed */}
-                            <Checkbox
+                            {
+                                todo && (
+                                   <Checkbox
                                 label="Completed"
                                 checked={
                                     formik.values.isCompleted
@@ -314,6 +316,9 @@ const TodoForm = ({ open, onClose, projectid, todo, onSuccess }: AddTodoProps) =
                                     )
                                 }
                             />
+                                )
+                            }
+ 
                         </div>
                         <DialogActions>
 

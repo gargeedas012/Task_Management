@@ -97,7 +97,6 @@ if (app.Environment.IsDevelopment())
 }
 
 
-// ADD THIS LINE
 app.UseCors("AllowReact");
 
 

@@ -46,10 +46,6 @@ const TodoRow = ({
             <TableCell>
                 {todo.priority}
             </TableCell>
-            {/* Creation Date */}
-            <TableCell>
-                {formatDate(todo.createdDate)}
-            </TableCell>
             {/* Due Date */}
             <TableCell>
                 {formatDate(todo.dueDate)}
@@ -243,7 +239,6 @@ const TodoList = ({ projectid, refreshTrigger }: AddTodoListProps) => {
                         <TableHeaderCell>Description</TableHeaderCell>
                         <TableHeaderCell>Status</TableHeaderCell>
                         <TableHeaderCell>Priority</TableHeaderCell>
-                        <TableHeaderCell>CreationDate</TableHeaderCell>
                         <TableHeaderCell>Due Date</TableHeaderCell>
                         <TableHeaderCell>Category</TableHeaderCell>
                         <TableHeaderCell>Actions</TableHeaderCell>

@@ -108,6 +108,11 @@ export const getAllProjects=async (data:string):Promise<ApiResponse<Project[]>>=
     return response.data;
 }
 export const updateProject=async (data :Project):Promise<ApiResponse<string>> =>{
+    console.log("ohreog", data.id)
     const response=await api.put(`/Project/${data.id}`,data);
+    return response.data;
+}
+export const deleteProject = async (data: string):Promise<ApiResponse<string>>=>{
+    const response=await api.delete(`Project/${data}`);
     return response.data;
 }

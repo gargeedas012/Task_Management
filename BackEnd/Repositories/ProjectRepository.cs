@@ -28,13 +28,19 @@ namespace BackEnd.Repositories
         {
             return await _projectCollection.Find(x => x.UserId == userId).ToListAsync();
         }
-        public async Task UpdateProjectAsync(string userId, Project project)
+        public async Task UpdateProjectAsync(string id, Project project)
         {
-            await _projectCollection.ReplaceOneAsync(x => x.UserId == userId, project);
+            var update= Builders<Project>.Update
+                .Set(x => x.UserId, project.UserId)
+                .Set(x => x.Name, project.Name)
+                .Set(x => x.Description, project.Description)
+                .Set(x => x.DueDate, project.DueDate)
+                .Set(x => x.Status, project.Status);
+            await _projectCollection.UpdateOneAsync(x=>x.Id== id, update);
         }
-        public async Task DeleteProjectAsync(string userId)
+        public async Task DeleteProjectAsync(string id)
         {
-            await _projectCollection.DeleteOneAsync(x => x.UserId == userId);
+            await _projectCollection.DeleteOneAsync(x => x.Id == id);
         }
     }
 }

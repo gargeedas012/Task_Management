@@ -14,15 +14,22 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import type { Project } from "../types/project";
 import { useAppSelector } from "../app/hooks";
-import { createProject } from "../api/authApi";
+import { createProject, updateProject } from "../api/authApi";
 import { getApiErrorMessage } from "../api/apiError";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 
 function ProjectForm() {
     const user = useAppSelector(state => state.auth.user)
     const { dispatchToast } = useToastController("app-toaster");
     const navigate= useNavigate()
+    const location=useLocation()
+    const project=location.state?.project as Project
+    console.log("oho",project)
+    const formatDateForInput=(date?: string | null)=>{
+        if(!date) return "";
+        return date.split("T")[0];
+    }
     const HandleError = (message: string) => {
         dispatchToast(
             <Toast>
@@ -48,12 +55,13 @@ function ProjectForm() {
         );
     };
     const formik = useFormik<Project>({
+        enableReinitialize: true,
         initialValues: {
-            userId: user?.userId ?? "",
-            name: "",
-            description: "",
-            dueDate: "",
-            status: "Active",
+            userId: user?.userId ?? project.userId ?? "",
+            name: project?.name ?? "" ,
+            description: project?.description ??  "",
+            dueDate: formatDateForInput(project?.dueDate),
+            status: project?.status ?? "Active",
         },
 
         validationSchema: Yup.object({
@@ -73,15 +81,28 @@ function ProjectForm() {
             status: Yup.string()
                 .required("Status is required"),
         }),
-
         onSubmit: async (values: Project) => {
             console.log("Project:", values);
             try {
-                await createProject(values);
+                if(project)
+                {
+                    try{
+                        await updateProject({
+                            ...values,
+                            id:project.id
+                        });
+                        navigate("/")
+                        HandleSuccess("Project Update Successfully")
+                    }catch(err)
+                    {
+                        HandleError(getApiErrorMessage(err))
+                    }
+                }else{
+                 await createProject(values);
                 formik.resetForm();
                 HandleSuccess("Project Create Successfully")
                 navigate("/dashboard")
-                
+                }           
             } catch (err) {
                 HandleError(getApiErrorMessage(err))
                 console.log(err);
@@ -91,7 +112,6 @@ function ProjectForm() {
 
     return (
         <form onSubmit={formik.handleSubmit}>
-
             {/* Project Name */}
             <Field
                 label="Project Name"
@@ -174,7 +194,9 @@ function ProjectForm() {
             <br />
 
             {/* Status */}
-            <Field
+            {
+                project && (
+                                <Field
                 label="Status"
             // required
             >
@@ -193,15 +215,29 @@ function ProjectForm() {
                     <Option value="Completed">Completed</Option>
                 </Dropdown>
             </Field>
-
+                )
+            }
             <br />
-
-            <Button
+            {
+                project && (
+              <Button
+                appearance="primary"
+                type="submit"
+            >
+                Update Project
+            </Button>
+                )
+            }
+            {
+                !project && (
+                                <Button
                 appearance="primary"
                 type="submit"
             >
                 Create Project
             </Button>
+                )
+            }
 
         </form>
     );
