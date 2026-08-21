@@ -1,6 +1,9 @@
 ﻿using BackEnd.DTOs;
 using BackEnd.Interfaces;
 using BackEnd.Models;
+using BackEnd.Settings;
+using Google.Apis.Auth;
+using Microsoft.Extensions.Options;
 using Microsoft.Win32;
 
 namespace BackEnd.Services
@@ -10,11 +13,13 @@ namespace BackEnd.Services
         private readonly IUserService _userService;
         private readonly IJwtService _jwtService;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public AuthService(IUserService userService, IJwtService jwtService, IHttpContextAccessor httpContextAccessor)
+        private readonly GoogleSettings _googleSettings;
+        public AuthService(IUserService userService, IJwtService jwtService, IHttpContextAccessor httpContextAccessor ,IOptions<GoogleSettings> googleSettings)
         {
             _userService = userService;
             _jwtService = jwtService;
             _httpContextAccessor = httpContextAccessor;
+            _googleSettings = googleSettings.Value;
         }
         public async Task<TokenResponseDto> LoginAsync(LoginDto login)
         {
@@ -77,7 +82,7 @@ namespace BackEnd.Services
 
         }
 
-        public async Task<TokenResponseDto> RefreshTokenAsync()
+        public async Task<string> RefreshTokenAsync()
         {
             var httpContext = _httpContextAccessor.HttpContext;
 
@@ -138,13 +143,7 @@ namespace BackEnd.Services
                     Expires = DateTime.UtcNow.AddMinutes(30)
                 });
 
-            return new TokenResponseDto
-            {
-                Username=user.Username,
-                UserId = user.Id.ToString(),
-                Email =user.Email,
-                Role=user.Role
-            };
+            return newAccessToken;
         }
 
         public async Task<TokenResponseDto> RegisterAsync(RegisterDto register)
@@ -284,6 +283,78 @@ namespace BackEnd.Services
                     Secure = true,
                     SameSite = SameSiteMode.None
                 });
+        }
+        public async Task<TokenResponseDto> GoogleLoginAsync(GoogleLoginDto request)
+        {
+            var payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken,
+                new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new[] { _googleSettings.ClientId }
+                });
+            if(payload == null)
+            {
+                throw new Exception("Invalid Google token");
+            }
+            var user= await _userService.GetByEmailAsync(payload.Email);
+            if(user == null)
+            {
+                user = new User
+                {
+                    Username = payload.Name,
+                    Email = payload.Email,
+                    Password = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()),
+                    Role = "User"
+                };
+                await _userService.CreateAsync(user);
+                user = await _userService.GetByEmailAsync(payload.Email);
+
+                if (user == null)
+                {
+                    throw new Exception("Failed to create Google user");
+                }                              
+            }
+            // Generate your application's JWT
+            var token = _jwtService.GenerateToken(user);
+            var ipAddress =
+                _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+            var refreshToken = new RefreshTokenResponseDto
+            {
+                Token = _jwtService.GenerateRefreshToken(),
+                ExpiryDate = DateTime.UtcNow.AddDays(7),
+                IsRevoked = false,
+                CreatedAt = DateTime.UtcNow,
+                IpAddress = ipAddress ?? ""
+            };
+            user.RefreshTokens.Add(refreshToken);
+            await _userService.UpdateAsync(user.Id, user);
+            var httpContext = _httpContextAccessor.HttpContext;
+            httpContext?.Response.Cookies.Append(
+                "accessToken",
+                token,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None,
+                    Expires = DateTime.UtcNow.AddMinutes(30)
+                });
+            httpContext?.Response.Cookies.Append(
+                "refreshToken",
+                refreshToken.Token,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None,
+                    Expires = refreshToken.ExpiryDate
+                });
+            return new TokenResponseDto
+            {
+                Username = user.Username,
+                UserId = user.Id.ToString(),
+                Email = user.Email,
+                Role = user.Role
+            };
         }
     }
 }

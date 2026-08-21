@@ -6,9 +6,10 @@ namespace BackEnd.Interfaces
     {
         Task<TokenResponseDto> RegisterAsync(RegisterDto register);
         Task<TokenResponseDto> LoginAsync(LoginDto login);
-        Task<TokenResponseDto> RefreshTokenAsync();
+        Task<string> RefreshTokenAsync();
 
         Task<TokenResponseDto> GetCurrentUserAsync();
         Task LogoutAsync();
+        Task<TokenResponseDto> GoogleLoginAsync(GoogleLoginDto request);
     }
 }

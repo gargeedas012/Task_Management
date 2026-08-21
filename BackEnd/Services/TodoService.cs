@@ -22,50 +22,49 @@ namespace BackEnd.Services
             _authService = authService;
         }
 
-        private async Task VerifyAuthAsync()
-        {
-            var httpContext = _httpContextAccessor.HttpContext;
-            if (httpContext == null) return;
+        //private async Task VerifyAuthAsync()
+        //{
+        //    var httpContext = _httpContextAccessor.HttpContext;
+        //    if (httpContext == null) return;
 
-            var accessToken = httpContext.Request.Cookies["accessToken"];
-            var refreshToken = httpContext.Request.Cookies["refreshToken"];
+        //    var accessToken = httpContext.Request.Cookies["accessToken"];
+        //    var refreshToken = httpContext.Request.Cookies["refreshToken"];
             
-            bool refreshNeeded = false;
+        //    bool refreshNeeded = false;
 
-            if (string.IsNullOrEmpty(accessToken))
-            {
-                refreshNeeded = true;
-            }
-            else
-            {
-                var principal = _jwtService.ValidateToken(accessToken);
-                if (principal == null)
-                {
-                    refreshNeeded = true;
-                }
-            }
+        //    if (string.IsNullOrEmpty(accessToken))
+        //    {
+        //        refreshNeeded = true;
+        //    }
+        //    else
+        //    {
+        //        var principal = _jwtService.ValidateToken(accessToken);
+        //        if (principal == null)
+        //        {
+        //            refreshNeeded = true;
+        //        }
+        //    }
 
-            if (refreshNeeded)
-            {
-                if (string.IsNullOrEmpty(refreshToken))
-                {
-                    throw new UnauthorizedAccessException("Unauthorized: No valid tokens.");
-                }
+        //    if (refreshNeeded)
+        //    {
+        //        if (string.IsNullOrEmpty(refreshToken))
+        //        {
+        //            throw new UnauthorizedAccessException("Unauthorized: No valid tokens.");
+        //        }
                 
-                try
-                {
-                    await _authService.RefreshTokenAsync();
-                }
-                catch
-                {
-                    throw new UnauthorizedAccessException("Unauthorized: Token refresh failed.");
-                }
-            }
-        }
+        //        try
+        //        {
+        //            await _authService.RefreshTokenAsync();
+        //        }
+        //        catch
+        //        {
+        //            throw new UnauthorizedAccessException("Unauthorized: Token refresh failed.");
+        //        }
+        //    }
+        //}
 
         public async Task CreateAsync(CreateTodoDto createTodoDto)
         {
-            await VerifyAuthAsync();
             var todo = new Todo
             {
                 Title = createTodoDto.Title,
@@ -83,25 +82,21 @@ namespace BackEnd.Services
 
         public async Task DeleteAsync(string id)
         {
-            await VerifyAuthAsync();
             await _repository.DeleteAsync(id);
         }
 
         public async Task<List<Todo>> GetAllAsync()
         {
-           await VerifyAuthAsync();
            return await _repository.GetAllAsync();
         }
 
         public async Task<Todo?> GetByIdAsync(string id)
         {
-           await VerifyAuthAsync();
            return await _repository.GetByIdAsync(id);
         }
 
         public async Task UpdateAsync(string id, UpdateTodoDto updateTodoDto)
         {
-            await VerifyAuthAsync();
             var todo = new Todo
             {
                 Id = id,
@@ -119,43 +114,36 @@ namespace BackEnd.Services
 
         public async Task<List<InCompleteTodoResponseDto>> GetIncompleteTodos(bool isCompleted)
         {
-            await VerifyAuthAsync();
             return await _repository.GetIncompleteTodos(isCompleted);
         }
         
         public async Task<List<PriorityCountDto>> GetPriorityCount()
         {
-            await VerifyAuthAsync();
             return await _repository.GetPriorityCount();
         }
 
         public async Task<List<Todo>> SearchAsync(string SearchText)
         {
-            await VerifyAuthAsync();
             return await _repository.SearchAsync(SearchText);
         }
 
         public async Task<List<Todo>> GetTodosByUserIdAsync(string userId)
         {
-            await VerifyAuthAsync();
             return await _repository.GetTodosByUserIdAsync(userId);
         }
 
         public async Task<List<Todo>> GetTodosByProjectIdAsync(string projectId)
         {
-            await VerifyAuthAsync();
             return await _repository.GetTodosByProjectIdAsync(projectId);
         }
 
         public async Task<TodoListResponse> GetTodosByProjectIdWithLimit(string projectId, int page, int pageSize)
         {
-            await VerifyAuthAsync();
             return await _repository.GetTodosByProjectIdWithLimit(projectId, page, pageSize);
         }
 
         public async Task<List<TodoByDateDto>> GetTodosByDateAsync(string projectId, DateTime startDate, int page, int pagesize , string filterType)
         {
-            await VerifyAuthAsync();
             return await _repository.GetTodosByDateAsync(projectId, startDate ,  page,  pagesize , filterType);
         }
     }

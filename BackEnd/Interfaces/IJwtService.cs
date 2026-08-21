@@ -1,3 +1,4 @@
+using BackEnd.DTOs;
 using BackEnd.Models;
 using System.Security.Claims;
 
@@ -8,6 +9,7 @@ namespace BackEnd.Interfaces
         string GenerateToken(User user);
         string GenerateRefreshToken();
         ClaimsPrincipal? ValidateToken(string token);
+        //ClaimsPrincipal ValidateToken(TokenResponseDto newAccessToken);
     }
 }
 

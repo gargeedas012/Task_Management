@@ -1,3 +1,4 @@
+using BackEnd.Authentication;
 using BackEnd.DTOs;
 using BackEnd.Interfaces;
 using BackEnd.Repositories;
@@ -6,10 +7,8 @@ using BackEnd.Settings;
 using BackEnd.Validators;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using MongoDB.Driver;
-using System.Text;
+using Microsoft.AspNetCore.Authentication;
+
 
 
 
@@ -30,6 +29,8 @@ builder.Services.AddSwaggerGen();
 // MongoDB Settings
 builder.Services.Configure<TodoDatabaseSettings>(
     builder.Configuration.GetSection("TodoDatabase"));
+// Google Settings
+builder.Services.Configure<GoogleSettings>(builder.Configuration.GetSection("Google"));
 
 
 // Dependency Injection
@@ -47,32 +48,13 @@ builder.Services.AddHttpContextAccessor();
 //add authentication
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = "CookieJwt";
+    options.DefaultChallengeScheme = "CookieJwt";
 })
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-
-        ValidateAudience = true,
-
-        ValidateLifetime = true,
-
-        ValidateIssuerSigningKey = true,
-
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(
-                builder.Configuration["Jwt:Key"]!
-            )
-        )
-    };
-});
+.AddScheme<AuthenticationSchemeOptions, CookieJwtAuthenticationHandler>(
+    "CookieJwt",
+    options => { }
+    );
 
 // CORS
 builder.Services.AddCors(options =>

@@ -7,6 +7,7 @@ import { Toaster } from "@fluentui/react-components";
 import ProjectForm from "./src/pages/ProjectForm";
 import ProjectList from "./src/pages/ProjectList";
 import ProjectBoard from "./src/pages/ProjectBoard";
+import { Layout } from "./src/pages/Layout";
 
 function App() {
   return (
@@ -15,12 +16,14 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/projects" element={<ProtectedRoute><ProjectForm/></ProtectedRoute>}/>
-          <Route path="/viewproject" element={<ProtectedRoute><ProjectList/></ProtectedRoute>}/>
-          <Route path="/projectboard" element={<ProtectedRoute><ProjectBoard/></ProtectedRoute>}/>
+           <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+            <Route element={<Layout/>}>
+                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/projects" element={<ProtectedRoute><ProjectForm/></ProtectedRoute>}/>
+                <Route path="/viewproject" element={<ProtectedRoute><ProjectList/></ProtectedRoute>}/>
+                <Route path="/projectboard" element={<ProtectedRoute><ProjectBoard/></ProtectedRoute>}/>
+            </Route>
           <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
         </Routes>
       </BrowserRouter>
     </>

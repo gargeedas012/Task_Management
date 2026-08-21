@@ -24,6 +24,23 @@ export const getCurrentUser = async (): Promise<ApiResponse<TokenResponseDto>> =
 export const logoutUser = async (): Promise<void> => {
     await api.post("/Auth/logout");
 };  
+export const GoogleLoginFun = async (
+    credentialResponse: any
+): Promise<ApiResponse<TokenResponseDto>> => {
+
+    const response = await api.post(
+        "/Auth/google",
+        {
+            idToken: credentialResponse.credential
+        },
+        {
+            withCredentials: true
+        }
+    );
+
+    return response.data;
+};
+
 //Todo Funtionality
 export const getTodos = async (data: string):Promise<ApiResponse<Todo[]>>=>{
     const response = await api.get("/Todo/SearchByUserId", { params: { userId: data } });
@@ -98,6 +115,9 @@ export const getTodosByProjectIdWithLimitByFilter = async (
     );
     return response.data;
 };
+
+
+
 //project todo
 export const createProject= async (data:Project):Promise<ApiResponse<string>>=>{
     const response=await api.post("/Project",data);

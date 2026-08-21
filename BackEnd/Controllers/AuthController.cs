@@ -59,9 +59,9 @@ namespace BackEnd.Controllers
             }
         }
         [HttpPost("refresh")]
-        public async Task<ActionResult<ApiResponse<TokenResponseDto>>> Refresh()
+        public async Task<ActionResult<ApiResponse<string>>> Refresh()
         {
-            var response = new ApiResponse<TokenResponseDto>();
+            var response = new ApiResponse<string>();
 
             try
             {
@@ -116,6 +116,26 @@ namespace BackEnd.Controllers
                 return Ok(response);
             }
             catch (Exception ex)
+            {
+                response.Status = false;
+                response.Errors.Add(new ApiError
+                {
+                    Code = "500",
+                    Message = ex.Message
+                });
+                return Unauthorized(response);
+            }
+        }
+        [HttpPost("google")]
+        public async Task<ActionResult<ApiResponse<TokenResponseDto>>> GoogleLogin([FromBody] GoogleLoginDto loginDto)
+        {
+            var response = new ApiResponse<TokenResponseDto>();
+            try
+            {
+                var result=await _authService.GoogleLoginAsync(loginDto);
+                response.Result = result;
+                return Ok(response);
+            }catch(Exception ex)
             {
                 response.Status = false;
                 response.Errors.Add(new ApiError
