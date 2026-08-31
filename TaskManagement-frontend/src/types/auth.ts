@@ -27,3 +27,9 @@ export interface TokenResponseDto {
   email: string;
   role: string;
 }
+
+export interface ProjectCountDto{
+  TotalProjects:number;
+  ActiveProjects:number;
+  TotalTasks:number;
+}

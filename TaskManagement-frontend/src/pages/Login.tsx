@@ -27,6 +27,8 @@ import { Avatar ,makeStyles} from "@fluentui/react-components";
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        padding: "20px",
+        boxSizing: "border-box",
         background: `
         radial-gradient(circle at 10% 20%, rgba(99,102,241,0.25), transparent 35%),
         radial-gradient(circle at 90% 20%, rgba(168,85,247,0.20), transparent 35%),

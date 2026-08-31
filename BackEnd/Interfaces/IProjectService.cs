@@ -1,3 +1,4 @@
+using BackEnd.DTOs;
 using BackEnd.Models;
 
 namespace BackEnd.Interfaces
@@ -9,5 +10,6 @@ namespace BackEnd.Interfaces
         Task UpdateProjectAsync(string id, Project project);
         Task DeleteProjectAsync(string id);
         Task<List<Project>> GetProjectsByUserIdAsync(string userId);
+        Task<List<ProjectResponseDto>> getRecentProjects(string UserId);
     }
 }

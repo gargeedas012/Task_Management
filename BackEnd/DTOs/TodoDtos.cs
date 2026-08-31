@@ -1,4 +1,5 @@
 using BackEnd.Models;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 namespace BackEnd.DTOs
 {
@@ -56,4 +57,21 @@ namespace BackEnd.DTOs
         public List<Todo> Todos { get; set; } = new();
         public long TotalCount { get; set; }
     }
+
+    public class TodoResponse
+    {
+
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? Id { get; set; } = null!;
+        public string Title { get; set; }=string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public DateTime CreatedDate { get; set; } 
+        public string TodoDueDate { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public bool IsCompleted { get; set; }=false;
+        public string Priority { get; set; } = null!;
+        public string ProjectName { get; set; } = string.Empty;
+    }
+
 }

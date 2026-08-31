@@ -1,4 +1,5 @@
-﻿using BackEnd.Models;
+﻿using BackEnd.DTOs;
+using BackEnd.Models;
 
 namespace BackEnd.Interfaces
 {
@@ -8,5 +9,6 @@ namespace BackEnd.Interfaces
         Task<User> GetByEmailAsync(string email);
         Task UpdateAsync(string id, User user);
         Task<User> GetByRefreshTokenAsync(string refreshToken);
+        Task<ProjectCountDto> GetProjectInfo(string UserId);
     }
 }

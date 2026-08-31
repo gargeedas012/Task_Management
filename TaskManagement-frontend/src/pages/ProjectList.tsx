@@ -85,100 +85,102 @@ function ProjectList() {
         );
     };
     return (
-        <Table arial-label="Project list">
+        <div style={{ overflowX: "auto", width: "100%" }}>
+            <Table arial-label="Project list">
 
-            <TableHeader>
-                <TableRow>
-                    <TableHeaderCell>Name</TableHeaderCell>
-                    <TableHeaderCell>Description</TableHeaderCell>
-                    <TableHeaderCell>Created Date</TableHeaderCell>
-                    <TableHeaderCell>Due Date</TableHeaderCell>
-                    <TableHeaderCell>Status</TableHeaderCell>
-                    <TableHeaderCell>Action</TableHeaderCell>
-                </TableRow>
-            </TableHeader>
-
-            <TableBody>
-                {projects.map((project) => (
-                    <TableRow key={project.id}>
-
-                        <TableCell>
-                            {project.name}
-                        </TableCell>
-
-                        <TableCell>
-                            {project.description}
-                        </TableCell>
-
-
-                        <TableCell>
-                            {project.dueDate
-                                ? new Date(
-                                    project.dueDate
-                                ).toLocaleDateString()
-                                : "-"}
-                        </TableCell>
-
-                        <TableCell>
-                            {project.status}
-                        </TableCell>
-
-<TableCell>
-    <div style={{ display: "flex", gap: "8px" }}>
-
-        <Button onClick={() => handleView(project)}>
-            View
-        </Button>
-
-        <Button onClick={() => handleEdit(project)}>
-            Edit
-        </Button>
-
-        <Popover
-            open={openProjectId === project.id}
-            onOpenChange={(_, data) => 
-                setOpenProjectId(data.open ? project.id! : null)
-            }
-        >
-            <PopoverTrigger disableButtonEnhancement>
-                <Button>
-                    Delete
-                </Button>
-            </PopoverTrigger>
-
-            <PopoverSurface>
-                <p>Are you sure you want to delete this project?</p>
-
-                <Button
-                    appearance="primary"
-                    onClick={() => {
-                        handleDelete(project.id!);
-                        setOpenProjectId(null);
-                       setRefreshTrigger((prev)=>prev+1)
-                    }}
-                >
-                    Yes
-                </Button>
-
-                <Button
-                    onClick={() => {  setOpenProjectId(null)
-
-                    }
-                    }
-                >
-                    No
-                </Button>
-            </PopoverSurface>
-        </Popover>
-
-    </div>
-</TableCell>
-
+                <TableHeader>
+                    <TableRow>
+                        <TableHeaderCell>Name</TableHeaderCell>
+                        <TableHeaderCell>Description</TableHeaderCell>
+                        <TableHeaderCell>Created Date</TableHeaderCell>
+                        <TableHeaderCell>Due Date</TableHeaderCell>
+                        <TableHeaderCell>Status</TableHeaderCell>
+                        <TableHeaderCell>Action</TableHeaderCell>
                     </TableRow>
-                ))}
-            </TableBody>
+                </TableHeader>
 
-        </Table>
+                <TableBody>
+                    {projects.map((project) => (
+                        <TableRow key={project.id}>
+
+                            <TableCell>
+                                {project.name}
+                            </TableCell>
+
+                            <TableCell>
+                                {project.description}
+                            </TableCell>
+
+
+                            <TableCell>
+                                {project.dueDate
+                                    ? new Date(
+                                        project.dueDate
+                                    ).toLocaleDateString()
+                                    : "-"}
+                            </TableCell>
+
+                            <TableCell>
+                                {project.status}
+                            </TableCell>
+
+    <TableCell>
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+
+            <Button onClick={() => handleView(project)}>
+                View
+            </Button>
+
+            <Button onClick={() => handleEdit(project)}>
+                Edit
+            </Button>
+
+            <Popover
+                open={openProjectId === project.id}
+                onOpenChange={(_, data) => 
+                    setOpenProjectId(data.open ? project.id! : null)
+                }
+            >
+                <PopoverTrigger disableButtonEnhancement>
+                    <Button>
+                        Delete
+                    </Button>
+                </PopoverTrigger>
+
+                <PopoverSurface>
+                    <p>Are you sure you want to delete this project?</p>
+
+                    <Button
+                        appearance="primary"
+                        onClick={() => {
+                            handleDelete(project.id!);
+                            setOpenProjectId(null);
+                        setRefreshTrigger((prev)=>prev+1)
+                        }}
+                    >
+                        Yes
+                    </Button>
+
+                    <Button
+                        onClick={() => {  setOpenProjectId(null)
+
+                        }
+                        }
+                    >
+                        No
+                    </Button>
+                </PopoverSurface>
+            </Popover>
+
+        </div>
+    </TableCell>
+
+                        </TableRow>
+                    ))}
+                </TableBody>
+
+            </Table>
+        </div>
     );
 }
 

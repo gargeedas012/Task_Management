@@ -1,0 +1,24 @@
+:root {
+    font-family: Arial, sans-serif;
+    --bg-primary: #F1F3F9;
+    --bg--card: #FFFFFF;
+    --text-primary: black;
+    --primary-color: #4F39F6;
+    --border-color: rgba(0,0,0,0.10);
+    --nav-selected-bg: rgba(79, 57, 246, 0.1);
+    --nav-selected-border: #a9a4d6;
+    --nav-hover-bg: rgba(0, 0, 0, 0.05);
+    --permanent-text-color:#585b5f;
+}
+
+body[data-theme="dark"] {
+    --bg-primary: #0B0D16;
+    --bg--card: #121623;
+    --text-primary: white;
+    --primary-color: #8B7FFF;
+    --border-color: #252A3A;
+    --nav-selected-bg: rgba(139, 127, 255, 0.1);
+    --nav-selected-border: #392aa5;
+    --nav-hover-bg: rgba(255, 255, 255, 0.05);
+   --permanent-text-color:#aeb6c2;
+}

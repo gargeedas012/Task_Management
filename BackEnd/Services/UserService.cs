@@ -1,4 +1,5 @@
-﻿using BackEnd.Interfaces;
+﻿using BackEnd.DTOs;
+using BackEnd.Interfaces;
 using BackEnd.Models;
 
 namespace BackEnd.Services
@@ -27,6 +28,11 @@ namespace BackEnd.Services
         public Task UpdateAsync(string id, User user)
         {
             return _repository.UpdateAsync(id, user);
+        }
+
+        public Task<ProjectCountDto> GetProjectInfo(string UserId)
+        {
+            return _repository.GetProjectInfo(UserId);
         }
     }
 }

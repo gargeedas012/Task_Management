@@ -8,6 +8,8 @@ import ProjectForm from "./src/pages/ProjectForm";
 import ProjectList from "./src/pages/ProjectList";
 import ProjectBoard from "./src/pages/ProjectBoard";
 import { Layout } from "./src/pages/Layout";
+import { Settings } from "./src/pages/Settings";
+import "./css/global.css";
 
 function App() {
   return (
@@ -22,6 +24,7 @@ function App() {
                 <Route path="/projects" element={<ProtectedRoute><ProjectForm/></ProtectedRoute>}/>
                 <Route path="/viewproject" element={<ProtectedRoute><ProjectList/></ProtectedRoute>}/>
                 <Route path="/projectboard" element={<ProtectedRoute><ProjectBoard/></ProtectedRoute>}/>
+                <Route path="/settings" element={<ProtectedRoute><Settings/></ProtectedRoute>}/>
             </Route>
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>

@@ -5,6 +5,7 @@ import { store } from './src/app/store.ts'
 import { FluentProvider, webLightTheme } from "@fluentui/react-components";
 import AuthInitializer from './src/components/AuthInitializer.tsx'
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import {ThemeProvider } from "./context/ThemeContext.tsx";
 import "./index.css";
 
 const clientID=import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -14,7 +15,9 @@ createRoot(document.getElementById('root')!).render(
     <Provider store={store}>
       <FluentProvider theme={webLightTheme}>
         <AuthInitializer>
-          <App />
+          <ThemeProvider>
+            <App />
+          </ThemeProvider>
         </AuthInitializer>
       </FluentProvider>
     </Provider>

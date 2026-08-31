@@ -1,0 +1,430 @@
+
+Q1. Find all movies released in 2010
+[
+  {
+    $match: {
+      year:2015
+    }
+  }
+]
+//BsonDocument
+var pipeline=new[]
+{
+	new BsonDocument(
+		"$match",
+		new BsonDocument("year",2015)
+	)
+};
+var result=await movies.Aggregate<BsonDocument>(pipeline).ToListAsync()
+//flent Api
+var result=await movies.Aggregate().Match(
+  Builder<BsonDocument>.Filter.Eq("year",2015)
+).ToListAsync()
+//linq
+var result = await movies.AsQueryable()
+    .Where(m => m.Year == 2015)
+    .ToListAsync();
+
+Q2. Find movies whose year is greater than 2015
+[
+  {
+    $match: {
+      year:{
+        $gt:2015
+      }
+    }
+  }
+]
+//BsonDocument
+var pipeline=new[]
+{
+  new BsonDocument(
+    "$match",
+    new BsonDocument(
+      "year",
+      new BsonDocument(
+        "$gt", 2015
+      )
+    )
+  )
+}
+var result=await movies.Aggregate<BsonDocument>(pipeline).ToListAsync()
+//Flent api
+var result=await movies.Aggregate().Match(
+  Builder<BsonDocument>.Filter.Gt("year", 2015).ToListAsync()
+)
+//linq
+var result=await movie.AsQueryable().Where(m=>m.Year > 2015).ToListAsync()
+
+Q3. Find Action movies released after 2010
+[
+  {
+    $match: {
+      genres:"Action",
+      year:{
+        $gt:2010
+      }
+    }
+  }
+]
+var pipeline=new []
+{
+  new BsonDocument(
+    $match, new BsonDocument{
+      {"genres","Action"},
+      {"year", new BsonDocument ("$gt",2010)}
+    }
+  )
+}
+vae result= await movies.Aggregate<BsonDocument>(pipeline).ToListAsync();
+//flent api
+var result=await movies.Aggregate().Match(
+  Builder<BsonDocument>.Filter.And(
+    Builder<BsonDocument>.Filter.Eq("genres","Action"),
+    Builder<BsonDocument>.Filter.Gt("year",2010)
+  )
+).ToListAsync()
+//linq
+var result = await movies.AsQueryable()
+    .Where(m => m.Genres.Contains("Action") && m.Year > 2010)
+    .ToListAsync();
+
+Q4. Display only title, year and genres
+[
+  {
+    $match: {
+      genres:"Action",
+      year:{
+        $gt:2010
+      }
+    }
+  },
+  {
+    $project: {
+      _id:0,
+      genres:1,
+      title: 1,
+      year: 1,
+    }
+  }
+]
+var pipeline=new []
+{
+  new BsonDocument(
+    "$match", new BsonDocument{
+      {"genres","Action"},
+      {"year", new BsonDocument ("$gt",2010)}
+    }
+  ),
+  new BsonDocument(
+    "$project", new BsonDocument {
+        {"title",1},
+        { "year", 1},
+        { "genres", 1},
+        { "_id", 0}
+    }
+  )
+}
+var result= await movies.Aggregate<BsonDocument>(pipeline).ToListAsync();
+//flent api
+var result=await movies.Aggregate().Match(
+  Builder<BsonDocument>.Filter.And(
+    Builder<BsonDocument>.Filter.Eq("genres","Action"),
+    Builder<BsonDocument>.Filter.Gt("year",2010))
+).Project(new BsonDocument{
+    {"title",1},
+    {"year", 2},
+    { "genres", 1},
+    { "_id", 0}
+  }).ToListAsync()
+
+Q5. Sort movies by IMDb rating highest to lowest
+[
+  {
+    $match: {
+      genres:"Action",
+      year:{
+        $gt:2010
+      }
+    }
+  },
+  {
+    $project: {
+      _id:0,
+      genres:1,
+      title: 1,
+      year: 1,
+    }
+  },
+  {
+    $sort: {
+      "imdb.rating": -1
+    }
+  },
+  {
+    $limit: 5
+  }
+]
+var pipeline=new []
+{
+  new BsonDocument(
+    "$match", new BsonDocument{
+      {"genres","Action"},
+      {"year", new BsonDocument ("$gt",2010)}
+    }
+  ),
+  new BsonDocument(
+    "$project", new BsonDocument {
+        {"title",1},
+        { "year", 1},
+        { "genres", 1},
+        { "_id", 0}
+    }
+  ),
+  new BsonDocument(
+    "$sort, new BsonDocument{
+      {"year": -1}
+    }
+  ),
+  new BsonDocument(
+    "$limit:5
+  )
+}
+var result= await movies.Aggregate<BsonDocument>(pipeline).ToListAsync();
+//flent api
+var result=await movies.Aggregate().Match(
+  Builder<BsonDocument>.Filter.And(
+    Builder<BsonDocument>.Filter.Eq("genres","Action"),
+    Builder<BsonDocument>.Filter.Gt("year",2010))
+).Project(new BsonDocument{
+    {"title",1},
+    {"year", 2},
+    { "genres", 1},
+    { "_id", 0}
+  }).Sort(new BsonDocument("year",1)).Limit(5).ToListAsync()
+
+Q6. Movies released in 2010, 2015, or 2020
+[
+  {
+    $match: {
+      year:{
+        $in:[2010,2015,2020]
+      }
+    }
+  }
+]
+var pipeline=new []
+{
+  new BsonDocument(
+    "$match", new BsonDocument{
+      {
+        "year", new BsonDocument ("$in", new BsonArray { 2010, 2015, 2020})
+      }
+    }
+  )
+}
+var result= await movies.Aggregate<BsonDocument>(pipeline).ToListAsync();
+//fluent api
+var result=await movies.Aggregate().Match(
+  Builder<BsonDocument>.Filter.In("year",new [] {2010, 2015, 2020 })).ToListAsync()
+
+Q7. Find movies that are NOT Drama
+[
+  {
+    $match: {
+     "genres":{
+       $nin:["Drama","Short"]
+     }
+    }
+  }
+]
+var pipeline=new []
+{
+  new BsonDocument(
+    "$match", new BsonDocument{
+      {
+        "genres", new BsonDocument ("$nin", new BsonArray { "Drama","Short"})
+      }
+    }
+  )
+}
+var result= await movies.Aggregate<BsonDocument>(pipeline).ToListAsync();
+//fluent api
+var result=await movies.Aggregate().Match(
+  Builder<BsonDocument>.Filter.Nin("genres",new [] {"Drama","Short"})).ToListAsync()
+
+
+Q8. Show every genre separately
+[
+  {
+    $unwind: {
+      path: "$genres",
+      includeArrayIndex: 'genresindex',
+      preserveNullAndEmptyArrays: false
+    }
+  },
+    {
+    $project: {
+      _id: 0,
+      title: 1,
+      genres: 1,
+      genresindex:1
+    }
+  }
+]
+var pipeline=new []
+{
+  new BsonDocument(
+    "$unwind",{
+      {"path","$genres"},
+      { "includeArrayIndex", "genresindex" },
+      { "preserveNullAndEmptyArrays", false }
+    }
+  ),
+  new BsonDocument(
+    "$project",
+      new BsonDocument {
+         { "_id", 0 },
+         { "title", 1 },
+         { "genres", 1 },
+         { "genresindex", 1 }
+      }
+  )
+}
+var result= await movies.Aggregate<BsonDocument>(pipeline).ToListAsync();
+//fluent api
+var result=await movies.Aggregate().Unwind("genres" , new AggregateUnwindOptions<BsonDocument>{ IncludeArrayIndex = "genresindex" }).Project(new BsonDocument {
+  { "_id", 0 },
+  { "title", 1 },
+  { "genres", 1 },
+  { "genresindex", 1 }
+}).ToListAsync()
+
+Q9. Find the sum IMDb rating for each genre
+[
+  {
+    $unwind: {
+      path: "$genres",
+      includeArrayIndex: 'genresindex',
+      preserveNullAndEmptyArrays: false
+    }
+  },
+  {
+    $group: {
+      _id: "$genres",
+      count: {
+        "$sum": 1
+      }
+    }
+  },
+    {
+    $project: {
+      _id: 1,
+      // genres: "$_id",
+      count:1
+    }
+  }
+]
+var pipeline=new []
+{
+  new BsonDocument(
+    "$unwind",{
+      {"path","$genres"},
+      { "includeArrayIndex", "genresindex" },
+      { "preserveNullAndEmptyArrays", false }
+    }
+  ),
+  new BsonDocument(
+    "$group", {
+      {"_id" , "$genres"},
+      {"count", new BsonDocument ("$sum" ,1)}
+    }
+  ),
+  new BsonDocument(
+    "$project",
+      new BsonDocument {
+         { "_id", 1 },
+         { "genres", "$_id },
+         {"count" ,1}
+      }
+  )
+}
+var result= await movies.Aggregate<BsonDocument>(pipeline).ToListAsync();
+//fluent api
+var result = await movies.Aggregate()
+    .Unwind("genres", new AggregateUnwindOptions<BsonDocument>
+    {
+        IncludeArrayIndex = "genresindex",
+        PreserveNullAndEmptyArrays = false
+    })
+    .Group(
+        new BsonDocument
+        {
+            { "_id", "$genres" },
+            { "count", new BsonDocument("$sum", 1) }
+        }
+    )
+    .Project(new BsonDocument
+    {
+        { "_id", 0 },
+        { "genres", "$_id" },
+        { "count", 1 }
+    })
+    .ToListAsync();
+
+Q10. Find the highest-rated movie in each genre.
+[
+  {
+    $unwind: {
+      path: "$genres",
+      preserveNullAndEmptyArrays: false
+    }
+  },
+  {
+    $group: {
+      _id: "$genres",
+      movie: {
+        $first: "$title"
+      },
+     rating: {
+        $first: "$imdb.rating"
+      }
+    }
+  },
+  {
+    $sort: {
+      rating: -1
+    }
+  },
+    {
+    $project: {
+      _id: 0,
+      genre: "$_id",
+      movie: 1,
+      rating: 1
+    }
+  }
+]
+//fluent api
+var result = await movies.Aggregate()
+    .Unwind("genres", new AggregateUnwindOptions<BsonDocument>
+    {
+        PreserveNullAndEmptyArrays = false
+    })
+    .Sort(new BsonDocument("imdb.rating", -1))
+    .Group(new BsonDocument
+    {
+        { "_id", "$genres" },
+        { "movie", new BsonDocument("$first", "$title") },
+        { "rating", new BsonDocument("$first", "$imdb.rating") }
+    })
+    .Project(new BsonDocument
+    {
+        { "_id", 0 },
+        { "genre", "$_id" },
+        { "movie", 1 },
+        { "rating", 1 }
+    })
+    .ToListAsync();
+
+  Q11. Find the number of movies for each genre.

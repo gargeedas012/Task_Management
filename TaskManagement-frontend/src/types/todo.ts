@@ -2,7 +2,7 @@ export interface Todo {
     id?: string;
     title: string;
     userId: string;
-    projectId: "string";
+    projectId: string;
     description: string;
     priority: "Low" | "Medium" | "High";
     dueDate: string;
@@ -18,4 +18,15 @@ export interface TodoByDateDto{
 export interface TodoListResponse{
     todos:Todo[];
     totalCount : number;
+}
+export interface TodoResponse {
+    id: string;
+    title: string;
+    description: string;
+    createdDate: string;
+    todoDueDate: string;
+    category: string;
+    isCompleted: boolean;
+    priority:string;
+    projectName: string;
 }

@@ -232,7 +232,8 @@ const TodoList = ({ projectid, refreshTrigger }: AddTodoListProps) => {
                     />
                 )}
             </div>
-            <Table aria-label="Todo list">
+            <div style={{ overflowX: "auto", width: "100%" }}>
+                <Table aria-label="Todo list">
                 <TableHeader>
                     <TableRow>
                         <TableHeaderCell>Title</TableHeaderCell>
@@ -457,7 +458,8 @@ const TodoList = ({ projectid, refreshTrigger }: AddTodoListProps) => {
                     )}
 
                 </TableBody>
-            </Table>
+                </Table>
+            </div>
             {
                 filterBy === "All" && (
                     <div

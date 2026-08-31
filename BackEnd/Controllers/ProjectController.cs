@@ -1,10 +1,13 @@
 using BackEnd.Common;
+using BackEnd.DTOs;
 using BackEnd.Interfaces;
 using BackEnd.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BackEnd.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class ProjectController : ControllerBase
@@ -140,6 +143,40 @@ namespace BackEnd.Controllers
                     response.Result = projects;
                     return Ok(response);
                 }
+            }
+            catch (Exception ex)
+            {
+                response.Status = false;
+                response.Errors.Add(new ApiError
+                {
+                    Code = "500",
+                    Message = ex.Message
+                });
+                return Unauthorized(response);
+            }
+        }
+        [HttpGet("getRecentProjects")]
+        public async Task<ActionResult<List<ProjectResponseDto>>> getRecentProjects(string UserId)
+        {
+            var response = new ApiResponse<List<ProjectResponseDto>>();
+            try
+            {
+                var result = await _projectService.getRecentProjects(UserId);
+                if (result == null)
+                {
+                    response.Errors.Add(new ApiError
+                    {
+                        Code = "404",
+                        Message = "Projects not found"
+                    });
+                    return NotFound();
+                }
+                else
+                {
+                    response.Result = result;
+                    return Ok(response);
+                }
+
             }
             catch (Exception ex)
             {

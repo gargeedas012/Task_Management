@@ -5,6 +5,8 @@ using BackEnd.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Threading.Tasks;
+using static Google.Apis.Requests.BatchRequest;
 
 namespace BackEnd.Controllers
 {
@@ -371,6 +373,39 @@ namespace BackEnd.Controllers
             }
         }
 
+        [HttpGet("getRecentTodos")]
+        public async Task<ActionResult<List<TodoResponse>>> getRecentTodos(string UserId)
+        {
+            var resposne = new ApiResponse<List<TodoResponse>>();
+            try
+            {
+                var result= await _todoService.getRecentTodos(UserId);
+                if (result == null)
+                {
+                    resposne.Errors.Add(new ApiError
+                    {
+                        Code = "404",
+                        Message = "Task not found"
+                    });
+                    return NotFound();
+                }
+                else
+                {
+                    resposne.Result = result;
+                    return Ok(resposne);
+                }
+            }
+            catch (Exception ex)
+            {
+                resposne.Errors.Add(new ApiError
+                {
+                   
+                    Message = ex.Message
+                });
+                return BadRequest(resposne);
+            }
+
+        }
 
     }
 }

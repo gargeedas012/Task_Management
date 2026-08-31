@@ -10,59 +10,11 @@ namespace BackEnd.Services
     public class TodoService : ITodoService
     {
         private  readonly ITodoRepository _repository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IJwtService _jwtService;
-        private readonly IAuthService _authService;
 
-        public TodoService(ITodoRepository repository, IHttpContextAccessor httpContextAccessor, IJwtService jwtService, IAuthService authService)
+        public TodoService(ITodoRepository repository)
         {
             _repository = repository;
-            _httpContextAccessor = httpContextAccessor;
-            _jwtService = jwtService;
-            _authService = authService;
         }
-
-        //private async Task VerifyAuthAsync()
-        //{
-        //    var httpContext = _httpContextAccessor.HttpContext;
-        //    if (httpContext == null) return;
-
-        //    var accessToken = httpContext.Request.Cookies["accessToken"];
-        //    var refreshToken = httpContext.Request.Cookies["refreshToken"];
-            
-        //    bool refreshNeeded = false;
-
-        //    if (string.IsNullOrEmpty(accessToken))
-        //    {
-        //        refreshNeeded = true;
-        //    }
-        //    else
-        //    {
-        //        var principal = _jwtService.ValidateToken(accessToken);
-        //        if (principal == null)
-        //        {
-        //            refreshNeeded = true;
-        //        }
-        //    }
-
-        //    if (refreshNeeded)
-        //    {
-        //        if (string.IsNullOrEmpty(refreshToken))
-        //        {
-        //            throw new UnauthorizedAccessException("Unauthorized: No valid tokens.");
-        //        }
-                
-        //        try
-        //        {
-        //            await _authService.RefreshTokenAsync();
-        //        }
-        //        catch
-        //        {
-        //            throw new UnauthorizedAccessException("Unauthorized: Token refresh failed.");
-        //        }
-        //    }
-        //}
-
         public async Task CreateAsync(CreateTodoDto createTodoDto)
         {
             var todo = new Todo
@@ -145,6 +97,11 @@ namespace BackEnd.Services
         public async Task<List<TodoByDateDto>> GetTodosByDateAsync(string projectId, DateTime startDate, int page, int pagesize , string filterType)
         {
             return await _repository.GetTodosByDateAsync(projectId, startDate ,  page,  pagesize , filterType);
+        }
+
+        public async Task<List<TodoResponse>> getRecentTodos(string UserId)
+        {
+            return await _repository.getRecentTodos(UserId);
         }
     }
 }

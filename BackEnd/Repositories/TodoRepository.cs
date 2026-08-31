@@ -3,6 +3,7 @@ using BackEnd.Interfaces;
 using BackEnd.Models;
 using BackEnd.Settings;
 using Microsoft.Extensions.Options;
+using Microsoft.VisualBasic;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
@@ -49,7 +50,6 @@ namespace BackEnd.Repositories
         {
             await _todoCollection.DeleteOneAsync(x => x.Id == id);
         }
-
         public async Task<List<Todo>> GetTodosByUserIdAsync(string userId)
         {
             var sort = Builders<Todo>.Sort.Descending(x => x.CreatedDate);
@@ -58,14 +58,11 @@ namespace BackEnd.Repositories
                 .Sort(sort)
                 .ToListAsync();
         }
-        
-        
         public async Task<List<Todo>> GetTodosByProjectIdAsync(string projectId)
         {
             var sort=Builders<Todo>.Sort.Descending(x=>x.CreatedDate);
             return await _todoCollection.Find(x=>x.ProjectId == projectId).Sort(sort).ToListAsync();
         }
-
         public async Task<TodoListResponse> GetTodosByProjectIdWithLimit(string projectId,int page,int pageSize)
         {
             var filter=Builders<Todo>.Filter.Eq(x=>x.ProjectId,projectId);
@@ -111,7 +108,6 @@ namespace BackEnd.Repositories
             var result = await _todoCollection.Aggregate<PriorityCountDto>(pipeline).ToListAsync();
             return result;
         }
-
         public async Task<List<Todo>> SearchAsync(string SearchText)
         {
             var filter = Builders<Todo>.Filter.Empty;
@@ -126,16 +122,9 @@ namespace BackEnd.Repositories
             }
             return await _todoCollection.Find(filter).ToListAsync();
         }
-
-        public async Task<List<TodoByDateDto>> GetTodosByDateAsync(
-            string projectId,
-            DateTime startDate,
-            int page,
-            int pagesize,
-            string filterType)
+        public async Task<List<TodoByDateDto>> GetTodosByDateAsync( string projectId, DateTime startDate, int page, int pagesize, string filterType)
         {
             DateTime endDate;
-
             if (filterType.ToLower() == "month")
             {
                 endDate = startDate.AddMonths(1);
@@ -148,24 +137,10 @@ namespace BackEnd.Repositories
             {
                 throw new ArgumentException("filterType must be 'month' or 'day'");
             }
-
-            var filter = Builders<Todo>.Filter.And(
-                Builders<Todo>.Filter.Eq(
-                    x => x.ProjectId,
-                    projectId
-                ),
-
-                Builders<Todo>.Filter.Gte(
-                    x => x.CreatedDate,
-                    startDate
-                ),
-
-                Builders<Todo>.Filter.Lt(
-                    x => x.CreatedDate,
-                    endDate
-                )
+            var filter = Builders<Todo>.Filter.And( Builders<Todo>.Filter.Eq( x => x.ProjectId, projectId),
+                Builders<Todo>.Filter.Gte( x => x.CreatedDate, startDate ),
+                Builders<Todo>.Filter.Lt( x => x.CreatedDate, endDate )
             );
-
             var result = await _todoCollection
                 .Aggregate()
                 .Match(filter)
@@ -196,10 +171,8 @@ namespace BackEnd.Repositories
                 )
                 .Sort(new BsonDocument("_id", 1))
                 .ToListAsync();
-
             // Number of dates
             var count = result.Count;
-
             // Convert + paginate dates
             var response = result
                 .Select(x => new TodoByDateDto
@@ -223,5 +196,107 @@ namespace BackEnd.Repositories
 
             return response;
         }
+
+        public async Task<List<TodoResponse>> getRecentTodos(string UserId)
+        {
+            var result = await _todoCollection
+                .Aggregate()
+                .Match(
+                    Builders<Todo>.Filter.Eq("UserId", UserId)
+                    &
+                    Builders<Todo>.Filter.Eq("IsCompleted", false)
+                    &
+                    new BsonDocument(
+                        "$expr",
+                        new BsonDocument(
+                            "$and",
+                            new BsonArray
+                            {
+                        new BsonDocument("$gte",
+                            new BsonArray { "$DueDate", "$$NOW" }),
+
+                        new BsonDocument("$lte",
+                            new BsonArray
+                            {
+                                "$DueDate",
+                                new BsonDocument("$dateAdd",
+                                    new BsonDocument
+                                    {
+                                        { "startDate", "$$NOW" },
+                                        { "unit", "month" },
+                                        { "amount", 1 }
+                                    })
+                            })
+                            }
+                        )
+                    )
+                )
+                .AppendStage<BsonDocument>(
+                    new BsonDocument(
+                        "$addFields",
+                        new BsonDocument
+                        {
+                    {
+                        "ProjectObjectId",
+                        new BsonDocument("$toObjectId", "$ProjectId")
+                    },
+                    {
+                        "TodoDueDate",
+                        new BsonDocument(
+                            "$dateToString",
+                            new BsonDocument
+                            {
+                                { "format", "%b %d, %Y" },
+                                { "date", "$DueDate" },
+                                { "timezone", "UTC" }
+                            }
+                        )
+                    }
+                        }
+                    )
+                ).AppendStage<BsonDocument>(
+                    new BsonDocument(
+                        "$lookup",
+                        new BsonDocument
+                        {
+                    { "from", "Projects" },
+                    { "localField", "ProjectObjectId" },
+                    { "foreignField", "_id" },
+                    { "as", "result" }
+                        }
+                    )
+                ).AppendStage<BsonDocument>(
+                    new BsonDocument(
+                        "$project",
+                        new BsonDocument
+                        {
+                    { "_id", 1 },
+                    { "Title", 1 },
+                    { "Description", 1 },
+                    { "CreatedDate", 1 },
+                    { "TodoDueDate", 1 },
+                    { "Category", 1 },
+                    { "IsCompleted", 1 },
+                    {"Priority",1 },
+                    {
+                        "ProjectName",
+                        new BsonDocument(
+                            "$arrayElemAt",
+                            new BsonArray
+                            {
+                                "$result.Name",
+                                0
+                            }
+                        )
+                    }
+                        }
+                    )
+                )
+                .Sort(new BsonDocument("DueDate", 1))
+                .Limit(4)
+                .ToListAsync();
+
+            return result.Select(x => BsonSerializer.Deserialize<TodoResponse>(x)).ToList();
+        }
     }
-}
+    }
