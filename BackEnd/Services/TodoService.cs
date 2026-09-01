@@ -15,21 +15,9 @@ namespace BackEnd.Services
         {
             _repository = repository;
         }
-        public async Task CreateAsync(CreateTodoDto createTodoDto)
+        public async Task CreateAsync(Todo createTodoDto)
         {
-            var todo = new Todo
-            {
-                Title = createTodoDto.Title,
-                UserId = createTodoDto.UserId,
-                ProjectId=createTodoDto.ProjectId,
-                Description = createTodoDto.Description,
-                Priority = createTodoDto.Priority,
-                DueDate = createTodoDto.DueDate,
-                Category = createTodoDto.Category,
-                IsCompleted = createTodoDto.IsCompleted,
-                CreatedDate = DateTime.UtcNow
-            };
-            await _repository.CreateAsync(todo);
+            await _repository.CreateAsync(createTodoDto);
         }
 
         public async Task DeleteAsync(string id)
@@ -53,13 +41,12 @@ namespace BackEnd.Services
             {
                 Id = id,
                 Title = updateTodoDto.Title,
-                UserId = updateTodoDto.UserId,
+               
                 ProjectId=updateTodoDto.ProjectId,
                 Description = updateTodoDto.Description,
-                Priority = updateTodoDto.Priority,
+               
                 DueDate = updateTodoDto.DueDate,
-                Category = updateTodoDto.Category,
-                IsCompleted = updateTodoDto.IsCompleted
+                
             };
             await _repository.UpdateAsync(id, todo);
         }

@@ -36,10 +36,9 @@ namespace BackEnd.Repositories
             var update = Builders<Todo>.Update
                 .Set(x => x.Title, todo.Title)
                 .Set(x => x.Description, todo.Description)
-                .Set(x => x.IsCompleted, todo.IsCompleted)
                 .Set(x => x.Priority, todo.Priority)
-                .Set(x => x.DueDate, todo.DueDate)
-                .Set(x => x.Category, todo.Category);
+                .Set(x => x.DueDate, todo.DueDate);
+
 
             await _todoCollection.UpdateOneAsync(
                 x => x.Id == id,
@@ -54,7 +53,7 @@ namespace BackEnd.Repositories
         {
             var sort = Builders<Todo>.Sort.Descending(x => x.CreatedDate);
             return await _todoCollection
-                .Find(x => x.UserId == userId)
+                .Find(x => x.Id == userId)
                 .Sort(sort)
                 .ToListAsync();
         }

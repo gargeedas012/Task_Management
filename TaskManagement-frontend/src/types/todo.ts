@@ -30,3 +30,28 @@ export interface TodoResponse {
     priority:string;
     projectName: string;
 }
+
+export interface TaskComment {
+  id: string;
+  author: string;
+  initials: string;
+  text: string;
+  timestamp: string;
+  isMe: boolean;
+}
+
+export interface NewTodo {
+  id?: string;
+  projectId: string;
+  title: string;
+  description: string;
+  assignedTo: string[];
+  assignedBy: string;
+  status: "Todo"| "InProgress" | "Blocked" | "Review" | "Completed";
+  priority: "Low" | "Medium" | "High" | "Critical";
+  startDate: string;
+  dueDate: string;
+  updatedDate: string;
+  createdDate: string;
+  comments: TaskComment[];
+}

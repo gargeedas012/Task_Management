@@ -1,6 +1,7 @@
 import type { ApiResponse } from '../types/api';
 import type { LoginRequest, RegisterRequest, TokenResponseDto } from '../types/auth'
 import type { GetProjectInfoDto, Project, RecentProject } from '../types/project';
+import type { DashboardStats } from '../types/ProjectDashboardType';
 import type { Todo, TodoByDateDto, TodoListResponse, TodoResponse } from '../types/todo';
 import api from './axios'
 
@@ -41,7 +42,7 @@ export const GoogleLoginFun = async (
     return response.data;
 };
 //user
-export const GetProjectInfo = async (userId: string): Promise<ApiResponse<GetProjectInfoDto>> => {
+export const GetProjectInfo = async (userId: string): Promise<ApiResponse<DashboardStats>> => {
     const response = await api.get("/User/GetProjectInfo", { params: { userId } });
     return response.data;
 };

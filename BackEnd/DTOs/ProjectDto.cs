@@ -5,17 +5,17 @@ namespace BackEnd.DTOs
 {
     public class ProjectCountDto
     {
-        [BsonElement("TotalProjects")]
-        public int TotalProjects { get; set; }
+        [BsonElement("AssignedProjects")]
+        public int AssignedProjects { get; set; }
 
-        [BsonElement("ActiveProjects")]
-        public int ActiveProjects { get; set; }
+        [BsonElement("AssignedTasks")]
+        public int AssignedTasks { get; set; }
 
-        [BsonElement("TotalTasks")]
-        public int TotalTasks { get; set; }
+        [BsonElement("InProgressTasks")]
+        public int InProgressTasks { get; set; }
 
-        [BsonElement("CompletedTask")]
-        public int CompletedTask { get; set; }
+        [BsonElement("CompletedTasks")]
+        public int CompletedTasks { get; set; }
     }
     public class ProjectResponseDto
     {

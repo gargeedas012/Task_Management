@@ -6,6 +6,7 @@ import { getAllRecentProjects, GetProjectInfo, getrecentTodos } from "../api/aut
 import { useAppSelector } from "../app/hooks";
 import { type RecentProject, type GetProjectInfoDto } from "../types/project";
 import type { Todo, TodoResponse } from "../types/todo";
+import type { DashboardStats } from "../types/ProjectDashboardType";
 
 const useStyle = makeStyles({
     container: {
@@ -137,7 +138,7 @@ const useStyle = makeStyles({
 export function Dashboard() {
     const styles = useStyle();
     const user = useAppSelector((state) => state.auth.user);
-    const [response, setResponse] = useState<GetProjectInfoDto | null>(null);
+    const [response, setResponse] = useState<DashboardStats | null>(null);
     const [recentProject, setRecentProject] = useState<RecentProject[]>([]);
     const [recentTodos, setrecentTodos]= useState<TodoResponse[]>([]);
     useEffect(() => {
@@ -147,6 +148,7 @@ export function Dashboard() {
             try {
                 const result = await GetProjectInfo(user.userId);
                 setResponse(result.result);
+                
             } catch (error) {
                 console.error("Failed to fetch project info:", error);
                 setResponse(null);
@@ -157,6 +159,7 @@ export function Dashboard() {
             try {
                 const result = await getAllRecentProjects(user.userId);
                 setRecentProject(Array.isArray(result.result) ? result.result : []);
+                console.log(result.result);
             } catch (err) {
                 setRecentProject([]);
             }
@@ -200,29 +203,29 @@ export function Dashboard() {
                     <div className={styles.logo}>
                         <LayerRegular fontSize={30} style={{color:"#4F39F6"}}/>
                     </div>
-                    <Text size={400} weight="semibold"  style={{color:"var(--permanent-text-color)", fontSize:"12"}}>Total Project</Text>
-                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.totalProjects}</Text>
+                    <Text size={400} weight="semibold"  style={{color:"var(--permanent-text-color)", fontSize:"12"}}>Assigned Project</Text>
+                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.assignedProjects}</Text>
                 </div>
                 <div className={styles.card}>
                     <div className={styles.logo} style={{ background: "#d4f5ea" }}>
                         <ArrowTrendingRegular fontSize={30} style={{color:"#009966"}}/>
                     </div>
-                    <Text size={400} weight="semibold" style={{color:"var(--permanent-text-color)", fontSize:"12"}} >Active Projects</Text>
-                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.activeProjects}</Text>
+                    <Text size={400} weight="semibold" style={{color:"var(--permanent-text-color)", fontSize:"12"}} >Assigned Tasks</Text>
+                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.assignedTasks}</Text>
                 </div>
                 <div className={styles.card}>
                     <div className={styles.logo} style={{ background: "#d6ebf7"}}>
                         <TargetRegular fontSize={30} style={{color:"#0084D1"}}/>
                     </div>
-                    <Text size={400} weight="semibold" style={{color:"var(--permanent-text-color)",fontSize:"12"}} >Total Task</Text>
-                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.totalTasks}</Text>
+                    <Text size={400} weight="semibold" style={{color:"var(--permanent-text-color)",fontSize:"12"}} >In Progress Tasks</Text>
+                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.inProgressTasks}</Text>
                 </div>
                 <div className={styles.card}>
                     <div className={styles.logo} style={{ background: "#e3d9f0", }}>
                         <CheckmarkCircleRegular fontSize={30} style={{color:"#7F22FE"}}/>
                     </div>
-                    <Text size={400} weight="semibold" style={{color:"var(--permanent-text-color)",fontSize:"12"}}>Completed Task</Text>
-                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.completedTask}</Text>
+                    <Text size={400} weight="semibold" style={{color:"var(--permanent-text-color)",fontSize:"12"}}>Completed Tasks</Text>
+                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.completedTasks}</Text>
                 </div>
             </div>
             {/* Middle */}

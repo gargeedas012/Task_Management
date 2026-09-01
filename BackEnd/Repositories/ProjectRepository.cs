@@ -28,12 +28,12 @@ namespace BackEnd.Repositories
         }
         public async Task<List<Project>> GetProjectsByUserIdAsync(string userId)
         {
-            return await _projectCollection.Find(x => x.UserId == userId).ToListAsync();
+            return await _projectCollection.Find(x => x.Id == userId).ToListAsync();
         }
         public async Task UpdateProjectAsync(string id, Project project)
         {
             var update= Builders<Project>.Update
-                .Set(x => x.UserId, project.UserId)
+                //.Set(x => x.UserId, project.UserId)
                 .Set(x => x.Name, project.Name)
                 .Set(x => x.Description, project.Description)
                 .Set(x => x.DueDate, project.DueDate)

@@ -91,12 +91,12 @@ namespace BackEnd.Controllers
             }
         }
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<string>>> CreateAsync(CreateTodoDto dto)
+        public async Task<ActionResult<ApiResponse<string>>> CreateAsync(Todo todo)
         {
             var response = new ApiResponse<string>();
             try
             {
-                await _todoService.CreateAsync(dto);
+                await _todoService.CreateAsync(todo);
                 response.Result = "Todo Created";
                 return Ok(response);
             }

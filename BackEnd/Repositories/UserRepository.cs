@@ -47,104 +47,204 @@ namespace BackEnd.Repositories
             return user;
         }
 
-        public async Task<ProjectCountDto> GetProjectInfo(string UserId)
+        public async Task<ProjectCountDto?> GetProjectInfo(string UserId)
         {
-            var result = await _usersCollection.Aggregate().Match(new BsonDocument { { "_id", new ObjectId(UserId) }})
-                            .AppendStage<User>(new BsonDocument("$lookup",new BsonDocument
+            var result = await _usersCollection
+                .Aggregate().Match(new BsonDocument{
+                    {
+                        "_id", new ObjectId(UserId)
+                    }
+                })
+                .AppendStage<User>(new BsonDocument("$lookup",new BsonDocument
+                {
+                    { "from", "Projects" },
+                    { "let", new BsonDocument
+                        {
+                            {
+                                "userId",
+                                new BsonDocument("$toString", "$_id")
+                            }
+                        }
+                    },
+                    { "pipeline", new BsonArray
+                        {
+                            // Find projects where user is a member
+                            new BsonDocument("$match",
+                                new BsonDocument("$expr",
+                                    new BsonDocument("$in",
+                                        new BsonArray
+                                        {
+                                            "$$userId",
+                                            "$ProjectMemberId"
+                                        }
+                                    )
+                                )
+                            ),
+
+                            // 3. Lookup Todos for each project
+                            new BsonDocument("$lookup",
+                                new BsonDocument
                                 {
-                                    { "from", "Projects" },
+                                    { "from", "Todos" },
+
                                     { "let", new BsonDocument
                                         {
-                                            { "userId", new BsonDocument("$toString", "$_id") }
+                                            {
+                                                "projectId",
+                                                new BsonDocument("$toString", "$_id")
+                                            }
                                         }
                                     },
+
                                     { "pipeline", new BsonArray
                                         {
                                             new BsonDocument("$match",
                                                 new BsonDocument("$expr",
-                                                    new BsonDocument("$eq", new BsonArray
-                                                    {
-                                                        "$UserId", "$$userId"
-                                                    }))),
-                                            new BsonDocument("$lookup",
-                                                new BsonDocument
-                                                {
-                                                    { "from", "Todos" },
-                                                    { "let", new BsonDocument
+                                                    new BsonDocument("$eq",
+                                                        new BsonArray
                                                         {
-                                                            { "projectId", new BsonDocument("$toString", "$_id") }
+                                                            "$$projectId",
+                                                            "$ProjectId"
                                                         }
-                                                    },
-                                                    { "pipeline", new BsonArray
-                                                        {
-                                                            new BsonDocument("$match",
-                                                                new BsonDocument("$expr",
-                                                                    new BsonDocument("$eq", new BsonArray
-                                                                    {
-                                                                        "$ProjectId", "$$projectId"
-                                                                    })))
-                                                        }
-                                                    },
-                                                    { "as", "Todos" }
-                                                })
+                                                    )
+                                                )
+                                            )
                                         }
                                     },
-                                    { "as", "Projects" }
-                                }))
-                            .AppendStage<User>(new BsonDocument("$addFields",
-                                new BsonDocument
-                                {
-                                    { "TotalProjects", new BsonDocument("$size", "$Projects") },
-                                    { "ActiveProjects", new BsonDocument("$size",
-                                        new BsonDocument("$filter", new BsonDocument
+
+                                    { "as", "Tasks" }
+                                }
+                            )
+                        }
+                    },
+                    { "as", "projects" }
+                        }
+                    ))
+                .AppendStage<User>(new BsonDocument("$addFields",
+                    new BsonDocument
+                    { // Total assigned projects
+                        {
+                            "AssignedProjects",
+                            new BsonDocument("$size", "$projects")
+                        },
+                // Total assigned tasks
+                        {
+                            "AssignedTasks",
+                            new BsonDocument("$sum",
+                                new BsonDocument("$map",
+                                    new BsonDocument
+                                    {
+                                        { "input", "$projects" },
+                                        { "as", "project" },
                                         {
-                                            { "input", "$Projects" },
-                                            { "as", "project" },
-                                            { "cond", new BsonDocument("$eq", new BsonArray
-                                                {
-                                                    "$$project.Status", "Active"
-                                                })
-                                            }
-                                        }))
-                                    },
-                                    { "TotalTasks", new BsonDocument("$sum",
-                                        new BsonDocument("$map", new BsonDocument
-                                        {
-                                            { "input", "$Projects" },
-                                            { "as", "project" },
-                                            { "in", new BsonDocument("$size", "$$project.Todos") }
-                                        }))
-                                    },
-                                    { "CompletedTask", new BsonDocument("$sum",
-                                        new BsonDocument("$map", new BsonDocument
-                                        {
-                                            { "input", "$Projects" },
-                                            { "as", "project" },
-                                            { "in", new BsonDocument("$size",
-                                                new BsonDocument("$filter", new BsonDocument
-                                                {
-                                                    { "input", "$$project.Todos" },
-                                                    { "as", "projectTodo" },
-                                                    { "cond", new BsonDocument("$eq", new BsonArray
-                                                        {
-                                                            "$$projectTodo.IsCompleted", true
-                                                        })
-                                                    }
-                                                }))
-                                            }
-                                        }))
+                                            "in",
+                                            new BsonDocument(
+                                                "$size",
+                                                "$$project.Tasks"
+                                            )
+                                        }
                                     }
-                                }))
-                            .Project(new BsonDocument{
-                                { "_id", 0 },
-                                { "TotalProjects", 1 },
-                                { "ActiveProjects", 1 },
-                                { "TotalTasks", 1 },
-                                { "CompletedTask", 1 }
-                              }
-                            ).As<ProjectCountDto>()
-                            .FirstOrDefaultAsync();
-                return result;
+                                )
+                            )
+                        },
+                        // In-progress tasks
+                        {
+                            "InProgressTasks",
+                            new BsonDocument("$sum",
+                                new BsonDocument("$map",
+                                    new BsonDocument
+                                    {
+                                        { "input", "$projects" },
+                                        { "as", "project" },
+
+                                        {
+                                            "in",
+                                            new BsonDocument("$size",
+                                                new BsonDocument("$filter",
+                                                    new BsonDocument
+                                                    {
+                                                        {
+                                                            "input",
+                                                            "$$project.Tasks"
+                                                        },
+                                                        {
+                                                            "as",
+                                                            "task"
+                                                        },
+                                                        {
+                                                            "cond",
+                                                            new BsonDocument("$eq",
+                                                                new BsonArray
+                                                                {
+                                                                    "$$task.Status",
+                                                                    1
+                                                                }
+                                                            )
+                                                        }
+                                                    }
+                                                )
+                                            )
+                                        }
+                                    }
+                                )
+                            )
+                        },
+                // Completed tasks
+                {
+                    "CompletedTasks",
+                    new BsonDocument("$sum",
+                        new BsonDocument("$map",
+                            new BsonDocument
+                            {
+                                { "input", "$projects" },
+                                { "as", "project" },
+                                {
+                                    "in",
+                                    new BsonDocument("$size",
+                                        new BsonDocument("$filter",
+                                            new BsonDocument
+                                            {
+                                                {
+                                                    "input",
+                                                    "$$project.Tasks"
+                                                },
+                                                {
+                                                    "as",
+                                                    "task"
+                                                },
+                                                {
+                                                    "cond",
+                                                    new BsonDocument("$eq",
+                                                        new BsonArray
+                                                        {
+                                                            "$$task.Status",
+                                                            4
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        )
+                                    )
+                                }
+                            }
+                        )
+                    )
+                }
+                    }
+                ))
+                // 5. Return only required fields
+                .Project(new BsonDocument
+                {
+                    { "_id", 0 },
+                    { "AssignedProjects", 1 },
+                    { "AssignedTasks", 1 },
+                    { "InProgressTasks", 1 },
+                    { "CompletedTasks", 1 }
+                })
+                .As<ProjectCountDto>()
+                .FirstOrDefaultAsync();
+
+            return result;
         }
 
     }

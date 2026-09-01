@@ -24,3 +24,19 @@ export interface GetProjectInfoDto{
     totalTasks:Number,
     completedTask:Number
 }
+
+export interface NewProject {
+  id?: string;
+  name: string;
+  description: string;
+  projectManagerId: string;
+  client: string;
+  startDate: string;
+  dueDate?: string | null;
+  projectMemberId: string[];
+  status: "NotStarted" | "InProgress" | "OnHold" | "Completed";
+  priority: "Low" | "Medium" | "High" | "Critical";
+  totalTasks?: number | null;
+  completedTasks?: number | null;
+  createdDate: string;
+}

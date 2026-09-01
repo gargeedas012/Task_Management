@@ -6,7 +6,7 @@ namespace BackEnd.Interfaces
     {
         Task<List<Todo>> GetAllAsync();
         Task<Todo?> GetByIdAsync(string id);
-        Task CreateAsync(CreateTodoDto createTodoDto);
+        Task CreateAsync(Todo createTodoDto);
         Task UpdateAsync(string id, UpdateTodoDto updateTodoDto);
         Task DeleteAsync(string id);
         Task<List<InCompleteTodoResponseDto>> GetIncompleteTodos(bool isCompleted);
