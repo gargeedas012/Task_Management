@@ -11,5 +11,6 @@ namespace BackEnd.Interfaces
         Task DeleteProjectAsync(string id);
         Task<List<Project>> GetProjectsByUserIdAsync(string userId);
         Task<List<ProjectResponseDto>> getRecentProjects(string UserId);
+        Task<List<ProjectInfoDto>> GetProjectAssigneInfo(string userId);
     }
 }

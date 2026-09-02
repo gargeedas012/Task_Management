@@ -28,7 +28,8 @@ namespace BackEnd.Repositories
         }
         public async Task<List<Project>> GetProjectsByUserIdAsync(string userId)
         {
-            return await _projectCollection.Find(x => x.Id == userId).ToListAsync();
+            var filter = Builders<Project>.Filter.AnyEq( x => x.ProjectMemberId,userId);
+            return await _projectCollection.Find(filter).ToListAsync();
         }
         public async Task UpdateProjectAsync(string id, Project project)
         {
@@ -112,6 +113,133 @@ namespace BackEnd.Repositories
                 .ToListAsync();
             return result;
         }
+
+
+        public async Task<List<ProjectInfoDto>> GetProjectAssigneInfo(string userId)
+                {
+                    var filter = Builders<Project>.Filter.AnyEq(x => x.ProjectMemberId, userId);
+
+                    var result = await _projectCollection
+                        .Aggregate()
+                        .Match(filter)
+                        .AppendStage<Project>(
+                            new BsonDocument("$lookup", new BsonDocument
+                            {
+                        { "from", "Todos" },
+                        { "let", new BsonDocument("projectId", new BsonDocument("$toString", "$_id")) },
+                        { "pipeline", new BsonArray
+                            {
+                                new BsonDocument("$match", new BsonDocument("$expr",
+                                    new BsonDocument("$eq", new BsonArray { "$ProjectId", "$$projectId" }))),
+
+                                new BsonDocument("$group", new BsonDocument
+                                {
+                                    { "_id", BsonNull.Value },
+                                    { "TotalTasks", new BsonDocument("$sum", 1) },
+                                    { "CompletedTasks", new BsonDocument("$sum",
+                                        new BsonDocument("$cond", new BsonArray
+                                        {
+                                            new BsonDocument("$eq", new BsonArray { "$Status", 4 }),
+                                            1,
+                                            0
+                                        })) },
+                                    { "InProgressTasks", new BsonDocument("$sum",
+                                        new BsonDocument("$cond", new BsonArray
+                                        {
+                                            new BsonDocument("$eq", new BsonArray { "$Status", 1 }),
+                                            1,
+                                            0
+                                        })) },
+                                     { "TodoTasks", new BsonDocument("$sum",
+                                        new BsonDocument("$cond", new BsonArray
+                                        {
+                                            new BsonDocument("$eq", new BsonArray { "$Status", 0 }),
+                                            1,
+                                            0
+                                        })) },
+                                     { "ReviewTasks", new BsonDocument("$sum",
+                                        new BsonDocument("$cond", new BsonArray
+                                        {
+                                            new BsonDocument("$eq", new BsonArray { "$Status", 3 }),
+                                            1,
+                                            0
+                                        })) }
+                                })
+                            }
+                        },
+                        { "as", "TaskStats" }
+                            })
+                        )
+                        .AppendStage<Project>(
+                            new BsonDocument("$addFields", new BsonDocument
+                            {
+                        { "TotalTasks", new BsonDocument("$ifNull", new BsonArray
+                            {
+                                new BsonDocument("$arrayElemAt", new BsonArray { "$TaskStats.TotalTasks", 0 }),
+                                0
+                            }) },
+                        { "CompletedTasks", new BsonDocument("$ifNull", new BsonArray
+                            {
+                                new BsonDocument("$arrayElemAt", new BsonArray { "$TaskStats.CompletedTasks", 0 }),
+                                0
+                            }) },
+                        { "InProgressTasks", new BsonDocument("$ifNull", new BsonArray
+                            {
+                                new BsonDocument("$arrayElemAt", new BsonArray { "$TaskStats.InProgressTasks", 0 }),
+                                0
+                            }) },
+                         { "TodoTasks", new BsonDocument("$ifNull", new BsonArray
+                            {
+                                new BsonDocument("$arrayElemAt", new BsonArray { "$TaskStats.TodoTasks", 0 }),
+                                0
+                            }) },
+                          { "ReviewTasks", new BsonDocument("$ifNull", new BsonArray
+                            {
+                                new BsonDocument("$arrayElemAt", new BsonArray { "$TaskStats.ReviewTasks", 0 }),
+                                0
+                            }) }
+                            })
+                        )
+                        .Unwind("ProjectMemberId")
+                        .AppendStage<Project>(
+                            new BsonDocument("$addFields",
+                                new BsonDocument("MemberId",
+                                    new BsonDocument("$toObjectId", "$ProjectMemberId")))
+                        )
+                        .AppendStage<Project>(
+                            new BsonDocument("$lookup", new BsonDocument
+                            {
+                        { "from", "User" },
+                        { "localField", "MemberId" },
+                        { "foreignField", "_id" },
+                        { "as", "MemberInfo" }
+                            })
+                        )
+                        .AppendStage<Project>(
+                            new BsonDocument("$group", new BsonDocument
+                            {
+                        { "_id", "$_id" },
+                        { "Name", new BsonDocument("$first", "$Name") },
+                        { "TotalTasks", new BsonDocument("$first", "$TotalTasks") },
+                        { "CompletedTasks", new BsonDocument("$first", "$CompletedTasks") },
+                        { "InProgressTasks", new BsonDocument("$first", "$InProgressTasks") },
+                        { "TodoTasks", new BsonDocument("$first", "$TodoTasks") },
+                        { "ReviewTasks", new BsonDocument("$first", "$ReviewTasks") },
+                        { "Status", new BsonDocument("$first", "$Status") },
+                        { "Members", new BsonDocument("$push",
+                            new BsonDocument("$arrayElemAt",
+                                new BsonArray { "$MemberInfo.Username", 0 }))
+                        }
+                            })
+                        )
+                        .Limit(3)
+                        .As<ProjectInfoDto>()
+                        .ToListAsync();
+
+                    return result;
+                }
+
+
 
     }
 }

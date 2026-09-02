@@ -3,27 +3,29 @@ export interface DashboardStats {
     assignedProjects: number;
     inProgressTasks: number;
     completedTasks: number;   
+    todoTasks: number;
+    reviewTasks: number;
 }
-
-export interface TodayTask {
+export interface TaskInfoDto {
+  id: string;
+  title: string;
+  projectName: string;
+  status: number;
+  priority: number;
+  dueDate: string;
+}
+export interface TaskDashboardDto {
+  todayTasks: TaskInfoDto[];
+  upcomingTasks: TaskInfoDto[];
+}
+export interface ProjectInfoDto {
     id: string;
-    title: string;
-    projectName: string;
-    status: string;
-    priority: string;
-    dueDate: string;
-}
-
-export interface UpcomingDeadline {
-    id: string;
-    title: string;
-    projectName: string;
-    dueDate: string;
-}
-
-export interface ProjectProgress {
-    projectId: string;
-    projectName: string;
+    name: string;
     totalTasks: number;
     completedTasks: number;
+    inProgressTasks: number;
+    todoTasks: number;
+    reviewTasks: number;
+    status: string;
+    members: string[];
 }

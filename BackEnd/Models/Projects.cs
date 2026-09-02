@@ -35,8 +35,6 @@ namespace BackEnd.Models
 
         [BsonRepresentation(BsonType.String)]
         public ProjectPriority Priority { get; set; } = ProjectPriority.Low;
-        public int? TotalTasks { get; set; }
-        public int? CompletedTasks { get; set; }
         public DateTime CreatedDate { get; set; }
     }
 }

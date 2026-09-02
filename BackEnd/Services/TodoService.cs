@@ -90,5 +90,9 @@ namespace BackEnd.Services
         {
             return await _repository.getRecentTodos(UserId);
         }
+        public async  Task<TaskDashboardDto?> GetTaskInfo(string UserId)
+        {
+            return await _repository.GetTaskInfo(UserId);
+        }
     }
 }

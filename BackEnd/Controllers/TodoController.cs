@@ -406,6 +406,38 @@ namespace BackEnd.Controllers
             }
 
         }
+        [HttpGet("GetTaskInfo")]
+       public async  Task<ActionResult<TaskDashboardDto>> GetTaskInfo(string UserId)
+        {
+            var resposne = new ApiResponse<TaskDashboardDto>();
+            try
+            {
+                var result = await _todoService.GetTaskInfo(UserId);
+                if (result == null)
+                {
+                    resposne.Errors.Add(new ApiError
+                    {
+                        Code = "404",
+                        Message = "Task not found"
+                    });
+                    return NotFound();
+                }
+                else
+                {
+                    resposne.Result = result;
+                    return Ok(resposne);
+                }
+            }
+            catch (Exception ex)
+            {
+                resposne.Errors.Add(new ApiError
+                {
+
+                    Message = ex.Message
+                });
+                return BadRequest(resposne);
+            }
+        }
 
     }
 }

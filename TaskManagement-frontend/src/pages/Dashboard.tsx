@@ -1,14 +1,38 @@
-import { makeStyles } from "@fluentui/react-components"
-import { Badge, Button, Card, Text } from "@fluentui/react-components";
-import { LayerRegular, ArrowTrendingRegular, TargetRegular, CheckmarkCircleRegular, } from "@fluentui/react-icons";
+import { Avatar, makeStyles } from "@fluentui/react-components"
+import {  Button,  Text } from "@fluentui/react-components";
+import { LayerRegular, ArrowTrendingRegular, TargetRegular, CheckmarkCircleRegular,CalendarRegular, ChevronRightRegular  } from "@fluentui/react-icons";
 import { useEffect, useState } from "react";
-import { getAllRecentProjects, GetProjectInfo, getrecentTodos } from "../api/authApi";
+import {  getProjectAssigneeInfo, GetProjectInfo, getTodayUpcomingTaskInfo } from "../api/authApi";
 import { useAppSelector } from "../app/hooks";
-import { type RecentProject, type GetProjectInfoDto } from "../types/project";
-import type { Todo, TodoResponse } from "../types/todo";
-import type { DashboardStats } from "../types/ProjectDashboardType";
+import type { DashboardStats, ProjectInfoDto, TaskDashboardDto } from "../types/ProjectDashboardType";
+import ReactECharts from "echarts-for-react";
 
 const useStyle = makeStyles({
+    welcomeCard: {
+        width: "100%",
+        minHeight: "120px",
+        padding: "22px 24px",
+        borderRadius: "12px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        background: "linear-gradient(135deg, #4f46e5, #7c22ff)",
+        color: "white",
+        boxSizing: "border-box",
+    },
+    dateBox: {
+    minWidth: "100px",
+    padding: "10px 14px",
+    borderRadius: "10px",
+
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+    gap: "3px",
+
+    backgroundColor: "rgba(255,255,255,0.12)",
+  },
+  //4cards
     container: {
         display: "flex",
         flexDirection: "column",
@@ -54,93 +78,301 @@ const useStyle = makeStyles({
             gridTemplateColumns: "1fr",
         },
     },
-    projectHeader: {
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center"
-    },
-    projectGrid: {
-        display: "grid",
-        gridTemplateColumns: "repeat(2, 1fr)",
-        gap: "14px",
-
-        "@media (max-width: 900px)": {
-            gridTemplateColumns: "1fr",
-        },
-    },
-    projectCard: {
-        background:"var(--bg--card)",
-        padding: "20px",
-        border: "1px solid var(--border-color)",
-        borderRadius: "18px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        boxSizing: "border-box",
-    },
-    projectTitleRow: {
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        gap: "10px",
-    },
-    progress: {
-        width: "100%",
-        height: "5px",
-        backgroundColor: "#999fb6",
-        borderRadius: "20px",
-        overflow: "hidden",
-    },
-    progressBar: {
-        height: "100%",
-        backgroundColor: "#6d5dfc",
-        borderRadius: "8px",
-    },
-    projectDetails: {
-        display: "flex",
-        gap: "15px",
-        color: "var(--permanent-text-color)",
-        fontSize: "13px",
-        flexWrap: "wrap",
-    },
-    bottom: {
-        display: "flex",
-        flexDirection: "column",
-        width: "100%",
-        border: "1px solid var(--border-color)",
-        borderRadius: "18px",
-        overflow: "hidden",
-    },
-    taskCard: {
-        minHeight: "74px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "10px 14px",
-        boxSizing: "border-box",
-        backgroundColor: "var(--bg--card)",
-        gap: "10px",
-        border: "1px solid var(--border-color)"
-    },
-
-    taskInfo: {
-        display: "flex",
-        flexDirection: "column",
-        gap: "3px",
-        flex: 1,
-        padding:"6px",
-        marginLeft:"8px"
-    },
     primaryText:{
         color:"var(--text-primary)"
-    }
+    },
+    //upcoming and in-progress tasks
+        taskSection: {
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "20px",
+            marginTop: "20px",
+            "@media (max-width: 768px)": {
+                gridTemplateColumns: "1fr",
+            },
+        },
+        sectionHeader: {
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "10px",
+            color: "var(--text-primary)",
+        },
+
+        secondaryText: {
+            color: "var(--permanent-text-color)",
+            fontSize: "15px",
+        },
+
+        card1: {
+            backgroundColor: "var(--bg--card)",
+            border: "1px solid var(--border-color)",
+            borderRadius: "12px",
+            transition: "box-shadow 0.2s ease, transform 0.2s ease",
+            "&:hover": {
+                boxShadow: "0 3px 12px rgba(0, 0, 0, 0.06)",
+            },
+        },
+
+        todayCard: {
+            overflow: "hidden",
+        },
+
+        emptyTask: {
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            minHeight: "110px",
+            justifyContent: "center",
+            gap: "8px",
+            color: "var(--permanent-text-color)",
+        },
+
+        upcomingCard: {
+            overflow: "hidden",
+        },
+
+        deadline: {
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            padding: "13px 14px",
+            borderBottom: "1px solid var(--border-color)",
+            transition: "background-color 0.15s ease",
+            cursor: "pointer",
+            "&:last-child": {
+                borderBottom: "none",
+            },
+            "&:hover": {
+                backgroundColor: "var(--nav-hover-bg)",
+            },
+        },
+        days: {
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            minWidth: "35px",
+            color: "var(--primary-color)",
+            background: "#e6e3fc",
+            borderRadius: "8px",
+            padding: "2px 2px",
+        },
+
+        deadlineInfo: {
+            flex: 1,
+            minWidth: 0,
+            display: "flex",
+            flexDirection: "column",
+            gap: "3px",
+        },
+
+        title: {
+            color: "var(--text-primary)",
+            fontSize: "13px",
+            fontWeight: 500,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+        },
+
+        project: {
+            color: "var(--permanent-text-color)",
+            fontSize: "11px",
+        },
+
+        icon: {
+            color: "var(--permanent-text-color)",
+            fontSize: "16px",
+        },
+        //project progress with assignee
+        projectProgressSection: {
+        marginTop: "20px",
+        },
+
+        projectTable: {
+        backgroundColor: "var(--bg--card)",
+        border: "1px solid var(--border-color)",
+        borderRadius: "12px",
+        overflow: "hidden",
+        },
+
+        projectHeader: {
+        display: "grid",
+        gridTemplateColumns: "2fr 1.5fr 1fr 1.5fr 30px",
+        padding: "10px 16px",
+        fontSize: "13px",
+        color: "var(--permanent-text-color)",
+        borderBottom: "1px solid var(--border-color)",
+        fontWeight: 500,
+        },
+
+        projectRow: {
+        display: "grid",
+        gridTemplateColumns: "2fr 1.5fr 1fr 1.5fr 30px",
+        alignItems: "center",
+        minHeight: "58px",
+        padding: "8px 16px",
+        borderBottom: "1px solid var(--border-color)",
+
+        "&:last-child": {
+            borderBottom: "none",
+        },
+
+        "&:hover": {
+            backgroundColor: "var(--nav-hover-bg)",
+        },
+        },
+
+        projectName: {
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        "& > div": {
+            display: "flex",
+            flexDirection: "column",
+            gap: "2px",
+        },
+        },
+
+        projectIndicator: {
+        width: "4px",
+        height: "28px",
+        borderRadius: "4px",
+        },
+
+        progressContainer: {
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        },
+
+        progressBar: {
+        width: "115px",
+        height: "8px",
+        borderRadius: "10px",
+        backgroundColor: "var(--nav-hover-bg)",
+        overflow: "hidden",
+        },
+
+        progress: {
+        height: "100%",
+        backgroundColor: "var(--primary-color)",
+        borderRadius: "10px",
+        },
+
+        taskInfo: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "2px",
+        fontSize: "11px",
+        color: "var(--permanent-text-color)",
+
+        "& small": {
+            color: "var(--primary-color)",
+        },
+        },
+
+        assignees: {
+        display: "flex",
+        alignItems: "center",
+        },
+
+        moreAssignees: {
+        width: "28px",
+        height: "28px",
+        borderRadius: "50%",
+        backgroundColor: "var(--nav-hover-bg)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: "10px",
+        color: "var(--permanent-text-color)",
+        marginLeft: "-4px",
+        },
+
+        rowArrow: {
+        color: "var(--permanent-text-color)",
+        fontSize: "15px",
+        },
+        //task status and weekly activity
+        analytics: {
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "20px",
+            marginTop: "20px",
+            "@media (max-width: 768px)": {
+                gridTemplateColumns: "1fr",
+            },
+        }
 });
 export function Dashboard() {
     const styles = useStyle();
     const user = useAppSelector((state) => state.auth.user);
     const [response, setResponse] = useState<DashboardStats | null>(null);
-    const [recentProject, setRecentProject] = useState<RecentProject[]>([]);
-    const [recentTodos, setrecentTodos]= useState<TodoResponse[]>([]);
+    const [projects, setProjects] = useState<ProjectInfoDto[]>([]);
+    const [tasks, setTasks] = useState<TaskDashboardDto | null>(null);
+    const hour = new Date().getHours();
+    const greeting =
+        hour < 12
+            ? "Good morning,"
+            : hour < 18
+            ? "Good afternoon,"
+            : "Good evening,";
+        const formattedDate = new Date().toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    });
+    const getProgressColor = (count: number) => {
+        if (count >= 30  && count <60 ) return "#6454EE";      // green
+        if (count >= 60  && count <=100 ) return "#09AD7B";       // yellow
+        if (count >= 0  && count < 30) return "#FDA64F";       // orange
+        return "#EF4444";                       // red
+    };
+    const today = new Date();
+    const option = {
+         tooltip: {
+        trigger: "item"
+    },
+         color: [
+        "#6366F1", // To Do
+        "#F59E0B", // In Progress
+        "#22C55E", // Completed
+        "#EF4444", // Assigned
+        ],
+        legend: {
+            orient: 'vertical',
+            right: "5%",
+            top: "center",
+            data: ['To Do', 'In Progress', 'Completed', 'Under Review']
+        },
+        series: [
+            {
+            type: 'pie',
+            radius: ['50%', '70%'],
+            center: ["40%", "50%"],
+            avoidLabelOverlap: false,
+            label: {
+                show: false
+            },
+            labelLine: {
+                show: false
+            },
+           emphasis: {
+            label: {
+                show: false
+            }
+            },
+           
+           data: [
+                { value: response?.todoTasks ?? 0, name: "To Do" },
+                { value: response?.inProgressTasks ?? 0, name: "In Progress" },
+                { value: response?.completedTasks ?? 0, name: "Completed" },
+                { value: response?.reviewTasks ?? 0, name: "Under Review" },
+            ]
+            }
+        ]
+        };
     useEffect(() => {
         const fetchProjectInfo = async () => {
             if (!user?.userId) return;
@@ -154,49 +386,52 @@ export function Dashboard() {
                 setResponse(null);
             }
         };
-        const fetchRecentProject = async () => {
+        const fetchTodayUpcomingTask = async () => {
             if (!user?.userId) return;
             try {
-                const result = await getAllRecentProjects(user.userId);
-                setRecentProject(Array.isArray(result.result) ? result.result : []);
+                const result = await getTodayUpcomingTaskInfo(user.userId);
+                setTasks(result.result);
                 console.log(result.result);
             } catch (err) {
-                setRecentProject([]);
+                setTasks(null);
             }
         };
-        const fetchRecentTodos = async () => {
+        const fetchProjectAssigneeInfo   = async () => {
             if (!user?.userId) return;
             try {
-                const result = await getrecentTodos(user.userId);
-                setrecentTodos(Array.isArray(result.result) ? result.result : []);
+                const result = await getProjectAssigneeInfo(user.userId);
+                setProjects(result.result);
+                console.log(result.result);
             } catch (err) {
-                setRecentProject([]);
+                setProjects([]) ;
             }
         };
         fetchProjectInfo();
-        fetchRecentProject();
-        fetchRecentTodos();
+        fetchTodayUpcomingTask();
+        fetchProjectAssigneeInfo();
     }, [user?.userId]);
 
-    const statusStyle = {
-    Active: {
-        backgroundColor: "#d4f5ea",
-        color: "#007A55",
-        borderColor: "#aaf0db"
-    },
-    Pending: {
-        backgroundColor: "#ffe7d7",
-        color: "#BB4D00",
-        borderColor: "#f1ba93"
-    },
-    Completed: {
-        backgroundColor: "#ecdcff",
-        color: "#7008E7",
-        borderColor: "#c79df7"
-    }
-    };
+
     return (
         <div className={styles.container}>
+            {/* Greeting */}
+           <div className={styles.welcomeCard}>
+                <div>
+                    <span>
+                        {greeting}
+                    </span>
+                    <h1>
+                        {user?.username} 👋
+                    </h1>
+                </div>
+                <div className={styles.dateBox}>
+                    <div style={{display:"flex", alignItems:"center", gap:"5px"}}>
+                        <CalendarRegular fontSize={20} style={{color:"white"}}/>
+                        <span>Today</span>
+                    </div>                  
+                <strong>{formattedDate}</strong>
+                </div>
+            </div>
             {/* 4 cards */}
             <div className={styles.cards}>
                 <div className={styles.card}>
@@ -228,89 +463,195 @@ export function Dashboard() {
                     <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.completedTasks}</Text>
                 </div>
             </div>
-            {/* Middle */}
-            <div className={styles.projectHeader}>
-                <Text size={500} weight="bold" className={styles.primaryText} >Recent Projects</Text>
-                <Button appearance="transparent" style={{color:"#4F39F6"}}>
-                    View all →
-                </Button>
+            {/* upcoming and in-progress tasks */}
+            <div className={styles.taskSection}>
+            <div>
+                <div className={styles.sectionHeader}>
+                    <Text weight="semibold" style={{fontSize:"15px"}}>
+                        Today's Tasks
+                    </Text>
+                    <Text size={200} className={styles.secondaryText} weight="semibold">
+                        {formattedDate}
+                    </Text>
+                </div>
+                <div className={`${styles.card1} ${styles.todayCard}`}>
+                        {tasks?.todayTasks && tasks.todayTasks.length === 0 ? (
+                            <div className={styles.emptyTask}>
+                                <CheckmarkCircleRegular fontSize={30} style={{color:"#11d100"}}/>
+                                <span className={styles.secondaryText}>No tasks due today</span>
+                            </div>
+                        ) : (
+                            tasks?.todayTasks?.map(task => (
+                                <div
+                                    key={task.id}
+                                    className={styles.deadline}
+                                >
+                                    <div className={styles.deadlineInfo}>
+                                        <span className={styles.title}>
+                                            {task.title}
+                                        </span>
+
+                                        <span className={styles.project}>
+                                            {task.projectName}
+                                        </span>
+                                    </div>
+
+                                    <ChevronRightRegular
+                                        className={styles.icon}
+                                    />
+                                </div>
+                            ))
+                        )}
+                </div>
             </div>
             <div>
-                <div className={styles.projectGrid}>
-                    {recentProject.map((project) => (
-                        <Card key={project.id} className={styles.projectCard}>
-                            <div className={styles.projectTitleRow} >
-                                <Text size={500} weight="semibold" className={styles.primaryText}>
+                <div className={styles.sectionHeader}>
+                    <Text weight="semibold" style={{fontSize:"15px"}}> Upcoming Deadlines</Text>
+                    <Text
+                        size={200}
+                        className={styles.secondaryText}
+                    >
+                        Next 7 days
+                    </Text>
+                </div>
+                <div className={`${styles.card1} ${styles.upcomingCard}`}>
+                    {
+                        tasks?.upcomingTasks && tasks.upcomingTasks.length === 0 ? (
+                            <div className={styles.emptyTask}>
+                                <CheckmarkCircleRegular fontSize={30} style={{color:"#11d100"}}/>
+                                <span className={styles.secondaryText}>No tasks due in the next 7 days</span>
+                            </div>
+                        ) : (
+                    tasks?.upcomingTasks?.map(task => (
+                        <div
+                            key={task.id}
+                            className={styles.deadline}
+                        >
+                                <div className={styles.days}>
+                                    <Text weight="semibold" style={{fontSize:"18px"}}>
+                                        {Math.ceil((new Date(task.dueDate).getTime() - today.getTime()) / (1000 * 60 * 60 * 24))}
+                                    </Text>
+                                    <span style={{fontSize:"10px"}}>days</span>
+                                </div>
+                            <div className={styles.deadlineInfo}>
+                              
+                                <span className={styles.title}>
+                                    {task.title}
+                                </span>
+
+                                <span className={styles.project}>
+                                    {task.projectName}
+                                </span>
+                            </div>
+                            <ChevronRightRegular
+                                className={styles.icon}
+                            />
+                        </div>
+                    )))}
+                </div>
+            </div>
+            </div>
+            {/* project progress with assignee */}
+            <div className={styles.projectProgressSection}>
+                    <div className={styles.sectionHeader}>
+                        <Text weight="semibold" style={{fontSize:"15px"}}> Project Progress </Text>
+                        <Button appearance="subtle">
+                        View all projects
+                        <ChevronRightRegular />
+                        </Button>
+                    </div>
+                    <div className={styles.projectTable}>
+                        {/* Header */}
+                        <div className={styles.projectHeader}>
+                        <span>Project</span>
+                        <span>Progress</span>
+                        <span>Tasks</span>
+                        <span>Assignees</span>
+                        <span></span>
+                        </div>
+                        {/* Project */}
+                        {projects?.map((project) => (
+                        <div className={styles.projectRow} key={project.id}>
+
+                            <div className={styles.projectName}>
+                            <span className={styles.projectIndicator} style={{backgroundColor: getProgressColor(
+                                        project.totalTasks > 0
+                                            ? Math.round((project.completedTasks / project.totalTasks) * 100)
+                                            : 0
+                                    )}}/>
+                            <div>
+                                <Text weight="semibold" style={{ fontSize: "13px", color: "var(--text-primary)" }}>
                                     {project.name}
                                 </Text>
-                                <Badge style={statusStyle[project.status as keyof typeof statusStyle]}>
-                                    {project.status}
-                                </Badge>
+                                <span style={{ fontSize: "13px", color: "var(--permanent-text-color)" }}>
+                                {project.completedTasks}/{project.totalTasks} tasks
+                                </span>
                             </div>
-                            <Text style={{ color: "var(--permanent-text-color)", }}>
-                                {project.description}
-                            </Text>
-                            <div className={styles.progress}>
+                            </div>
+
+                            <div className={styles.progressContainer}>
+                            <div className={styles.progressBar}>
                                 <div
-                                    className={styles.progressBar}
-                                    style={{
-                                        width: `${project.totalTasks >0 ?(project.completedTasks/project.totalTasks) * 100 : 0 }%`,
-                                    }}
+                                className={styles.progress}
+                                style={{
+                                    width: `${project.totalTasks > 0 ? Math.round((project.completedTasks / project.totalTasks) * 100) : 0}%`,
+                                    backgroundColor: getProgressColor(
+                                        project.totalTasks > 0
+                                            ? Math.round((project.completedTasks / project.totalTasks) * 100)
+                                            : 0
+                                    ),
+                                }}
                                 />
                             </div>
-                            <div className={styles.projectDetails}>
-                                <span>
-                                    {`${project.totalTasks >0 ?(project.completedTasks/project.totalTasks) * 100 : 0 }%`} done
-                                </span>
-                                <span>·</span>
-                                <span>{project.completedTasks}/{project.totalTasks}</span>
-                                <span>·</span>
-                                <span>
-                                    📅 {project.projectDueDate}
-                                </span>
-                            </div>
-                        </Card>
-                    ))}
-                </div>
-            </div>
-            {/* Bottom */}
-            <div className={styles.projectHeader}>
-                <Text size={500} weight="bold" className={styles.primaryText}>Recent Tasks</Text>
-                <Button appearance="transparent" style={{color:"#4F39F6"}}>
-                    View all →
-                </Button>
-            </div>
-            <div className={styles.bottom}>
-                <div style={{ display: "flex", flexDirection: "column" , borderRadius:"30%" }}>
-                    {recentTodos.slice(0, 5).map((task) => (
-                        <div className={styles.taskCard}>
-                            <div className={styles.taskInfo}>
-                                <Text size={500} weight="semibold" style={{fontSize:"14"}} className={styles.primaryText}>{task.title}</Text>
-                                <Text size={400} weight="semibold" style={{color:"var(--permanent-text-color)",fontSize:"12"}}>{task.projectName
-                                    }</Text>
-                            </div>
-                            <div style={{ display: "flex", gap: "10px" }}>
-                                <Badge
-                                    appearance="tint"
-                                    color={
-                                        task.priority === "High"
-                                            ? "danger"
-                                            : task.priority === "Low"
-                                                ? "warning"
-                                                : "success"
-                                    }
-                                >
-                                    {task.priority}
-                                </Badge>
-                                <Text weight="semibold" style={{color:"var(--permanent-text-color)"}}>
-                                    {task.todoDueDate}
-                                </Text>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
 
+                            <span>{project.totalTasks > 0? Math.round((project.completedTasks / project.totalTasks) * 100) : 0}%</span>
+                            </div>
+
+                            <div className={styles.taskInfo}>
+                            <span style={{ fontSize: "11px", color: "var(--permanent-text-color)" }}>
+                                {project.completedTasks}/{project.totalTasks} tasks
+                            </span>
+                                <Text weight="semibold" style={{ color: getProgressColor(
+                                            project.totalTasks > 0
+                                                ? Math.round((project.completedTasks / project.totalTasks) * 100)
+                                                : 0
+                                        ), fontSize: "13px" }}>{project.inProgressTasks} in progress</Text>
+                            </div>
+
+                            <div className={styles.assignees}>
+                            {project.members.slice(0, 3).map((person) => (
+                                <Avatar
+                                key={person}
+                                name={person}
+                                size={28}
+                                color="colorful"
+                                />
+                            ))}
+                            {project.members.length > 3 && (
+                                <span className={styles.moreAssignees}>
+                                +{project.members.length - 3}
+                                </span>
+                            )}
+                            </div>
+                            <ChevronRightRegular className={styles.rowArrow} />
+
+                        </div>
+                        ))}
+                    </div>
+            </div>
+            {/*ask Status Distribution and Weekly Activity */}
+            <div className={styles.analytics}>
+                <div className={styles.card}>
+                    <Text weight="semibold" style={{fontSize:"15px", color:"var(--text-primary)"}}>Task Status Distribution</Text>
+                    <span style={{fontSize:"12px", color:"var(--permanent-text-color)"}}>Distribution of tasks based on their current status</span>
+                     <ReactECharts option={option}
+                        style={{ height: "300px", width: "100%" }}
+                    />
+                </div>
+                <div className={styles.card}>
+                    <Text weight="semibold" style={{fontSize:"15px"}}>Weekly Activity</Text>
+                </div>
+            </div>
         </div>
     );
 }

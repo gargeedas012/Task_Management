@@ -43,6 +43,6 @@ namespace BackEnd.Models
         public DateTime DueDate { get; set; }
         public DateTime UpdatedDate { get; set; }
         public DateTime CreatedDate { get; set; }
-        public List<TaskComment> Comments { get; set; } = new();
+        public List<TaskComment>? Comments { get; set; } = new();
     }
 }

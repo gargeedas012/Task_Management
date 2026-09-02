@@ -16,6 +16,12 @@ namespace BackEnd.DTOs
 
         [BsonElement("CompletedTasks")]
         public int CompletedTasks { get; set; }
+
+        [BsonElement("TodoTasks")]
+        public int TodoTasks { get; set; }
+
+        [BsonElement("ReviewTasks")]
+        public int ReviewTasks { get; set; }
     }
     public class ProjectResponseDto
     {
@@ -33,4 +39,20 @@ namespace BackEnd.DTOs
         public int CompletedTask { get; set; }
         public string ProjectDueDate { get; set; } = null!;
     }
+    public class ProjectInfoDto
+    {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public int TotalTasks { get; set; }
+        public int CompletedTasks { get; set; }
+
+        public int InProgressTasks { get; set; }
+        public int TodoTasks { get; set; }
+        public int ReviewTasks { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public List<string> Members { get; set; } = new();
+    }
+
 }

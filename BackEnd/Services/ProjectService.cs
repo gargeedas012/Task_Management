@@ -46,5 +46,10 @@ namespace BackEnd.Services
         {
             return await _repository.getRecentProjects(UserId);
         }
+
+        public async Task<List<ProjectInfoDto>> GetProjectAssigneInfo(string userId)
+        {
+            return await _repository.GetProjectAssigneInfo(userId);
+        }
     }
 }

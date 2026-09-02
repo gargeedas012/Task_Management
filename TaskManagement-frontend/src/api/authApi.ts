@@ -1,7 +1,7 @@
 import type { ApiResponse } from '../types/api';
 import type { LoginRequest, RegisterRequest, TokenResponseDto } from '../types/auth'
 import type { GetProjectInfoDto, Project, RecentProject } from '../types/project';
-import type { DashboardStats } from '../types/ProjectDashboardType';
+import type { DashboardStats, ProjectInfoDto, TaskDashboardDto } from '../types/ProjectDashboardType';
 import type { Todo, TodoByDateDto, TodoListResponse, TodoResponse } from '../types/todo';
 import api from './axios'
 
@@ -124,6 +124,10 @@ export const getrecentTodos = async (userId: string):Promise<ApiResponse<TodoRes
     const response = await api.get("/Todo/getRecentTodos", { params: { userId: userId } });
     return response.data;
 };
+export const getTodayUpcomingTaskInfo = async (id: string): Promise<ApiResponse<TaskDashboardDto>> => {
+    const response=await api.get("Todo/GetTaskInfo",{ params: { userId: id } });
+        return response.data;
+}
 
 
 //project todo
@@ -146,5 +150,10 @@ export const deleteProject = async (data: string):Promise<ApiResponse<string>>=>
 }
 export const getAllRecentProjects=async (userId:string):Promise<ApiResponse<RecentProject>>=>{
     const response=await api.get("Project/getRecentProjects",{ params: { userId: userId } });
+    return response.data;
+}
+
+export const getProjectAssigneeInfo=async (userId:string):Promise<ApiResponse<ProjectInfoDto[]>>=>{
+    const response=await api.get("Project/GetProjectAssigneInfo",{ params: { userId: userId } });
     return response.data;
 }

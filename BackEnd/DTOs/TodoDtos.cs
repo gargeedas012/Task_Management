@@ -74,4 +74,22 @@ namespace BackEnd.DTOs
         public string ProjectName { get; set; } = string.Empty;
     }
 
+    public class TaskInfoDto
+    {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string? ProjectName { get; set; }
+        public int Status { get; set; }
+        public int Priority { get; set; }
+        public DateTime DueDate { get; set; }
+    }
+
+    public class TaskDashboardDto
+    {
+        public List<TaskInfoDto> TodayTasks { get; set; } = new();
+        public List<TaskInfoDto> UpcomingTasks { get; set; } = new();
+    }
+
 }
