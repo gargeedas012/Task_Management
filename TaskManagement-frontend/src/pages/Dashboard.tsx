@@ -311,6 +311,7 @@ export function Dashboard() {
     const [response, setResponse] = useState<DashboardStats | null>(null);
     const [projects, setProjects] = useState<ProjectInfoDto[]>([]);
     const [tasks, setTasks] = useState<TaskDashboardDto | null>(null);
+    const [loading, setLoading] = useState(true);
     const hour = new Date().getHours();
     const greeting =
         hour < 12
@@ -358,7 +359,7 @@ export function Dashboard() {
             labelLine: {
                 show: false
             },
-           emphasis: {
+            emphasis: {
             label: {
                 show: false
             }
@@ -374,41 +375,27 @@ export function Dashboard() {
         ]
         };
     useEffect(() => {
-        const fetchProjectInfo = async () => {
+        const fetchDashboardData = async () => {
             if (!user?.userId) return;
+            setLoading(true);
+            try {
+                const [projectInfo, taskInfo, assigneeInfo] = await Promise.all([
+                    GetProjectInfo(user.userId).catch(() => null),
+                    getTodayUpcomingTaskInfo(user.userId).catch(() => null),
+                    getProjectAssigneeInfo(user.userId).catch(() => null),
+                ]);
 
-            try {
-                const result = await GetProjectInfo(user.userId);
-                setResponse(result.result);
-                
-            } catch (error) {
-                console.error("Failed to fetch project info:", error);
-                setResponse(null);
-            }
-        };
-        const fetchTodayUpcomingTask = async () => {
-            if (!user?.userId) return;
-            try {
-                const result = await getTodayUpcomingTaskInfo(user.userId);
-                setTasks(result.result);
-                console.log(result.result);
+                if (projectInfo) setResponse(projectInfo.result);
+                if (taskInfo) setTasks(taskInfo.result);
+                if (assigneeInfo) setProjects(assigneeInfo.result || []);
             } catch (err) {
-                setTasks(null);
+                console.error("Failed to load dashboard data", err);
+            } finally {
+                setLoading(false);
             }
         };
-        const fetchProjectAssigneeInfo   = async () => {
-            if (!user?.userId) return;
-            try {
-                const result = await getProjectAssigneeInfo(user.userId);
-                setProjects(result.result);
-                console.log(result.result);
-            } catch (err) {
-                setProjects([]) ;
-            }
-        };
-        fetchProjectInfo();
-        fetchTodayUpcomingTask();
-        fetchProjectAssigneeInfo();
+
+        fetchDashboardData();
     }, [user?.userId]);
 
 
@@ -439,28 +426,28 @@ export function Dashboard() {
                         <LayerRegular fontSize={30} style={{color:"#4F39F6"}}/>
                     </div>
                     <Text size={400} weight="semibold"  style={{color:"var(--permanent-text-color)", fontSize:"12"}}>Assigned Project</Text>
-                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.assignedProjects}</Text>
+                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.assignedProjects ?? 0}</Text>
                 </div>
                 <div className={styles.card}>
                     <div className={styles.logo} style={{ background: "#d4f5ea" }}>
                         <ArrowTrendingRegular fontSize={30} style={{color:"#009966"}}/>
                     </div>
                     <Text size={400} weight="semibold" style={{color:"var(--permanent-text-color)", fontSize:"12"}} >Assigned Tasks</Text>
-                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.assignedTasks}</Text>
+                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.assignedTasks ?? 0}</Text>
                 </div>
                 <div className={styles.card}>
                     <div className={styles.logo} style={{ background: "#d6ebf7"}}>
                         <TargetRegular fontSize={30} style={{color:"#0084D1"}}/>
                     </div>
                     <Text size={400} weight="semibold" style={{color:"var(--permanent-text-color)",fontSize:"12"}} >In Progress Tasks</Text>
-                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.inProgressTasks}</Text>
+                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.inProgressTasks ?? 0}</Text>
                 </div>
                 <div className={styles.card}>
                     <div className={styles.logo} style={{ background: "#e3d9f0", }}>
                         <CheckmarkCircleRegular fontSize={30} style={{color:"#7F22FE"}}/>
                     </div>
                     <Text size={400} weight="semibold" style={{color:"var(--permanent-text-color)",fontSize:"12"}}>Completed Tasks</Text>
-                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.completedTasks}</Text>
+                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.completedTasks ?? 0}</Text>
                 </div>
             </div>
             {/* upcoming and in-progress tasks */}
@@ -475,7 +462,11 @@ export function Dashboard() {
                     </Text>
                 </div>
                 <div className={`${styles.card1} ${styles.todayCard}`}>
-                        {tasks?.todayTasks && tasks.todayTasks.length === 0 ? (
+                        {loading ? (
+                            <div className={styles.emptyTask}>
+                                <span className={styles.secondaryText}>Loading tasks...</span>
+                            </div>
+                        ) : !tasks?.todayTasks || tasks.todayTasks.length === 0 ? (
                             <div className={styles.emptyTask}>
                                 <CheckmarkCircleRegular fontSize={30} style={{color:"#11d100"}}/>
                                 <span className={styles.secondaryText}>No tasks due today</span>
@@ -515,8 +506,11 @@ export function Dashboard() {
                     </Text>
                 </div>
                 <div className={`${styles.card1} ${styles.upcomingCard}`}>
-                    {
-                        tasks?.upcomingTasks && tasks.upcomingTasks.length === 0 ? (
+                    {loading ? (
+                        <div className={styles.emptyTask}>
+                            <span className={styles.secondaryText}>Loading deadlines...</span>
+                        </div>
+                    ) : !tasks?.upcomingTasks || tasks.upcomingTasks.length === 0 ? (
                             <div className={styles.emptyTask}>
                                 <CheckmarkCircleRegular fontSize={30} style={{color:"#11d100"}}/>
                                 <span className={styles.secondaryText}>No tasks due in the next 7 days</span>
@@ -570,7 +564,16 @@ export function Dashboard() {
                         <span></span>
                         </div>
                         {/* Project */}
-                        {projects?.map((project) => (
+                        {loading ? (
+                            <div className={styles.emptyTask}>
+                                <span className={styles.secondaryText}>Loading project progress...</span>
+                            </div>
+                        ) : projects && projects.length === 0 ? (
+                            <div className={styles.emptyTask}>
+                                <span className={styles.secondaryText}>No project progression data available</span>
+                            </div>
+                        ) : (
+                        projects?.map((project) => (
                         <div className={styles.projectRow} key={project.id}>
 
                             <div className={styles.projectName}>
@@ -636,7 +639,7 @@ export function Dashboard() {
                             <ChevronRightRegular className={styles.rowArrow} />
 
                         </div>
-                        ))}
+                        )))}
                     </div>
             </div>
             {/*ask Status Distribution and Weekly Activity */}
