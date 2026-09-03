@@ -29,3 +29,20 @@ export interface ProjectInfoDto {
     status: string;
     members: string[];
 }
+export interface WeeklyActivityDto
+{
+    week: string;
+    started:number;
+    completed:number;
+}
+export const Priority = {
+  Low: 0,
+  Medium: 1,
+  High: 2
+} as const;
+export type Priority = typeof Priority[keyof typeof Priority];
+export interface PriorityDistributionDto
+{
+    priority: Priority;
+    count: number;
+}

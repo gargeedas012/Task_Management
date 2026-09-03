@@ -183,12 +183,12 @@ namespace BackEnd.Controllers
             return response;
         }
         [HttpGet("GetPriorityCount")]
-        public async Task<ApiResponse<List<PriorityCountDto>>> GetPriorityCount()
+        public async Task<ApiResponse<List<PriorityCountDto>>> GetPriorityCount(string UserId)
         {
             var response = new ApiResponse<List<PriorityCountDto>>();
             try
             {
-                var task = await _todoService.GetPriorityCount();
+                var task = await _todoService.GetPriorityCount(UserId);
                 if (task == null)
                 {
                     response.Errors.Add(new ApiError
@@ -413,6 +413,38 @@ namespace BackEnd.Controllers
             try
             {
                 var result = await _todoService.GetTaskInfo(UserId);
+                if (result == null)
+                {
+                    resposne.Errors.Add(new ApiError
+                    {
+                        Code = "404",
+                        Message = "Task not found"
+                    });
+                    return NotFound();
+                }
+                else
+                {
+                    resposne.Result = result;
+                    return Ok(resposne);
+                }
+            }
+            catch (Exception ex)
+            {
+                resposne.Errors.Add(new ApiError
+                {
+
+                    Message = ex.Message
+                });
+                return BadRequest(resposne);
+            }
+        }
+        [HttpGet("GetWeeklyActivity")]
+        public async Task<ActionResult<List<WeeklyActivityDto>>> GetWeeklyActivity(string UserId)
+        {
+            var resposne = new ApiResponse<List<WeeklyActivityDto>>();
+            try
+            {
+                var result = await _todoService.GetWeeklyActivity(UserId);
                 if (result == null)
                 {
                     resposne.Errors.Add(new ApiError

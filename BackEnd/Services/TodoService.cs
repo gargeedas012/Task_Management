@@ -56,9 +56,9 @@ namespace BackEnd.Services
             return await _repository.GetIncompleteTodos(isCompleted);
         }
         
-        public async Task<List<PriorityCountDto>> GetPriorityCount()
+        public async Task<List<PriorityCountDto>> GetPriorityCount(string UserId)
         {
-            return await _repository.GetPriorityCount();
+            return await _repository.GetPriorityCount(UserId);
         }
 
         public async Task<List<Todo>> SearchAsync(string SearchText)
@@ -93,6 +93,11 @@ namespace BackEnd.Services
         public async  Task<TaskDashboardDto?> GetTaskInfo(string UserId)
         {
             return await _repository.GetTaskInfo(UserId);
+        }
+
+        public async Task<List<WeeklyActivityDto>> GetWeeklyActivity(string UserId)
+        {
+            return await _repository.GetWeeklyActivity(UserId);
         }
     }
 }

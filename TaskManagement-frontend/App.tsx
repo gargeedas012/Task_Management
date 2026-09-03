@@ -10,6 +10,7 @@ import ProjectBoard from "./src/pages/ProjectBoard";
 import { Layout } from "./src/pages/Layout";
 import { Settings } from "./src/pages/Settings";
 import "./css/global.css";
+import TaskList from "./src/pages/TaskList";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
                 <Route path="/viewproject" element={<ProtectedRoute><ProjectList/></ProtectedRoute>}/>
                 <Route path="/projectboard" element={<ProtectedRoute><ProjectBoard/></ProtectedRoute>}/>
                 <Route path="/settings" element={<ProtectedRoute><Settings/></ProtectedRoute>}/>
+                <Route path="/tasks" element={<ProtectedRoute><TaskList/></ProtectedRoute>}/>
             </Route>
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>

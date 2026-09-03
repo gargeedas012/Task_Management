@@ -321,15 +321,112 @@ namespace BackEnd.Repositories
                 .As<TaskDashboardDto>().FirstOrDefaultAsync();
             return result;
         }
+        public async Task<List<WeeklyActivityDto>> GetWeeklyActivity(string UserId)
+        {
+            var pipeline = new[]
+            {
+                new BsonDocument("$match",
+                    new BsonDocument("$expr",
+                        new BsonDocument("$and", new BsonArray
+                        {
+                            new BsonDocument("$in", new BsonArray { UserId, "$AssignedTo" }),
+                            new BsonDocument("$gte", new BsonArray { "$StartDate","$$NOW" }),
+                            new BsonDocument("$lt", new BsonArray
+                            {
+                                "$StartDate",
+                                new BsonDocument("$dateAdd",
+                                    new BsonDocument
+                                    {
+                                        { "startDate", "$$NOW" },
+                                        { "unit", "week" },
+                                        { "amount", 8 }
+                                    })
+                            })
+                        })
+                    )
+                ),
+                new BsonDocument("$group",
+                    new BsonDocument
+                    {
+                        {
+                            "_id", new BsonDocument("$dateTrunc",
+                                new BsonDocument
+                                {
+                                    { "date", "$StartDate" },
+                                    { "unit", "week" },
+                                    { "startOfWeek", "monday" }
+                                })
+                        },
+                        {
+                            "started", new BsonDocument("$sum",
+                                new BsonDocument("$cond", new BsonArray
+                                {
+                                    new BsonDocument("$eq", new BsonArray
+                                    {
+                                        "$Status",
+                                        0
+                                    }),
+                                    1,
+                                    0
+                                }))
+                        },
+                        {
+                            "completed", new BsonDocument("$sum",
+                                new BsonDocument("$cond", new BsonArray
+                                {
+                                    new BsonDocument("$eq", new BsonArray
+                                    {
+                                        "$Status",
+                                        4
+                                    }),
+                                    1,
+                                    0
+                                }))
+                        }
+                    }
+                ),
+                new BsonDocument("$sort", new BsonDocument("_id", 1)),
+                new BsonDocument("$project",
+                    new BsonDocument
+                    {
+                        { "_id", 0 },
+                        {
+                            "week",
+                            new BsonDocument("$dateToString",
+                                new BsonDocument
+                                {
+                                    { "format", "%B %d" },
+                                    { "date", "$_id" }
+                                })
+                        },
+                        { "started", 1 },
+                        { "completed", 1 }
+                    })
+            };
 
+            return await _todoCollection
+                .Aggregate<WeeklyActivityDto>(pipeline)
+                .ToListAsync();
+        }
         public Task<List<InCompleteTodoResponseDto>> GetIncompleteTodos(bool isCompleted)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<PriorityCountDto>> GetPriorityCount()
+        public async Task<List<PriorityCountDto>> GetPriorityCount(string UserId)
         {
-            throw new NotImplementedException();
+            var filter = Builders<Todo>.Filter.AnyEq(x => x.AssignedTo, UserId);
+            var result = await _todoCollection.Aggregate().Match(filter).Group(x => x.Priority, g => new
+            {
+                Priority = g.Key,
+                Count = g.Count(),
+            })
+            .Project(x => new PriorityCountDto
+            {
+                Priority=x.Priority,
+                Count=x.Count
+            }).ToListAsync();
+            return result;
         }
 
         public Task<List<Todo>> SearchAsync(string SearchText)

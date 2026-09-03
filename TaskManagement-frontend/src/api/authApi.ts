@@ -1,7 +1,7 @@
 import type { ApiResponse } from '../types/api';
 import type { LoginRequest, RegisterRequest, TokenResponseDto } from '../types/auth'
 import type { GetProjectInfoDto, Project, RecentProject } from '../types/project';
-import type { DashboardStats, ProjectInfoDto, TaskDashboardDto } from '../types/ProjectDashboardType';
+import type { DashboardStats, PriorityDistributionDto, ProjectInfoDto, TaskDashboardDto, WeeklyActivityDto } from '../types/ProjectDashboardType';
 import type { Todo, TodoByDateDto, TodoListResponse, TodoResponse } from '../types/todo';
 import api from './axios'
 
@@ -128,7 +128,14 @@ export const getTodayUpcomingTaskInfo = async (id: string): Promise<ApiResponse<
     const response=await api.get("Todo/GetTaskInfo",{ params: { userId: id } });
         return response.data;
 }
-
+export const getWeeklyActivity=async (userId:string):Promise<ApiResponse<WeeklyActivityDto[]>>=>{
+    const response=await api.get("Todo/GetWeeklyActivity",{ params: { userId: userId } });
+    return response.data;
+}
+export const getPriorityCount=async (userId:string):Promise<ApiResponse<PriorityDistributionDto[]>>=>{
+    const response=await api.get("Todo/GetPriorityCount",{ params: { userId: userId } });
+    return response.data;
+}
 
 //project todo
 export const createProject= async (data:Project):Promise<ApiResponse<string>>=>{
@@ -157,3 +164,4 @@ export const getProjectAssigneeInfo=async (userId:string):Promise<ApiResponse<Pr
     const response=await api.get("Project/GetProjectAssigneInfo",{ params: { userId: userId } });
     return response.data;
 }
+

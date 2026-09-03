@@ -2,9 +2,9 @@ import { Avatar, makeStyles } from "@fluentui/react-components"
 import {  Button,  Text } from "@fluentui/react-components";
 import { LayerRegular, ArrowTrendingRegular, TargetRegular, CheckmarkCircleRegular,CalendarRegular, ChevronRightRegular  } from "@fluentui/react-icons";
 import { useEffect, useState } from "react";
-import {  getProjectAssigneeInfo, GetProjectInfo, getTodayUpcomingTaskInfo } from "../api/authApi";
+import {  getPriorityCount, getProjectAssigneeInfo, GetProjectInfo, getTodayUpcomingTaskInfo, getWeeklyActivity } from "../api/authApi";
 import { useAppSelector } from "../app/hooks";
-import type { DashboardStats, ProjectInfoDto, TaskDashboardDto } from "../types/ProjectDashboardType";
+import { Priority, type DashboardStats, type PriorityDistributionDto, type ProjectInfoDto, type TaskDashboardDto, type WeeklyActivityDto } from "../types/ProjectDashboardType";
 import ReactECharts from "echarts-for-react";
 
 const useStyle = makeStyles({
@@ -303,6 +303,16 @@ const useStyle = makeStyles({
             "@media (max-width: 768px)": {
                 gridTemplateColumns: "1fr",
             },
+        },
+        //priority and status distribution
+        Priorityanalytics: {
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "20px",
+            marginTop: "20px",
+            "@media (max-width: 768px)": {
+                gridTemplateColumns: "1fr",
+            },
         }
 });
 export function Dashboard() {
@@ -310,28 +320,34 @@ export function Dashboard() {
     const user = useAppSelector((state) => state.auth.user);
     const [response, setResponse] = useState<DashboardStats | null>(null);
     const [projects, setProjects] = useState<ProjectInfoDto[]>([]);
+    const [weeklyActivity, setWeeklyActivity] = useState<WeeklyActivityDto[]>([]);
     const [tasks, setTasks] = useState<TaskDashboardDto | null>(null);
+    const [priorityDistribution, setPriorityDistribution] = useState<PriorityDistributionDto[]>([]);
     const [loading, setLoading] = useState(true);
-    const hour = new Date().getHours();
+    const now = new Date();
+    const hour = now.getHours();
+
     const greeting =
         hour < 12
             ? "Good morning,"
             : hour < 18
             ? "Good afternoon,"
             : "Good evening,";
-        const formattedDate = new Date().toLocaleDateString("en-US", {
+    const formattedDate = now.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
         year: "numeric",
     });
     const getProgressColor = (count: number) => {
-        if (count >= 30  && count <60 ) return "#6454EE";      // green
-        if (count >= 60  && count <=100 ) return "#09AD7B";       // yellow
-        if (count >= 0  && count < 30) return "#FDA64F";       // orange
-        return "#EF4444";                       // red
+        if (count >= 30  && count <60 ) return "#6454EE";    
+        if (count >= 60  && count <=100 ) return "#09AD7B";     
+        if (count >= 0  && count < 30) return "#FDA64F";       
+        return "#EF4444";                     
     };
+    const priorityNames = ["Low", "Medium", "High","Critical"];
+    const priorityColors = ["#10B981", "#0EA5E9", "#F59E0B","#EF4444"];
     const today = new Date();
-    const option = {
+    const taskStatus = {
          tooltip: {
         trigger: "item"
     },
@@ -345,6 +361,15 @@ export function Dashboard() {
             orient: 'vertical',
             right: "5%",
             top: "center",
+            icon: "circle", 
+            selectedMode: false,
+            textStyle: {
+                fontSize: 12,
+                fontWeight: 500,
+                fontFamily: "Arial",
+                color: "var(--permanent-text-color)"
+            },
+
             data: ['To Do', 'In Progress', 'Completed', 'Under Review']
         },
         series: [
@@ -364,7 +389,11 @@ export function Dashboard() {
                 show: false
             }
             },
-           
+            itemStyle: {
+                borderColor: "#fff",
+                borderWidth: 4,
+                borderRadius: 0
+            },
            data: [
                 { value: response?.todoTasks ?? 0, name: "To Do" },
                 { value: response?.inProgressTasks ?? 0, name: "In Progress" },
@@ -374,20 +403,251 @@ export function Dashboard() {
             }
         ]
         };
+    const weekActivity = {
+        xAxis: {
+            type: "category",
+            boundaryGap: false,
+            data:weeklyActivity?.map((item) => item.week) ?? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+             axisLine: {
+                show: true,
+                 lineStyle: {
+                    color: "#CECECE"
+                    }
+                },
+                lineStyle: {
+                    color: "#E5E7EB"
+                },
+                axisTick: {
+                    show: true
+                },
+                axisLabel: {
+                    fontSize: 10,
+                    color: "#9CA3AF",
+                }
+        },
+        yAxis: {
+            type: "value",
+            min: 0,
+            max: 3,
+            interval: 2,
+            axisLine: {
+                show: true,
+                 lineStyle: {
+                    color: "#CECECE"
+                    }
+                },
+            axisTick: {
+                show: true
+            },
+            axisLabel: {
+                fontSize: 8,
+                color: "#9CA3AF"
+            },
+            splitLine: {
+                show: true,
+                lineStyle: {
+                    type: "dashed",
+                    color: "#E5E7EB"
+                }
+            }
+        },
+        grid: {
+            left: 50,
+            right: 10,
+            top: 15,
+            bottom: 35
+        },
+        tooltip: {
+            trigger: "axis",
+            backgroundColor: "#FFFFFF",
+            borderColor: "#E5E7EB",
+            borderWidth: 1,
+            textStyle: {
+                color: "#374151",
+                fontSize: 10
+            },
+            axisPointer: {
+                type: "line"
+            }
+        },
+        legend: {
+            bottom: 0,
+            left: 0,
+            icon: "circle",
+            itemWidth: 6,
+            itemHeight: 6,
+            itemGap: 15,
+            textStyle: {
+                fontSize: 9,
+                color: "#585b5f"
+            },
+            data: ["Completed", "Started"]
+        },
+        series: [
+            {
+                name: "Completed",
+                type: "line",
+                smooth: true,
+                color:"#B0AFFF",
+                data: weeklyActivity?.map((item) => item.completed) ?? [0, 0, 0, 0, 0, 0, 0, 0],
+                symbol: "circle",
+                symbolSize: 4,
+                lineStyle: {
+                    width: 1.5
+                },
+                itemStyle: {
+                    color: "#6366F1"
+                },
+                areaStyle: {
+                    opacity: 0.08
+                }
+            },
+            {
+                name: "Started",
+                type: "line",
+                color:"#FFCD80",
+                smooth: true,
+                data: weeklyActivity?.map((item) => item.started) ?? [0, 0, 0, 0, 0, 0, 0, 0],
+                symbol: "circle",
+                symbolSize: 4,
+                lineStyle: {
+                    width: 1.5
+                },
+                itemStyle: {
+                    color: "#F59E0B"
+                },
+                areaStyle: {
+                    opacity: 0.08
+                }
+            }
+        ]
+    };
+    const priorityDistributionOption ={
+        xAxis: {
+            type: 'category',
+           data: priorityDistribution?.map(item => priorityNames[item.priority]) ?? [],
+        },
+        yAxis: {
+            type: 'value',
+            interval: 1,
+            axisLine: {
+            show: true,
+        },
+        splitLine: {
+            show: false
+        }
+        },
+        tooltip: {
+            trigger: "axis",
+            backgroundColor: "#FFFFFF",
+            borderColor: "#E5E7EB",
+            borderWidth: 1,
+            textStyle: {
+                color: "#374151",
+                fontSize: 10
+            },
+            axisPointer: {
+                type: "line"
+            }
+        },
+       series: [
+        {
+            type: "bar",
+            barWidth: 40,
+            data: priorityDistribution?.map(item => ({
+                value: item.count,
+                itemStyle: {
+                color: priorityColors[item.priority]
+                }
+            })) ?? []
+            }
+        ]
+    }
+    const workloadDistributionOption={
+        xAxis: {
+        type: "value",
+        min: 0,
+        max: 100,
+        interval: 25,
+        axisLine: {
+        show: true
+        },
+        axisTick: {
+        show: false
+        },
+        splitLine: {
+        show: false,
+        },
+        axisLabel: {
+        formatter: "{value}%"
+    }
+    },
+    yAxis: {
+        type: "category",
+        data: projects?.map(project => project.name) ?? [],
+          axisLabel: {
+            formatter: (value: string) => {
+            const words = value.split(" ");
+            return words.length > 1
+                ? words.slice(0, 2).join(" ") + "\n" + words.slice(2).join(" ")
+                : value;
+            }
+        },
+        axisLine: {
+        show: true
+        },
+        axisTick: {
+        show: true
+        }
+    },
+    series: [
+        {
+        type: "bar",
+        barWidth: 20,
+        data: projects?.map(project => ({
+            value:
+            project.totalTasks === 0
+                ? 0
+                : ((project.todoTasks + project.reviewTasks) /
+                    project.totalTasks) *
+                100,
+            itemStyle: {
+            color: getProgressColor((project.todoTasks + project.reviewTasks) / project.totalTasks * 100),
+            borderRadius: [0, 5, 5, 0]
+            }
+        })) ?? [],
+            label: {
+            show: true,
+            position: "right",
+             formatter: (params: any) => `${params.value.toFixed(2)}%`
+            }
+        }
+    ],
+    tooltip: {
+        trigger: "axis",
+        axisPointer: {
+        type: "shadow"
+        },
+    }
+    }
     useEffect(() => {
         const fetchDashboardData = async () => {
             if (!user?.userId) return;
             setLoading(true);
             try {
-                const [projectInfo, taskInfo, assigneeInfo] = await Promise.all([
+                const [projectInfo, taskInfo, assigneeInfo, weeklyActivity, priorityDistribution] = await Promise.all([
                     GetProjectInfo(user.userId).catch(() => null),
                     getTodayUpcomingTaskInfo(user.userId).catch(() => null),
                     getProjectAssigneeInfo(user.userId).catch(() => null),
+                    getWeeklyActivity(user.userId).catch(() => null),
+                    getPriorityCount(user.userId).catch(() => null)
                 ]);
 
                 if (projectInfo) setResponse(projectInfo.result);
                 if (taskInfo) setTasks(taskInfo.result);
                 if (assigneeInfo) setProjects(assigneeInfo.result || []);
+                if (weeklyActivity) setWeeklyActivity(weeklyActivity.result || []);
+                if (priorityDistribution) setPriorityDistribution(priorityDistribution.result || []);
             } catch (err) {
                 console.error("Failed to load dashboard data", err);
             } finally {
@@ -646,13 +906,34 @@ export function Dashboard() {
             <div className={styles.analytics}>
                 <div className={styles.card}>
                     <Text weight="semibold" style={{fontSize:"15px", color:"var(--text-primary)"}}>Task Status Distribution</Text>
-                    <span style={{fontSize:"12px", color:"var(--permanent-text-color)"}}>Distribution of tasks based on their current status</span>
-                     <ReactECharts option={option}
+                    <span style={{fontSize:"12px", color:"var(--permanent-text-color)"}}>Breakdown of all {response?.assignedTasks ?? 0} assigned tasks</span>
+                    <ReactECharts option={taskStatus}
                         style={{ height: "300px", width: "100%" }}
                     />
                 </div>
                 <div className={styles.card}>
-                    <Text weight="semibold" style={{fontSize:"15px"}}>Weekly Activity</Text>
+                    <Text weight="semibold" style={{fontSize:"15px", color:"var(--text-primary)"}}>Weekly Activity</Text>
+                    <span style={{fontSize:"12px", color:"var(--permanent-text-color)"}}>Tasks completed vs. started — last 8 weeks</span>
+                    <ReactECharts option={weekActivity}
+                        style={{ height: "300px", width: "100%" }}
+                    />
+                </div>
+            </div>
+            {/* prority and status distribution */}
+            <div className={styles.Priorityanalytics}>
+                <div className={styles.card}>
+                    <Text weight="semibold" style={{fontSize:"15px", color:"var(--text-primary)"}}>Priority Breakdown</Text>
+                    <span style={{fontSize:"12px", color:"var(--permanent-text-color)"}}>Number of tasks by urgency level</span>
+                    <ReactECharts option={priorityDistributionOption}
+                        style={{ height: "300px", width: "100%" }}
+                    />
+                </div>
+                <div className={styles.card}>
+                    <Text weight="semibold" style={{fontSize:"15px", color:"var(--text-primary)"}}>Project Workload Distribution</Text>
+                    <span style={{fontSize:"12px", color:"var(--permanent-text-color)"}}>Tasks assigned to each project</span>
+                    <ReactECharts option={workloadDistributionOption}
+                        style={{ height: "300px", width: "100%" }}
+                    />
                 </div>
             </div>
         </div>

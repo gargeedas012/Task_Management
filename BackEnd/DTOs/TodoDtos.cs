@@ -40,8 +40,8 @@ namespace BackEnd.DTOs
     [BsonIgnoreExtraElements]
     public class PriorityCountDto
     {
-        public string Id { get; set; }
-        public int Total { get; set; }
+        public TaskPriority Priority { get; set; }
+        public int Count { get; set; }
     }
     [BsonIgnoreExtraElements]
     public class TodoByDateDto
@@ -91,5 +91,17 @@ namespace BackEnd.DTOs
         public List<TaskInfoDto> TodayTasks { get; set; } = new();
         public List<TaskInfoDto> UpcomingTasks { get; set; } = new();
     }
+
+    public class WeeklyActivityDto
+    {
+        [BsonElement("week")]
+        public string Week { get; set; } = string.Empty;
+        [BsonElement("started")]
+        public int Started { get; set; }
+        [BsonElement("completed")]
+        public int Completed { get; set; }
+    }
+
+
 
 }

@@ -16,7 +16,7 @@ body[data-theme="dark"] {
     --bg--card: #121623;
     --text-primary: white;
     --primary-color: #8B7FFF;
-    --border-color: #252A3A;
+    --border-color: #555555;
     --nav-selected-bg: rgba(139, 127, 255, 0.1);
     --nav-selected-border: #392aa5;
     --nav-hover-bg: rgba(255, 255, 255, 0.05);

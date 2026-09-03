@@ -1,6 +1,8 @@
 import { Avatar,Button,makeStyles, Text,} from "@fluentui/react-components";
 import { WeatherMoonRegular, AlertRegular, WeatherSunnyRegular } from "@fluentui/react-icons";
 import { useTheme } from "../../context/ThemeContext";
+import { useLocation } from "react-router-dom";
+import { useLayoutEffect, useState } from "react";
 
 const useStyles = makeStyles({
     navbar: {
@@ -38,10 +40,37 @@ const useStyles = makeStyles({
 export function Navbar() {
     const styles = useStyles();
     const {theme, toggleTheme}=useTheme();
+    const [ title, setTitle ] = useState("DashBoard");   
+    const location = useLocation();
+    useLayoutEffect(() => {
+        contentchecker();
+        }, [location.pathname]);
+    const contentchecker = () => {
+        if (location.pathname === "/dashboard") {
+            setTitle("Dashboard")
+            return
+        }
+        else if (location.pathname === "/projects") {
+            setTitle("Projects")
+            return;
+        }
+        else if (location.pathname === "/tasks") {
+            setTitle("My Tasks")
+            return;
+        }
+        else if (location.pathname === "/settings") {
+            setTitle("Profile")
+            return;
+        }
+        else if (location.pathname.startsWith("/home/")) {
+            setTitle("My Tasks")
+            return;
+        }
+    }
     return (
         <nav className={styles.navbar}>
             <Text size={400} weight="semibold" className={styles.title}>
-                Dashboard
+                {title}
             </Text>
             <div className={styles.actions}>
                 <Button appearance="subtle" icon={theme==="light"? <WeatherSunnyRegular /> : <WeatherMoonRegular />} className={styles.iconButton}  onClick={toggleTheme}/>
@@ -51,3 +80,4 @@ export function Navbar() {
         </nav>
     );
 }
+
