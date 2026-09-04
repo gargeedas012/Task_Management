@@ -99,5 +99,10 @@ namespace BackEnd.Services
         {
             return await _repository.GetWeeklyActivity(UserId);
         }
+
+        public async Task<List<TaskPriorityGroupDto>> GetTaskPriorityGroup(string UserId, string? projectId)
+        {
+            return await _repository.GetTaskPriorityGroup(UserId,projectId);
+        }
     }
 }

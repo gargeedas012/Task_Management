@@ -238,7 +238,19 @@ namespace BackEnd.Repositories
 
                     return result;
                 }
+        public async Task<List<ProjectIdNameInfo>> GetProjectsNameByUserIdAsync(string userId)
+        {
+            var filter = Builders<Project>.Filter.AnyEq(x => x.ProjectMemberId, userId);
 
+            var result = await _projectCollection.Aggregate().Match(filter)
+                .Project(x => new ProjectIdNameInfo
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                })
+                .ToListAsync();
+            return result;
+        }
 
 
     }

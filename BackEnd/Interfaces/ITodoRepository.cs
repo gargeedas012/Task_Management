@@ -20,5 +20,6 @@ namespace BackEnd.Interfaces
         Task<List<TodoResponse>> getRecentTodos(string UserId);
         Task<TaskDashboardDto?> GetTaskInfo(string UserId);
         Task<List<WeeklyActivityDto>> GetWeeklyActivity(string UserId);
+        Task<List<TaskPriorityGroupDto>> GetTaskPriorityGroup(string UserId, string? projectId);
     }
 }

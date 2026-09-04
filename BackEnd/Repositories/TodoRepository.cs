@@ -428,6 +428,103 @@ namespace BackEnd.Repositories
             }).ToListAsync();
             return result;
         }
+        public async Task<List<TaskPriorityGroupDto>> GetTaskPriorityGroup(string UserId , string? projectId)
+        {
+            var filter = Builders<Todo>.Filter.AnyEq( x => x.AssignedTo, UserId);
+            if (!string.IsNullOrEmpty(projectId))
+            {
+                filter = Builders<Todo>.Filter.And(
+                    filter,
+                    Builders<Todo>.Filter.Eq(
+                        x => x.ProjectId,
+                        projectId
+                    )
+                );
+            }
+            var result = await _todoCollection
+                .Aggregate()
+                .Match(filter)
+
+                .AppendStage<Todo>(
+                    new BsonDocument("$lookup",
+                        new BsonDocument
+                        {
+                    { "from", "Projects" },
+                    {
+                        "let", new BsonDocument
+                        {
+                            {
+                                "projectId",
+                                new BsonDocument("$toObjectId", "$ProjectId")
+                            }
+                        }
+                    },
+                    {
+                        "pipeline", new BsonArray
+                        {
+                            new BsonDocument("$match",
+                                new BsonDocument("$expr",
+                                    new BsonDocument("$eq",
+                                        new BsonArray
+                                        {
+                                            "$_id",
+                                            "$$projectId"
+                                        }
+                                    )
+                                )
+                            ),
+                            new BsonDocument("$project",
+                                new BsonDocument
+                                {
+                                    { "_id", 0 },
+                                    { "Name", 1 }
+                                }
+                            )
+                        }
+                    },
+                    { "as", "Projects" }
+                        }
+                    )
+                )
+
+                .AppendStage<Todo>(
+                    new BsonDocument(
+                        "$set",
+                        new BsonDocument(
+                            "ProjectName",
+                            new BsonDocument(
+                                "$arrayElemAt",
+                                new BsonArray { "$Projects.Name", 0 }
+                            )
+                        )
+                    )
+                )
+                .AppendStage<TaskDto>(
+                    new BsonDocument("$unset", "Projects")
+                )
+                .Project(x => new TaskDto
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    ProjectName = x.ProjectName,
+                    Description = x.Description,
+                    Status = x.Status,
+                    Priority = x.Priority,
+                    StartDate = x.StartDate,
+                    DueDate = x.DueDate
+                })
+                .Group(
+                    x => x.Status,
+                    g => new TaskPriorityGroupDto
+                    {
+                        Status = (int)g.Key,
+                        Tasks = g.ToList()
+                    }
+                )
+                .ToListAsync();
+
+            return result;
+        }
 
         public Task<List<Todo>> SearchAsync(string SearchText)
         {

@@ -1,22 +1,9 @@
-import { useState } from "react";
-import { dummyTasks as initialTasks, type Task, type TaskStatus, type Priority } from "../../dummydata/project";
-import {
-    Input,
-    makeStyles,
-    Menu,
-    MenuTrigger,
-    MenuPopover,
-    MenuList,
-    MenuItem,
-} from "@fluentui/react-components";
-import {
-    SearchRegular,
-    ChevronDownRegular,
-    ChevronRightRegular,
-    FlagRegular,
-    AppsListDetailRegular,
-    FilterRegular,
-} from "@fluentui/react-icons";
+import { useEffect, useState } from "react";
+import { Input, makeStyles, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem} from "@fluentui/react-components";
+import { SearchRegular,  ChevronDownRegular,  ChevronRightRegular, FlagRegular, AppsListDetailRegular, FilterRegular} from "@fluentui/react-icons";
+import { useAppSelector } from "../app/hooks";
+import { type ProjectIdNameInfo, type TaskPriorityGroupDto ,type TaskStatus , type Priority} from "../types/TaskListType";
+import { getProjectsNameByUserIdAsync, getTaskPriorityGroup } from "../api/authApi";
 
 const useStyles = makeStyles({
     pageContainer: {
@@ -268,6 +255,7 @@ const useStyles = makeStyles({
         overflow: "hidden",
         textOverflow: "ellipsis",
         whiteSpace: "nowrap",
+        marginRight:"10px"
     },
     dueDate: {
         fontSize: "12px",
@@ -323,7 +311,7 @@ const statusConfig: Record<TaskStatus, { color: string; label: string; dotColor:
         dotColor: "#6366F1",
         pillClass: "statusToDo",
     },
-    "Overdue": {
+    "Review": {
         color: "#DC2626",
         label: "Overdue",
         dotColor: "#EF4444",
@@ -335,49 +323,85 @@ const statusConfig: Record<TaskStatus, { color: string; label: string; dotColor:
         dotColor: "#10B981",
         pillClass: "statusCompleted",
     },
+     "Blocked": {
+        color: "#059669",
+        label: "Completed",
+        dotColor: "#10B981",
+        pillClass: "statusCompleted",
+    },
 };
-
-const statusOrder: TaskStatus[] = ["In Progress", "To Do", "Overdue", "Completed"];
-
-const priorityOptions = ["All Priorities", "Urgent", "High", "Medium", "Low"];
+const statusOrder: TaskStatus[] = [ "To Do","In Progress","Blocked", "Review", "Completed"];
+const priorityMap: Record<string, number> = {
+     "Low": 0,
+    "Medium": 1,
+     "High":2,
+    "Critical":3,
+};
+const priorityOptions = ["Low","Medium", "High", "Critical" ,"All Priorities"];
 
 export default function TaskList() {
     const styles = useStyles();
-    const [tasks, setTasks] = useState<Task[]>(initialTasks);
+    const [tasklist,settasklist]=useState<TaskPriorityGroupDto[]>([]);
+    const [project, setproject]=useState<ProjectIdNameInfo[]>([]);
     const [search, setSearch] = useState("");
+    const [selectedProject,setSelectedProject]=useState("All Projects");
+    const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
     const [selectedPriority, setSelectedPriority] = useState("All Priorities");
     const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
-
+    const user=useAppSelector((state)=>state.auth.user);
+    const formatDueDate = (dueDate: string) => {
+        return new Date(dueDate).toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        });
+    };
     const toggleGroup = (status: string) => {
         setCollapsedGroups((prev) => ({
             ...prev,
             [status]: !prev[status],
         }));
     };
-
-    const handleStatusChange = (taskId: string, newStatus: TaskStatus) => {
-        setTasks((prev) =>
-            prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t))
-        );
-    };
+    useEffect(() => {
+        const fetchTaskList = async ()=>{
+            if(!user?.userId) return;
+            setLoading(true);
+            try{
+                const [ tasklistResponse , projectNameResponse ] = await Promise.all([
+                    getTaskPriorityGroup(user.userId, selectedProjectId ?? undefined).catch(()=>null),
+                    getProjectsNameByUserIdAsync(user.userId).catch(()=>null)
+                ]);
+                if(tasklistResponse){
+                    settasklist(tasklistResponse.result);
+                }
+                if(projectNameResponse){
+                    setproject(projectNameResponse.result);
+                }
+            }catch(error){
+                console.error("Error fetching task list:", error);
+            }finally{
+                setLoading(false);
+            }
+        }
+        fetchTaskList();
+    }, [user?.userId ,selectedProjectId]);
 
     // Filter tasks
-    const filteredTasks = tasks.filter((task) => {
+    const filteredTasks = tasklist.flatMap(group=>group.tasks).filter((task)=>{
         const searchMatch =
-            task.title.toLowerCase().includes(search.toLowerCase()) ||
-            task.id.toLowerCase().includes(search.toLowerCase()) ||
-            task.project.toLowerCase().includes(search.toLowerCase());
-
+        task.title.toLowerCase().includes(search.toLowerCase()) ||
+        task.projectName.toLowerCase().includes(search.toLowerCase());
         const priorityMatch =
             selectedPriority === "All Priorities" ||
-            task.priority === selectedPriority;
-
+            task.priority === priorityMap[selectedPriority];
         return searchMatch && priorityMatch;
-    });
-
+    })
+    //Filter name
+   const filteredName = project.map((group) => group.name);
     const getPriorityClass = (priority: Priority) => {
         switch (priority) {
-            case "Urgent":
+            case "Critical":
                 return styles.priorityUrgent;
             case "High":
                 return styles.priorityHigh;
@@ -396,7 +420,7 @@ export default function TaskList() {
                 return styles.statusInProgress;
             case "To Do":
                 return styles.statusToDo;
-            case "Overdue":
+            case "Review":
                 return styles.statusOverdue;
             case "Completed":
                 return styles.statusCompleted;
@@ -418,7 +442,6 @@ export default function TaskList() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-
                     <Menu>
                         <MenuTrigger disableButtonEnhancement>
                             <button className={styles.priorityFilterButton}>
@@ -439,6 +462,31 @@ export default function TaskList() {
                             </MenuList>
                         </MenuPopover>
                     </Menu>
+                    <Menu>
+                    <MenuTrigger disableButtonEnhancement>
+                        <button className={styles.priorityFilterButton}>
+                            <span>{selectedProject || "All Projects"}</span>
+                            <ChevronDownRegular fontSize={14} />
+                        </button>
+                    </MenuTrigger>
+
+                    <MenuPopover>
+                        <MenuList>
+                            <MenuItem onClick={() => {setSelectedProject("All Projects"), setSelectedProjectId(null)}}>
+                                All Projects
+                            </MenuItem>
+
+                            {project.map((p) => (
+                                <MenuItem
+                                    key={p.id}
+                                    onClick={() =>{ setSelectedProject(p.name), setSelectedProjectId(p.id)}}
+                                >
+                                    {p.name}
+                                </MenuItem>
+                            ))}
+                        </MenuList>
+                    </MenuPopover>
+                </Menu>
                 </div>
 
                 <div className={styles.toolbarRight}>
@@ -467,25 +515,20 @@ export default function TaskList() {
                         <span>PRIORITY</span>
                         <span></span>
                     </div>
-
                     {/* GROUPED STATUS SECTIONS */}
                     {statusOrder.map((status) => {
                         const statusTasks = filteredTasks.filter(
-                            (task) => task.status === status
+                            (task) => statusOrder[task.status] === status
                         );
-
                         if (statusTasks.length === 0 && search !== "") {
                             return null;
                         }
-
                         const isCollapsed = collapsedGroups[status];
                         const config = statusConfig[status];
-
                         return (
                             <div key={status}>
                                 {/* GROUP HEADER */}
-                                <div
-                                    className={styles.statusGroupHeader}
+                                <div className={styles.statusGroupHeader}
                                     onClick={() => toggleGroup(status)}
                                 >
                                     {isCollapsed ? (
@@ -498,7 +541,6 @@ export default function TaskList() {
                                         className={styles.statusDot}
                                         style={{ backgroundColor: config.dotColor }}
                                     />
-
                                     <span
                                         className={styles.statusGroupName}
                                         style={{ color: config.color }}
@@ -510,20 +552,19 @@ export default function TaskList() {
                                         {statusTasks.length}
                                     </span>
                                 </div>
-
                                 {/* GROUP TASK ROWS */}
                                 {!isCollapsed &&
                                     statusTasks.map((task) => {
                                         const isDueOverdue =
-                                            task.status === "Overdue" ||
-                                            task.status === "Completed";
+                                            statusOrder[task.status] === "Review" ||
+                                            statusOrder[task.status] === "Completed";
 
                                         return (
-                                            <div className={styles.taskRow} key={task.id}>
+                                            <div className={styles.taskRow} >
                                                 {/* TASK ID */}
                                                 <div>
                                                     <span className={styles.taskIdBadge}>
-                                                        {task.id}
+                                                       GM11
                                                     </span>
                                                 </div>
 
@@ -532,46 +573,43 @@ export default function TaskList() {
                                                     <span className={styles.taskTitle}>
                                                         {task.title}
                                                     </span>
-                                                    {task.progress > 0 && task.progress < 100 && (
-                                                        <span className={styles.taskProgress}>
-                                                            {task.progress}%
-                                                        </span>
-                                                    )}
                                                 </div>
 
                                                 {/* STATUS PILL (Interactive Dropdown) */}
                                                 <div>
-                                                    <Menu>
-                                                        <MenuTrigger disableButtonEnhancement>
-                                                            <button
+                                                         <button
                                                                 className={`${styles.statusPill} ${getStatusPillClass(
-                                                                    task.status
+                                                                    statusOrder[task.status]
                                                                 )}`}
                                                             >
-                                                                <span>{task.status}</span>
-                                                                <ChevronDownRegular fontSize={12} />
+                                                                <span>{statusOrder[task.status]}</span>
+                                                                
                                                             </button>
-                                                        </MenuTrigger>
-                                                        <MenuPopover>
+                                                        {/* <Menu> */}
+                                                        {/* <MenuTrigger disableButtonEnhanscement>
+                                                        </MenuTrigger> */}
+                                                        {/* <MenuPopover>
                                                             <MenuList>
                                                                 {statusOrder.map((s) => (
                                                                     <MenuItem
                                                                         key={s}
-                                                                        onClick={() =>
-                                                                            handleStatusChange(task.id, s)
-                                                                        }
+                                                                        onClick={() => {
+                                                                            if (task.id) {
+                                                                                handleStatusChange(task.id, s);
+                                                                            }
+                                                                        }}
                                                                     >
                                                                         {s}
                                                                     </MenuItem>
                                                                 ))}
                                                             </MenuList>
-                                                        </MenuPopover>
-                                                    </Menu>
+                                                        </MenuPopover> */}
+                                                    {/* </Menu> */}
                                                 </div>
 
                                                 {/* PROJECT */}
                                                 <span className={styles.projectName}>
-                                                    {task.project}
+                                                    {task.projectName}
                                                 </span>
 
                                                 {/* DUE DATE */}
@@ -579,17 +617,17 @@ export default function TaskList() {
                                                     className={`${styles.dueDate} ${isDueOverdue ? styles.dueDateOverdue : ""
                                                         }`}
                                                 >
-                                                    {task.dueDate}
+                                                    {formatDueDate(task.dueDate)}
                                                 </span>
 
                                                 {/* PRIORITY */}
                                                 <div
                                                     className={`${styles.priorityContainer} ${getPriorityClass(
-                                                        task.priority
+                                                       priorityOptions[task.priority] as Priority
                                                     )}`}
                                                 >
                                                     <FlagRegular fontSize={14} />
-                                                    <span>{task.priority}</span>
+                                                    <span>{priorityOptions[task.priority] as Priority}</span>
                                                 </div>
 
                                                 {/* ARROW */}

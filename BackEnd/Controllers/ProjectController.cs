@@ -223,5 +223,39 @@ namespace BackEnd.Controllers
                 return Unauthorized(response);
             }
         }
+        [HttpGet("GetProjectsNameByUserIdAsync")]
+        public async Task<ActionResult<List<ProjectIdNameInfo>>> GetProjectsNameByUserIdAsync(string UserId)
+        {
+            var response = new ApiResponse<List<ProjectIdNameInfo>>();
+            try
+            {
+                var result = await _projectService.GetProjectsNameByUserIdAsync(UserId);
+                if (result == null)
+                {
+                    response.Errors.Add(new ApiError
+                    {
+                        Code = "404",
+                        Message = "Projects not found"
+                    });
+                    return NotFound();
+                }
+                else
+                {
+                    response.Result = result;
+                    return Ok(response);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                response.Status = false;
+                response.Errors.Add(new ApiError
+                {
+                    Code = "500",
+                    Message = ex.Message
+                });
+                return Unauthorized(response);
+            }
+        }
     }
 }

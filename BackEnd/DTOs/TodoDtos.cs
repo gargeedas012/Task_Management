@@ -1,6 +1,7 @@
 using BackEnd.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using TaskStatus = BackEnd.Models.TaskStatus;
 namespace BackEnd.DTOs
 {
     public class CreateTodoDto
@@ -101,7 +102,24 @@ namespace BackEnd.DTOs
         [BsonElement("completed")]
         public int Completed { get; set; }
     }
-
+    public class TaskPriorityGroupDto
+    {
+        public int Status { get; set; }
+        public List<TaskDto> Tasks { get; set; } = new();
+    }
+    public class TaskDto
+    {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? Id { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public TaskStatus Status { get; set; }
+        public TaskPriority Priority { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime DueDate { get; set; }
+        public string ProjectName { get; set; }
+    }
 
 
 }

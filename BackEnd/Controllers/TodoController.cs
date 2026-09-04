@@ -470,6 +470,38 @@ namespace BackEnd.Controllers
                 return BadRequest(resposne);
             }
         }
+        [HttpGet("GetTaskPriorityGroup")]
+        public async Task<ActionResult<List<TaskPriorityGroupDto>>> GetTaskPriorityGroup(string UserId, string? projectId)
+        {
+            var resposne = new ApiResponse<List<TaskPriorityGroupDto>>();
+            try
+            {
+                var result = await _todoService.GetTaskPriorityGroup(UserId, projectId);
+                if (result == null)
+                {
+                    resposne.Errors.Add(new ApiError
+                    {
+                        Code = "404",
+                        Message = "Task not found"
+                    });
+                    return NotFound();
+                }
+                else
+                {
+                    resposne.Result = result;
+                    return Ok(resposne);
+                }
+            }
+            catch (Exception ex)
+            {
+                resposne.Errors.Add(new ApiError
+                {
+
+                    Message = ex.Message
+                });
+                return BadRequest(resposne);
+            }
+        }
 
     }
 }

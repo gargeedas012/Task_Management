@@ -38,7 +38,8 @@ export interface WeeklyActivityDto
 export const Priority = {
   Low: 0,
   Medium: 1,
-  High: 2
+  High: 2,
+  Critical:3
 } as const;
 export type Priority = typeof Priority[keyof typeof Priority];
 export interface PriorityDistributionDto

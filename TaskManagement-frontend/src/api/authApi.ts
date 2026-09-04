@@ -2,6 +2,7 @@ import type { ApiResponse } from '../types/api';
 import type { LoginRequest, RegisterRequest, TokenResponseDto } from '../types/auth'
 import type { GetProjectInfoDto, Project, RecentProject } from '../types/project';
 import type { DashboardStats, PriorityDistributionDto, ProjectInfoDto, TaskDashboardDto, WeeklyActivityDto } from '../types/ProjectDashboardType';
+import type { ProjectIdNameInfo, TaskPriorityGroupDto } from '../types/TaskListType';
 import type { Todo, TodoByDateDto, TodoListResponse, TodoResponse } from '../types/todo';
 import api from './axios'
 
@@ -41,11 +42,23 @@ export const GoogleLoginFun = async (
 
     return response.data;
 };
+
+
+
+
+
 //user
 export const GetProjectInfo = async (userId: string): Promise<ApiResponse<DashboardStats>> => {
     const response = await api.get("/User/GetProjectInfo", { params: { userId } });
     return response.data;
 };
+
+
+
+
+
+
+
 //Todo Funtionality
 export const getTodos = async (data: string):Promise<ApiResponse<Todo[]>>=>{
     const response = await api.get("/Todo/SearchByUserId", { params: { userId: data } });
@@ -136,6 +149,16 @@ export const getPriorityCount=async (userId:string):Promise<ApiResponse<Priority
     const response=await api.get("Todo/GetPriorityCount",{ params: { userId: userId } });
     return response.data;
 }
+export const getTaskPriorityGroup=async (userId:string , projectId?:string):Promise<ApiResponse<TaskPriorityGroupDto[]>>=>{
+    const response=await api.get("Todo/GetTaskPriorityGroup",{ params: { userId: userId  , projectId: projectId} });
+    return response.data;
+}
+
+
+
+
+
+
 
 //project todo
 export const createProject= async (data:Project):Promise<ApiResponse<string>>=>{
@@ -162,6 +185,10 @@ export const getAllRecentProjects=async (userId:string):Promise<ApiResponse<Rece
 
 export const getProjectAssigneeInfo=async (userId:string):Promise<ApiResponse<ProjectInfoDto[]>>=>{
     const response=await api.get("Project/GetProjectAssigneInfo",{ params: { userId: userId } });
+    return response.data;
+}
+export const getProjectsNameByUserIdAsync=async (userId:string):Promise<ApiResponse<ProjectIdNameInfo[]>>=>{
+    const response=await api.get("Project/GetProjectsNameByUserIdAsync",{ params: { userId: userId } });
     return response.data;
 }
 
