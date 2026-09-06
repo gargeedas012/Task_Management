@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Input, makeStyles, Menu, MenuTrigger, MenuPopover, MenuList, MenuItem} from "@fluentui/react-components";
-import { SearchRegular,  ChevronDownRegular,  ChevronRightRegular, FlagRegular, AppsListDetailRegular, FilterRegular} from "@fluentui/react-icons";
+import { SearchRegular,  ChevronDownRegular,  ChevronRightRegular, FlagRegular, AppsListDetailRegular, FilterRegular, AddRegular } from "@fluentui/react-icons";
 import { useAppSelector } from "../app/hooks";
 import { type ProjectIdNameInfo, type TaskPriorityGroupDto ,type TaskStatus , type Priority} from "../types/TaskListType";
 import { getProjectsNameByUserIdAsync, getTaskPriorityGroup } from "../api/authApi";
@@ -341,12 +342,13 @@ const priorityOptions = ["Low","Medium", "High", "Critical" ,"All Priorities"];
 
 export default function TaskList() {
     const styles = useStyles();
+    const navigate = useNavigate();
     const [tasklist,settasklist]=useState<TaskPriorityGroupDto[]>([]);
     const [project, setproject]=useState<ProjectIdNameInfo[]>([]);
     const [search, setSearch] = useState("");
     const [selectedProject,setSelectedProject]=useState("All Projects");
     const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [_loading, setLoading] = useState(true);
     const [selectedPriority, setSelectedPriority] = useState("All Priorities");
     const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
     const user=useAppSelector((state)=>state.auth.user);
@@ -396,9 +398,7 @@ export default function TaskList() {
             selectedPriority === "All Priorities" ||
             task.priority === priorityMap[selectedPriority];
         return searchMatch && priorityMatch;
-    })
-    //Filter name
-   const filteredName = project.map((group) => group.name);
+    });
     const getPriorityClass = (priority: Priority) => {
         switch (priority) {
             case "Critical":
@@ -490,6 +490,20 @@ export default function TaskList() {
                 </div>
 
                 <div className={styles.toolbarRight}>
+                    <button
+                        className={styles.priorityFilterButton}
+                        style={{
+                            backgroundColor: "#4f46e5",
+                            color: "#ffffff",
+                            border: "none",
+                            gap: "6px",
+                            cursor: "pointer",
+                        }}
+                        onClick={() => navigate("/tasks/new")}
+                    >
+                        <AddRegular fontSize={16} />
+                        Add Task
+                    </button>
                     <span className={styles.taskCount}>
                         {filteredTasks.length} tasks
                     </span>

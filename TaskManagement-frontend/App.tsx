@@ -11,6 +11,7 @@ import { Layout } from "./src/pages/Layout";
 import { Settings } from "./src/pages/Settings";
 import "./css/global.css";
 import TaskList from "./src/pages/TaskList";
+import TaskForm from "./src/pages/TaskForm";
 
 function App() {
   return (
@@ -27,6 +28,8 @@ function App() {
                 <Route path="/projectboard" element={<ProtectedRoute><ProjectBoard/></ProtectedRoute>}/>
                 <Route path="/settings" element={<ProtectedRoute><Settings/></ProtectedRoute>}/>
                 <Route path="/tasks" element={<ProtectedRoute><TaskList/></ProtectedRoute>}/>
+                <Route path="/tasks/new" element={<ProtectedRoute><TaskForm/></ProtectedRoute>}/>
+                <Route path="/addtask" element={<ProtectedRoute><TaskForm/></ProtectedRoute>}/>
             </Route>
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>

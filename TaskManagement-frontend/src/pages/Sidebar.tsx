@@ -93,9 +93,11 @@ export function Sidebar() {
     const navigate = useNavigate();
     const location = useLocation();
     const styles = useStyles();
-    const user = useAppSelector(state => state.auth.user)
+    const user = useAppSelector(state => state.auth.user);
+    const selectedNav = location.pathname.startsWith("/tasks") || location.pathname === "/addtask" ? "/tasks" : location.pathname;
+
     return (
-        <NavDrawer open={true} type="inline" selectedValue={location.pathname} style={{ minHeight: "100vh" }} className={styles.sidebar}>
+        <NavDrawer open={true} type="inline" selectedValue={selectedNav} style={{ minHeight: "100vh" }} className={styles.sidebar}>
             <NavDrawerHeader className={styles.logoContainer}>
                 <div className={styles.logo}>
                     <LayerRegular fontSize={25} style={{

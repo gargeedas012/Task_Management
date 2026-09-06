@@ -10,7 +10,10 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // Skip token refresh logic for authentication endpoints to prevent infinite loops
+        const isAuthUrl = originalRequest?.url?.includes("/Auth/");
+
+        if (error.response?.status === 401 && !originalRequest._retry && !isAuthUrl) {
             originalRequest._retry = true;
 
             try {
@@ -24,8 +27,10 @@ api.interceptors.response.use(
                 // Retry original request with new token cookie
                 return api(originalRequest);
             } catch (refreshError) {
-                // Redirect to login if refresh fails
-                window.location.href = "/login";
+                // Only redirect to login if user was on a protected page and refresh failed
+                if (window.location.pathname !== "/login" && window.location.pathname !== "/register") {
+                    window.location.href = "/login";
+                }
                 return Promise.reject(refreshError);
             }
         }
