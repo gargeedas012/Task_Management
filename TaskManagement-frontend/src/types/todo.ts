@@ -1,34 +1,34 @@
 export interface Todo {
-    id?: string;
-    title: string;
-    userId: string;
-    projectId: string;
-    description: string;
-    priority: "Low" | "Medium" | "High";
-    dueDate: string;
-    createdDate: string;
-    category: string;
-    isCompleted: boolean;
+  id?: string;
+  title: string;
+  userId: string;
+  projectId: string;
+  description: string;
+  priority: "Low" | "Medium" | "High";
+  dueDate: string;
+  createdDate: string;
+  category: string;
+  isCompleted: boolean;
 }
-export interface TodoByDateDto{
-    date:string;
-    tasks:Todo[];
-    totalTaskCount:number;
+export interface TodoByDateDto {
+  date: string;
+  tasks: Todo[];
+  totalTaskCount: number;
 }
-export interface TodoListResponse{
-    todos:Todo[];
-    totalCount : number;
+export interface TodoListResponse {
+  todos: Todo[];
+  totalCount: number;
 }
 export interface TodoResponse {
-    id: string;
-    title: string;
-    description: string;
-    createdDate: string;
-    todoDueDate: string;
-    category: string;
-    isCompleted: boolean;
-    priority:string;
-    projectName: string;
+  id: string;
+  title: string;
+  description: string;
+  createdDate: string;
+  todoDueDate: string;
+  category: string;
+  isCompleted: boolean;
+  priority: string;
+  projectName: string;
 }
 
 export interface TaskComment {
@@ -47,8 +47,8 @@ export interface NewTodo {
   description: string;
   assignedTo: string[];
   assignedBy: string;
-  status: "Todo"| "InProgress" | "Blocked" | "Review" | "Completed";
-  priority: "Low" | "Medium" | "High" | "Critical";
+  status: number;
+  priority: number;
   startDate: string;
   dueDate: string;
   updatedDate: string;

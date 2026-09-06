@@ -251,7 +251,85 @@ namespace BackEnd.Repositories
                 .ToListAsync();
             return result;
         }
+        public async Task<List<TeamMemberDto>> GetTeamMembersAsync( string projectId, string memberId)
+        {
+            var pipeline = _projectCollection.Aggregate()
 
+                .Match(new BsonDocument("$expr",
+                    new BsonDocument("$and", new BsonArray
+                    {
+                new BsonDocument("$in", new BsonArray
+                {
+                    memberId,
+                    "$ProjectMemberId"
+                }),
+
+                new BsonDocument("$eq", new BsonArray
+                {
+                    new BsonDocument("$toString", "$_id"),
+                    projectId
+                })
+                    })
+                ))
+                .Unwind("ProjectMemberId")
+                .AppendStage<BsonDocument>(
+                    new BsonDocument("$lookup",
+                        new BsonDocument
+                        {
+                    { "from", "User" },
+
+                    {
+                        "let",
+                        new BsonDocument
+                        {
+                            { "userId", "$ProjectMemberId" }
+                        }
+                    },
+
+                    {
+                        "pipeline",
+                        new BsonArray
+                        {
+                            new BsonDocument("$match",
+                                new BsonDocument("$expr",
+                                    new BsonDocument("$eq",
+                                        new BsonArray
+                                        {
+                                            new BsonDocument(
+                                                "$toString",
+                                                "$_id"
+                                            ),
+                                            "$$userId"
+                                        }
+                                    )
+                                )
+                            ),
+
+                            new BsonDocument("$project",
+                                new BsonDocument
+                                {
+                                    { "_id", 1 },
+                                    { "Username", 1 },
+                                    { "Role", 1 }
+                                }
+                            )
+                        }
+                    },
+
+                    { "as", "userInfo" }
+                        }
+                    )
+                )
+                .Unwind("userInfo")
+                .Project(new BsonDocument
+                {
+                    { "_id", "$userInfo._id" },
+                    { "Username", "$userInfo.Username" },
+                    { "Role", "$userInfo.Role" }
+                })
+                .As<TeamMemberDto>();
+            return await pipeline.ToListAsync();
+        }
 
     }
 }

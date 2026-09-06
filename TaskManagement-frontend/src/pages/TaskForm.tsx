@@ -1,90 +1,21 @@
 import React, { useEffect, useState } from "react";
-import {
-    Card,
-    Dropdown,
-    Input,
-    Option,
-    Toast,
-    ToastBody,
-    ToastTitle,
-    makeStyles,
-    useToastController,
-} from "@fluentui/react-components";
-import {
-    CalendarRegular,
-    ChevronDownRegular,
-    ChevronRightRegular,
-    DismissRegular,
-    TextBoldRegular,
-    TextItalicRegular,
-    TextUnderlineRegular,
-    TextStrikethroughRegular,
-    TextBulletListRegular,
-    TextNumberListLtrRegular,
-    TextQuoteRegular,
-    LinkRegular,
-} from "@fluentui/react-icons";
-import { Link, useNavigate } from "react-router-dom";
+import { Avatar, Card, Dropdown, Input, Option, Toast, ToastBody, ToastTitle, makeStyles, useToastController } from "@fluentui/react-components";
+import { CalendarRegular, ChevronDownRegular, ChevronRightRegular, DismissRegular, TextBoldRegular, TextItalicRegular, TextUnderlineRegular, TextStrikethroughRegular, TextBulletListRegular, TextNumberListLtrRegular, TextQuoteRegular, LinkRegular, } from "@fluentui/react-icons";
+import { data, Link, useNavigate } from "react-router-dom";
 import { useAppSelector } from "../app/hooks";
-import { createTodo, getProjectsNameByUserIdAsync } from "../api/authApi";
+import { createTodo, GetTeamMembersAsync, getProjectsNameByUserIdAsync } from "../api/authApi";
 import { getApiErrorMessage } from "../api/apiError";
-import type { ProjectIdNameInfo } from "../types/TaskListType";
-
-interface TeamMember {
-    id: string;
-    name: string;
-    initials: string;
-    color: string;
-    role?: string;
-}
-
-const AVAILABLE_MEMBERS: TeamMember[] = [
-    { id: "1", name: "Alex Johnson", initials: "AJ", color: "#4f46e5", role: "Senior Frontend Developer" },
-    { id: "2", name: "Sarah Brown", initials: "SB", color: "#0284c7", role: "UI/UX Designer" },
-    { id: "3", name: "Michael Thompson", initials: "MT", color: "#6366f1", role: "Backend Engineer" },
-    { id: "4", name: "Emily Davis", initials: "ED", color: "#ec4899", role: "Product Manager" },
-    { id: "5", name: "David Wilson", initials: "DW", color: "#10b981", role: "QA Lead" },
-];
+import type { ProjectIdNameInfo, TeamMember1 } from "../types/TaskListType";
 
 interface CommentItem {
     id: string;
     author: string;
     initials: string;
-    avatarColor: string;
     isMe: boolean;
     timestamp: string;
     text: string;
 }
 
-const INITIAL_COMMENTS: CommentItem[] = [
-    {
-        id: "c1",
-        author: "Alex Johnson",
-        initials: "AJ",
-        avatarColor: "#4f46e5",
-        isMe: true,
-        timestamp: "May 16, 2026, 10:30 AM",
-        text: "This task is critical for the upcoming release. Please make sure to follow the guidelines.",
-    },
-    {
-        id: "c2",
-        author: "Sarah Brown",
-        initials: "SB",
-        avatarColor: "#0284c7",
-        isMe: false,
-        timestamp: "May 16, 2026, 11:15 AM",
-        text: "Got it! I'll start working on it.",
-    },
-    {
-        id: "c3",
-        author: "Michael Thompson",
-        initials: "MT",
-        avatarColor: "#6366f1",
-        isMe: false,
-        timestamp: "May 16, 2026, 11:45 AM",
-        text: "Let me know if you need any help.",
-    },
-];
 
 const useStyles = makeStyles({
     pageWrapper: {
@@ -477,8 +408,8 @@ export function TaskForm() {
     const [selectedProjectId, setSelectedProjectId] = useState<string>("");
     const [title, setTitle] = useState<string>("");
     const [description, setDescription] = useState<string>("");
-    const [status, setStatus] = useState<string>("In Progress");
-    const [priority, setPriority] = useState<"Low" | "Medium" | "High">("High");
+    const [status, setStatus] = useState<number>(0);
+    const [priority, setPriority] = useState<number>(0);
     const [startDate, setStartDate] = useState<string>(new Date().toISOString().split("T")[0]);
     const [dueDate, setDueDate] = useState<string>(
         new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
@@ -491,21 +422,19 @@ export function TaskForm() {
     const [isStrike, setIsStrike] = useState(false);
 
     // Assignees & Assigned By
-    const [assignees, setAssignees] = useState<TeamMember[]>([
-        AVAILABLE_MEMBERS[0],
-        AVAILABLE_MEMBERS[1],
-        AVAILABLE_MEMBERS[2],
-    ]);
+    const [assignees, setAssignees] = useState<TeamMember1[]>([]);
+    const [selectedTeamMember, setSelectedTeamMember] = useState<string[]>([])
+
     const [assignedBy, setAssignedBy] = useState<string>(user?.username || "Alex Johnson");
 
     // Comments
-    const [comments, setComments] = useState<CommentItem[]>(INITIAL_COMMENTS);
+    const [comments, setComments] = useState<CommentItem[]>([]);
     const [newCommentText, setNewCommentText] = useState<string>("");
 
     // Validation & loading
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
-
+    const today = new Date();
     // Current formatted date for metadata
     const todayFormatted = new Intl.DateTimeFormat("en-US", {
         month: "short",
@@ -514,38 +443,37 @@ export function TaskForm() {
     }).format(new Date());
 
     useEffect(() => {
-        const fetchProjects = async () => {
-            if (user?.userId) {
-                try {
-                    const res = await getProjectsNameByUserIdAsync(user.userId);
-                    if (res?.result && Array.isArray(res.result)) {
-                        setProjects(res.result);
-                        if (res.result.length > 0) {
-                            setSelectedProjectId(res.result[0].id);
-                        }
+        const fetchTaskFormData = async () => {
+            if (!user?.userId) return;
+            try {
+                const [projectNameResponse, memberNamesResponse] = await Promise.all([
+                    getProjectsNameByUserIdAsync(user.userId).catch(() => null),
+                    GetTeamMembersAsync(selectedProjectId, user.userId).catch(() => null),
+                ])
+                if (projectNameResponse) {
+                    setProjects(projectNameResponse.result);
+                    if (projectNameResponse.result.length > 0 && !selectedProjectId) {
+                        setSelectedProjectId(projectNameResponse.result[0].id);
                     }
-                } catch (err) {
-                    console.error("Failed to fetch user projects", err);
                 }
+                if (memberNamesResponse) {
+                    setAssignees(memberNamesResponse.result);
+                }
+            } catch (error) {
+                console.error("Failed to fetch task form data", error);
             }
-        };
-        fetchProjects();
-    }, [user?.userId]);
-
-    const handleAddAssignee = (memberId: string) => {
-        const member = AVAILABLE_MEMBERS.find((m) => m.id === memberId);
-        if (member && !assignees.some((a) => a.id === member.id)) {
-            setAssignees([...assignees, member]);
         }
-    };
+        fetchTaskFormData();
+    }, [user?.userId, selectedProjectId]);
+
 
     const handleRemoveAssignee = (memberId: string) => {
-        setAssignees(assignees.filter((a) => a.id !== memberId));
+        setSelectedTeamMember(prevSelectedTeamMembers => prevSelectedTeamMembers.filter((id) => id !== memberId));
     };
 
     const handlePostComment = () => {
         if (!newCommentText.trim()) return;
-
+        console.log("uggi", newCommentText);
         const newComment: CommentItem = {
             id: `c_${Date.now()}`,
             author: user?.username || "Alex Johnson",
@@ -555,20 +483,14 @@ export function TaskForm() {
                 .join("")
                 .substring(0, 2)
                 .toUpperCase(),
-            avatarColor: "#4f46e5",
             isMe: true,
-            timestamp: new Intl.DateTimeFormat("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-                hour: "numeric",
-                minute: "numeric",
-                hour12: true,
-            }).format(new Date()),
+            timestamp: new Date().toISOString(),
             text: newCommentText.trim(),
         };
 
-        setComments([...comments, newComment]);
+
+        setComments((prev) => [...(prev || []), newComment]);
+        console.log("comment", comments);
         setNewCommentText("");
     };
 
@@ -602,16 +524,18 @@ export function TaskForm() {
         try {
             await createTodo({
                 title: title.trim(),
-                userId: user?.userId ?? "",
+                assignedTo: selectedTeamMember,
                 projectId: selectedProjectId || (projects[0]?.id ?? ""),
                 description: description.trim(),
                 priority: priority,
                 dueDate: dueDate,
-                createdDate: startDate,
-                category: status,
-                isCompleted: status === "Completed",
+                createdDate: today.toISOString(),
+                updatedDate: today.toISOString(),
+                assignedBy: user?.userId ?? "",
+                status: status,
+                comments: comments,
+                startDate: startDate,
             });
-
             dispatchToast(
                 <Toast>
                     <ToastTitle>Success</ToastTitle>
@@ -838,17 +762,29 @@ export function TaskForm() {
                             </label>
                             <Dropdown
                                 className={styles.dropdownControl}
-                                value={status}
-                                selectedOptions={[status]}
+                                value={
+                                    status === 0 ? "Todo" :
+                                        status === 1 ? "In Progress" :
+                                            status === 2 ? "Blocked" :
+                                                status === 3 ? "Review" :
+                                                    "Completed"
+                                }
+                                selectedOptions={[
+                                    status === 0 ? "Todo" :
+                                        status === 1 ? "In Progress" :
+                                            status === 2 ? "Blocked" :
+                                                status === 3 ? "Review" :
+                                                    "Completed"
+                                ]}
                                 onOptionSelect={(_, data) => {
-                                    if (data.optionValue) setStatus(data.optionValue);
+                                    if (data.optionValue) setStatus(Number(data.optionValue));
                                 }}
                             >
-                                <Option value="In Progress" text="In Progress">🟡 In Progress</Option>
-                                <Option value="Todo" text="Todo">⚪ Todo</Option>
-                                <Option value="Blocked" text="Blocked">🔴 Blocked</Option>
-                                <Option value="Review" text="Review">🔵 Review</Option>
-                                <Option value="Completed" text="Completed">🟢 Completed</Option>
+                                <Option value="1" text="In Progress">🟡 In Progress</Option>
+                                <Option value="0" text="Todo">⚪ Todo</Option>
+                                <Option value="2" text="Blocked">🔴 Blocked</Option>
+                                <Option value="3" text="Review">🔵 Review</Option>
+                                <Option value="4" text="Completed">🟢 Completed</Option>
                             </Dropdown>
                         </div>
 
@@ -858,17 +794,28 @@ export function TaskForm() {
                             </label>
                             <Dropdown
                                 className={styles.dropdownControl}
-                                value={priority}
-                                selectedOptions={[priority]}
+                                value={
+                                    priority === 0 ? "Low" :
+                                        priority === 1 ? "Medium" :
+                                            priority === 2 ? "High" :
+                                                "Critical"
+                                }
+                                selectedOptions={[
+                                    priority === 0 ? "Low" :
+                                        priority === 1 ? "Medium" :
+                                            priority === 2 ? "High" :
+                                                "Critical"
+                                ]}
                                 onOptionSelect={(_, data) => {
                                     if (data.optionValue) {
-                                        setPriority(data.optionValue as "Low" | "Medium" | "High");
+                                        setPriority(Number(data.optionValue));
                                     }
                                 }}
                             >
-                                <Option value="High" text="High">🚩 High</Option>
-                                <Option value="Medium" text="Medium">🚩 Medium</Option>
-                                <Option value="Low" text="Low">🚩 Low</Option>
+                                <Option value="0" text="Low">🚩 Low</Option>
+                                <Option value="1" text="Medium">🚩 Medium</Option>
+                                <Option value="2" text="High">🚩 High</Option>
+                                <Option value="3" text="Critical">🚩 Critical</Option>
                             </Dropdown>
                         </div>
                     </div>
@@ -959,41 +906,43 @@ export function TaskForm() {
                     {/* Assign To Card */}
                     <Card className={styles.card}>
                         <h2 className={styles.cardTitle}>Assign To</h2>
-
-                        {/* Assignees */}
                         <div className={styles.fieldGroup}>
                             <label className={styles.fieldLabel}>Assignees</label>
-                            <Dropdown
-                                className={styles.dropdownControl}
-                                placeholder="Select team members..."
-                                onOptionSelect={(_, data) => {
-                                    if (data.optionValue) {
-                                        handleAddAssignee(data.optionValue);
-                                    }
-                                }}
-                            >
-                                {AVAILABLE_MEMBERS.map((member) => (
-                                    <Option
-                                        key={member.id}
-                                        value={member.id}
-                                        text={`${member.name} (${member.role})`}
-                                    >
-                                        {member.name} ({member.role})
+                            <Dropdown className={styles.dropdownControl} placeholder="Select team members..." onOptionSelect={(_, data) => {
+                                if (data.optionValue) {
+                                    setSelectedTeamMember((prev) =>
+                                        prev.includes(data.optionValue!) ? prev : [...prev, data.optionValue!]
+                                    );
+                                }
+                            }}>
+                                {assignees.map((member) => (
+                                    <Option key={member.id} value={member.id} text={member.username}>
+                                        <Avatar name={member.username} color="colorful" />
+                                        {member.username}
                                     </Option>
                                 ))}
                             </Dropdown>
+                        </div>
+                        {/* Assignee Chips */}
+                        <div className={styles.chipsContainer}>
+                            {selectedTeamMember.map(id => {
+                                const member = assignees.find(m => m.id === id);
 
-                            {/* Assignee Chips */}
-                            <div className={styles.chipsContainer}>
-                                {assignees.map((member) => (
-                                    <div key={member.id} className={styles.assigneeChip}>
-                                        <div
-                                            className={styles.chipAvatar}
-                                            style={{ backgroundColor: member.color }}
-                                        >
-                                            {member.initials}
-                                        </div>
-                                        <span>{member.name}</span>
+                                if (!member) return null;
+
+                                return (
+                                    <div
+                                        key={member.id}
+                                        className={styles.assigneeChip}
+                                    >
+                                        <Avatar
+                                            name={member.username}
+                                            color="colorful"
+                                            size={28}
+                                        />
+
+                                        <span>{member.username}</span>
+
                                         <button
                                             type="button"
                                             className={styles.chipDismiss}
@@ -1003,10 +952,9 @@ export function TaskForm() {
                                             <DismissRegular />
                                         </button>
                                     </div>
-                                ))}
-                            </div>
+                                );
+                            })}
                         </div>
-
                         {/* Assigned By */}
                         <div className={styles.fieldGroup}>
                             <label className={styles.fieldLabel}>Assigned By</label>
@@ -1018,26 +966,27 @@ export function TaskForm() {
                                     if (data.optionValue) setAssignedBy(data.optionValue);
                                 }}
                             >
-                                {AVAILABLE_MEMBERS.map((member) => (
-                                    <Option key={member.id} value={member.name} text={member.name}>
-                                        {member.name}
+                                {assignees.map((member) => (
+                                    <Option key={member.id} value={member.username} text={member.username}>
+                                        {member.username}
                                     </Option>
                                 ))}
                             </Dropdown>
                         </div>
+
                     </Card>
+
 
                     {/* Comments Card */}
                     <Card className={styles.card}>
                         <h2 className={styles.cardTitle}>Comments</h2>
 
                         <div className={styles.commentsList}>
-                            {comments.map((cmt, idx) => (
+                            {comments?.length > 0 ? comments.map((cmt, idx) => (
                                 <React.Fragment key={cmt.id}>
                                     <div className={styles.commentItem}>
                                         <div
                                             className={styles.commentAvatar}
-                                            style={{ backgroundColor: cmt.avatarColor }}
                                         >
                                             {cmt.initials}
                                         </div>
@@ -1060,9 +1009,8 @@ export function TaskForm() {
                                         <div className={styles.commentDivider} />
                                     )}
                                 </React.Fragment>
-                            ))}
+                            )) : <div>No comments yet</div>}
                         </div>
-
                         {/* Add Comment Input */}
                         <div className={styles.commentInputWrapper}>
                             <input
@@ -1070,13 +1018,13 @@ export function TaskForm() {
                                 className={styles.commentInput}
                                 placeholder="Add a comment..."
                                 value={newCommentText}
-                                onChange={(e) => setNewCommentText(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        e.preventDefault();
-                                        handlePostComment();
-                                    }
-                                }}
+                                onChange={(e) => { setNewCommentText(e.target.value) }}
+                            // onKeyDown={(e) => {
+                            //     if (e.key === "Enter") {
+                            //         e.preventDefault();
+                            //         handlePostComment();
+                            //     }
+                            // }}
                             />
                             <button
                                 type="button"

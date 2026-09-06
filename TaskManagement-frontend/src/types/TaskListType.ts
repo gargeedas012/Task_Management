@@ -3,7 +3,7 @@ export type Priority =
     | "High"
     | "Medium"
     | "Low";
-    
+
 export type TaskStatus =
     | "In Progress"
     | "To Do"
@@ -25,19 +25,24 @@ export interface TaskPriorityGroupDto {
 }
 
 export interface TaskDto {
-    id?:string;
-  title: string;
-  description: string;
-  assignedTo: string[];
-  assignedBy: string;
-  status: number;
-  priority: number;
-  startDate: string;
-  dueDate: string;
-  projectName: string;
+    id?: string;
+    title: string;
+    description: string;
+    assignedTo: string[];
+    assignedBy: string;
+    status: number;
+    priority: number;
+    startDate: string;
+    dueDate: string;
+    projectName: string;
 }
-export interface ProjectIdNameInfo
-{
-    id:string;
-    name:string;
+export interface ProjectIdNameInfo {
+    id: string;
+    name: string;
+}
+
+export interface TeamMember1 {
+    id: string;
+    username: string;
+    role: string;
 }

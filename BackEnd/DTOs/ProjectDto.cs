@@ -62,5 +62,12 @@ namespace BackEnd.DTOs
         public string? Id { get; set; }= string.Empty;
         public string Name { get; set; }= string.Empty;
     }
-
+    public class TeamMemberDto
+    {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
+        public string Username { get; set; }
+        public string Role { get; set; }
+    }
 }

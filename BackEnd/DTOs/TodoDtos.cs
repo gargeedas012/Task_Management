@@ -120,6 +120,4 @@ namespace BackEnd.DTOs
         public DateTime DueDate { get; set; }
         public string ProjectName { get; set; }
     }
-
-
 }

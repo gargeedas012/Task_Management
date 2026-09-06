@@ -56,5 +56,10 @@ namespace BackEnd.Services
         {
             return await _repository.GetProjectsNameByUserIdAsync(userId);
         }
+
+        public async Task<List<TeamMemberDto>> GetTeamMembersAsync(string projectId, string memberId)
+        {
+            return await _repository.GetTeamMembersAsync(projectId, memberId);
+        }
     }
 }
