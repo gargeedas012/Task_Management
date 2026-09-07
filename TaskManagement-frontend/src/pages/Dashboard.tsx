@@ -37,9 +37,9 @@ const useStyle = makeStyles({
         display: "flex",
         flexDirection: "column",
         gap: "20px",
-        width: "70%",
-       marginLeft:"auto",
-       marginRight:"auto",
+        width: "90%",
+        marginLeft:"auto",
+        marginRight:"auto",
         boxSizing: "border-box",
     },
     card: {

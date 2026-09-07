@@ -31,7 +31,7 @@ namespace BackEnd.Services
             return await _repository.GetAllProjectsAsync();
         }
 
-        public async Task<List<Project>> GetProjectsByUserIdAsync(string userId)
+        public async Task<List<GetAllProjectsInfo>> GetProjectsByUserIdAsync(string userId)
         {
             return await _repository.GetProjectsByUserIdAsync(userId);
         }

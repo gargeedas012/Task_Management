@@ -26,10 +26,72 @@ namespace BackEnd.Repositories
         {
             return await _projectCollection.Find(_ => true).ToListAsync();
         }
-        public async Task<List<Project>> GetProjectsByUserIdAsync(string userId)
+        public async Task<List<GetAllProjectsInfo>> GetProjectsByUserIdAsync(string userId)
         {
             var filter = Builders<Project>.Filter.AnyEq( x => x.ProjectMemberId,userId);
-            return await _projectCollection.Find(filter).ToListAsync();
+            var result= await _projectCollection.Aggregate().Match(filter).AppendStage<Project>(
+                    new BsonDocument(
+                        "$lookup", new BsonDocument {
+                              { "from", "Todos" },
+                              { "let", new BsonDocument("projectId", new BsonDocument("$toString", "$_id")) },
+                              { "pipeline",new BsonArray
+                                {
+                                    new BsonDocument("$match", new BsonDocument("$expr",
+                                            new BsonDocument("$eq",new BsonArray
+                                            {
+                                                "$$projectId",
+                                                "$ProjectId"
+                                            })))
+                                }
+                              },
+                              { "as", "Todos" }
+                        }
+                    )
+                ).AppendStage<Project>(
+                new BsonDocument(
+                        "$lookup", new BsonDocument {
+                              { "from", "User" },
+                              { "let", new BsonDocument("projectManagerId", new BsonDocument("$toObjectId", "$ProjectManagerId")) },
+                              { "pipeline",new BsonArray
+                                {
+                                    new BsonDocument("$match", new BsonDocument("$expr",
+                                            new BsonDocument("$eq",new BsonArray
+                                            {
+                                                "$$projectManagerId",
+                                                "$_id"
+                                            })))
+                                }
+                              },
+                              { "as", "UserInfo" }
+                        }
+                    )
+                ).AppendStage<Project>(new BsonDocument("$addFields", new BsonDocument
+                    {
+                        {"ProjectManager", new BsonDocument("$arrayElemAt", new BsonArray{"$UserInfo.Username",0}) },
+                        { "TotalTask", new BsonDocument("$size", "$Todos") },
+                        { "CompletedTask", new BsonDocument("$size", new BsonDocument("$filter", new BsonDocument
+                            {
+                                { "input", "$Todos" },
+                                { "as", "todos" },
+                                { "cond", new BsonDocument("$eq", new BsonArray
+                                    {
+                                        "$$todos.Status",4
+                                    })}
+                            }
+                        ))}
+                    })
+                ).Project<GetAllProjectsInfo>( new BsonDocument
+                    {
+                        { "Todos", 0 },
+                        { "Client", 0 },
+                        { "ProjectMemberId", 0 },
+                    {"ProjectManagerId" ,0},
+                    {"UserInfo",0 }
+                    }
+                )
+                .Sort(new BsonDocument("DueDate", 1))
+                .ToListAsync();
+            return result;
         }
         public async Task UpdateProjectAsync(string id, Project project)
         {

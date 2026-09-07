@@ -1,5 +1,5 @@
 import { makeStyles, Avatar, NavDrawer, NavDrawerBody, NavDrawerHeader, NavItem, Text } from "@fluentui/react-components";
-import { HomeRegular, FolderRegular, TaskListSquareAddRegular, SettingsRegular, LayerRegular } from "@fluentui/react-icons";
+import { HomeRegular, FolderRegular, TaskListSquareAddRegular, SettingsRegular, LayerRegular, CalendarRegular } from "@fluentui/react-icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector } from "../app/hooks";
 
@@ -121,6 +121,9 @@ export function Sidebar() {
                 </NavItem>
                 <NavItem value="/tasks" className={styles.navitem} icon={<TaskListSquareAddRegular fontSize={24} />} onClick={() => navigate("/tasks")} >
                     <span >Tasks</span>
+                </NavItem>
+                <NavItem value="/calender" className={styles.navitem} icon={<CalendarRegular  fontSize={24} />} onClick={() => navigate("/calender")}>
+                    <span >Calender</span>
                 </NavItem>
                 <NavItem value="/settings" className={styles.navitem} icon={<SettingsRegular fontSize={24} />} onClick={() => navigate("/settings")}>
                     <span >Settings</span>

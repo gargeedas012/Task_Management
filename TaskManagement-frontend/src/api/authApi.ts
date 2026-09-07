@@ -1,6 +1,6 @@
 import type { ApiResponse } from '../types/api';
 import type { LoginRequest, RegisterRequest, TokenResponseDto } from '../types/auth'
-import type { Project, RecentProject } from '../types/project';
+import type { NewProject, Project, RecentProject } from '../types/project';
 import type { DashboardStats, PriorityDistributionDto, ProjectInfoDto, TaskDashboardDto, WeeklyActivityDto } from '../types/ProjectDashboardType';
 import type { ProjectIdNameInfo, TaskPriorityGroupDto, TeamMember1 } from '../types/TaskListType';
 import type { NewTodo, Todo, TodoByDateDto, TodoListResponse, TodoResponse } from '../types/todo';
@@ -157,17 +157,13 @@ export const getTaskPriorityGroup = async (userId: string, projectId?: string): 
 
 
 
-
-
-
-
 //project todo
 export const createProject = async (data: Project): Promise<ApiResponse<string>> => {
     const response = await api.post("/Project", data);
     return response.data;
 }
-export const getAllProjects = async (data: string): Promise<ApiResponse<Project[]>> => {
-    const response = await api.get("Project/SearchByUserId", { params: { userId: data } });
+export const getAllProjects = async (userId: string): Promise<ApiResponse<NewProject[]>> => {
+    const response = await api.get("Project/SearchByUserId", { params: { userId: userId } });
     return response.data;
 }
 export const updateProject = async (data: Project): Promise<ApiResponse<string>> => {

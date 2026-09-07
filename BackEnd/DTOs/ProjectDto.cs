@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using BackEnd.Models;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace BackEnd.DTOs
@@ -69,5 +70,27 @@ namespace BackEnd.DTOs
         public string Id { get; set; }
         public string Username { get; set; }
         public string Role { get; set; }
+    }
+
+    public class GetAllProjectsInfo
+    {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? Id { get; set; } = null!;
+        public string Name { get; set; } = null!;
+        public string Description { get; set; } = null!;
+        public string ProjectManagerId { get; set; }= null!;
+        public string ProjectManager { get; set; } = null!;
+        public DateTime StartDate { get; set; }
+        public DateTime? DueDate { get; set; }
+
+        [BsonRepresentation(BsonType.String)]
+        public ProjectStatus Status { get; set; } = ProjectStatus.NotStarted;
+
+        [BsonRepresentation(BsonType.String)]
+        public ProjectPriority Priority { get; set; } = ProjectPriority.Low;
+        public DateTime CreatedDate { get; set; }
+        public int TotalTask { get; set; }
+        public int CompletedTask { get; set; }
     }
 }

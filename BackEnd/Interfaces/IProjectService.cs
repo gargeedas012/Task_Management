@@ -9,7 +9,7 @@ namespace BackEnd.Interfaces
         Task CreateProjectAsync(Project project);
         Task UpdateProjectAsync(string id, Project project);
         Task DeleteProjectAsync(string id);
-        Task<List<Project>> GetProjectsByUserIdAsync(string userId);
+        Task<List<GetAllProjectsInfo>> GetProjectsByUserIdAsync(string userId);
         Task<List<ProjectResponseDto>> getRecentProjects(string UserId);
         Task<List<ProjectInfoDto>> GetProjectAssigneInfo(string userId);
         Task<List<ProjectIdNameInfo>> GetProjectsNameByUserIdAsync(string userId);

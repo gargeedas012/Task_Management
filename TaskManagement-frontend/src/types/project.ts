@@ -29,14 +29,12 @@ export interface NewProject {
   id?: string;
   name: string;
   description: string;
-  projectManagerId: string;
-  client: string;
+  projectManager: string;
   startDate: string;
   dueDate?: string | null;
-  projectMemberId: string[];
-  status: "NotStarted" | "InProgress" | "OnHold" | "Completed";
-  priority: "Low" | "Medium" | "High" | "Critical";
-  totalTasks?: number | null;
-  completedTasks?: number | null;
+  status: number;
+  priority: number;
   createdDate: string;
+  totalTask:number;
+  completedTask:number;
 }

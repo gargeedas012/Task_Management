@@ -123,9 +123,9 @@ namespace BackEnd.Controllers
         }
 
         [HttpGet("SearchByUserId")]
-        public async Task<ActionResult<ApiResponse<List<Project>>>> GetProjectsByUserIdAsync(string userId)
+        public async Task<ActionResult<ApiResponse<List<GetAllProjectsInfo>>>> GetProjectsByUserIdAsync(string userId)
         {
-            var response = new ApiResponse<List<Project>>();
+            var response = new ApiResponse<List<GetAllProjectsInfo>>();
             try
             {
                 var projects = await _projectService.GetProjectsByUserIdAsync(userId);
