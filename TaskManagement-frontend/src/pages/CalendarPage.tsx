@@ -1,4 +1,4 @@
-import { Badge, Card, Text, makeStyles, } from "@fluentui/react-components";
+import { Badge, Card, Text, makeStyles, mergeClasses, } from "@fluentui/react-components";
 import { ClockRegular, ChevronRightRegular, } from "@fluentui/react-icons";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/react/daygrid";
@@ -54,6 +54,7 @@ const useStyles = makeStyles({
         borderRadius: "10px",
         marginBottom: "10px",
         cursor: "pointer",
+        transition: "all 0.15s ease-in-out",
 
         ":hover": {
             backgroundColor: "transparent",
@@ -171,6 +172,8 @@ export function CalendarPage() {
     const [selectedDate, setSelectedDate] = useState<string>(
         "2026-09-08"
     );
+    const [selectedTaskId, setSelectedTaskId] = useState<string | null>("1");
+
     const calendarEvents = tasks.map((task) => ({
         id: task.id,
         title: task.title,
@@ -180,9 +183,6 @@ export function CalendarPage() {
     const selectedTasks = tasks.filter(
         (task) => task.start === selectedDate
     );
-    const handleDateClick = (info: any) => {
-        setSelectedDate(info.dateStr);
-    };
     const handleEventClick = (info: any) => {
         const task = tasks.find(
             (item) => item.id === info.event.id
@@ -190,6 +190,7 @@ export function CalendarPage() {
 
         if (task) {
             setSelectedDate(task.start);
+            setSelectedTaskId(task.id);
         }
     };
     const getPriorityColor = (
@@ -220,33 +221,27 @@ export function CalendarPage() {
     return (
         <div className={styles.page}>
             <Card className="my-calendar">
-            <FullCalendar
-                plugins={[dayGridPlugin]}
-                initialView="dayGridMonth"
-                headerToolbar={{
-                    left: "prev,next",
-                    center: "title",
-                    right: "dayGridMonth,dayGridWeek,dayGridDay",
-                }}
-                toolbarClass="my-toolbar"
-                headerToolbarClass="my-header-toolbar"
-                toolbarTitleClass="my-toolbar-title"
-                toolbarSectionClass="my-toolbar-section"
-                dayHeaderClass="my-day-header"
-                dayCellClass="my-day-cell"
-                dayCellTopClass="my-day-cell-top"
-                eventClass="my-calendar-event"
-                height="auto"
-                contentHeight="auto"
-                events={[
-                    { title: "Complete Dashboard", start: "2026-09-08" },
-                    { title: "API Integration", start: "2026-09-12" },
-                    { title: "Create Login Page", start: "2026-09-15" },
-                    { title: "Database Optimization", start: "2026-09-18" },
-                    { title: "Testing", start: "2026-09-20" },
-                    { title: "Deployment", start: "2026-09-25" },
-                ]}
-            />
+                <FullCalendar
+                    plugins={[dayGridPlugin]}
+                    initialView="dayGridMonth"
+                    headerToolbar={{
+                        left: "prev,next",
+                        center: "title",
+                        right: "dayGridMonth,dayGridWeek,dayGridDay",
+                    }}
+                    toolbarClass="my-toolbar"
+                    headerToolbarClass="my-header-toolbar"
+                    toolbarTitleClass="my-toolbar-title"
+                    toolbarSectionClass="my-toolbar-section"
+                    dayHeaderClass="my-day-header"
+                    dayCellClass="my-day-cell"
+                    dayCellTopClass="my-day-cell-top"
+                    eventClass="my-calendar-event"
+                    height="auto"
+                    contentHeight="auto"
+                    events={calendarEvents}
+                    eventClick={handleEventClick}
+                />
 
 
             </Card>
@@ -280,37 +275,46 @@ export function CalendarPage() {
                     </div>
 
                 ) : (
-                    selectedTasks.map((task) => (
-                        <div
-                            key={task.id}
-                            className={styles.taskRow}
-                        >
-                            <div className={styles.taskLeft}>
-                                <div className={styles.taskIcon} >
-                                    <ClockRegular />
-                                </div>
-                                <div className={styles.taskInfo} >
-                                    <Text weight="semibold" >
-                                        {task.title}
-                                    </Text>
-                                    <Text className={styles.project} >
-                                        {task.project}
-                                    </Text>
-                                    {task.time && (<div className={styles.taskTime}  >
-                                        <ClockRegular fontSize={13} />
-                                        {task.time}
+                    selectedTasks.map((task) => {
+                        const isSelected = task.id === selectedTaskId;
+                        return (
+                            <div
+                                key={task.id}
+                                className={styles.taskRow}
+                                onClick={() => setSelectedTaskId(task.id)}
+                            >
+                                <div className={styles.taskLeft}>
+                                    <div className={styles.taskIcon} >
+                                        <ClockRegular />
                                     </div>
+                                    <div className={styles.taskInfo} >
+                                        <Text weight="semibold" >
+                                            {task.title}
+                                        </Text>
+                                        <Text className={styles.project} >
+                                            {task.project}
+                                        </Text>
+                                        {task.time && (<div className={styles.taskTime}  >
+                                            <ClockRegular fontSize={13} />
+                                            {task.time}
+                                        </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className={styles.taskRight} >
+                                    {isSelected && (
+                                        <Badge appearance="filled" color="brand">
+                                            Selected
+                                        </Badge>
                                     )}
+                                    <Badge appearance="tint" color={getPriorityColor(task.priority)}  >
+                                        {task.priority}
+                                    </Badge>
+                                    <ChevronRightRegular />
                                 </div>
                             </div>
-                            <div className={styles.taskRight} >
-                                <Badge appearance="tint" color={getPriorityColor(task.priority)}  >
-                                    {task.priority}
-                                </Badge>
-                                <ChevronRightRegular />
-                            </div>
-                        </div>
-                    ))
+                        );
+                    })
                 )}
             </Card>
         </div>

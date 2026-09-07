@@ -2,11 +2,12 @@
     width: 100%;
     max-width: 1100px;
     margin: 30px auto;
-    background: var(--bg--card);
+    background: var(--bg--card) !important;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     overflow: hidden;
 }
+
 
 /* Toolbar */
 .my-header-toolbar {
@@ -14,6 +15,7 @@
     background: var(--bg--card);
     border-bottom: 1px solid var(--border-color);
 }
+
 .my-toolbar {
     display: flex;
     align-items: center;
@@ -33,9 +35,11 @@
     color: var(--text-primary);
     margin: 0 20px;
 }
-.my-calendar button + button {
+
+.my-calendar button+button {
     margin-left: 20px;
 }
+
 /* Buttons */
 .my-calendar button {
     background: #ffffff !important;
@@ -48,9 +52,11 @@
     box-shadow: none !important;
     cursor: pointer;
 }
+
 .my-calendar button:hover {
     background: #f9fafb !important;
 }
+
 /* Weekday header */
 .my-day-header {
     background: var(--bg--card);
@@ -70,12 +76,15 @@
 .my-day-cell-top {
     padding: 8px;
 }
+
 .my-day-cell-top * {
     color: var(--text-primary) !important;
 }
+
 .my-day-cell {
     border-bottom: 1px solid var(--border-color) !important;
 }
+
 /* Events */
 .my-calendar-event {
     background: #c9def5 !important;
@@ -85,6 +94,13 @@
     padding: 3px 6px !important;
     font-size: 12px;
     margin: 2px;
+    cursor: pointer !important;
+    transition: transform 0.1s ease, background 0.1s ease !important;
+}
+
+.my-calendar-event:hover {
+    background: #a4c9f0 !important;
+    transform: translateY(-1px);
 }
 
 /* Remove scrollbars */

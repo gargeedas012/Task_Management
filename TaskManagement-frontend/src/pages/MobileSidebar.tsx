@@ -1,9 +1,10 @@
-import { makeStyles, NavItem ,Text } from "@fluentui/react-components";
+import { makeStyles, NavItem, Text } from "@fluentui/react-components";
 import {
     HomeRegular,
     FolderRegular,
     TaskListSquareAddRegular,
     SettingsRegular,
+    CalendarRegular
 } from "@fluentui/react-icons";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -29,11 +30,11 @@ const useStyles = makeStyles({
 
     navitem: {
         backgroundColor: "transparent",
-        display:"flex",
-        flexDirection:"column",
+        display: "flex",
+        flexDirection: "column",
         color: "var(--permanent-text-color)",
-        gap:0,
-        alignItems:"center",
+        gap: 0,
+        alignItems: "center",
         "& svg": {
             color: "var(--permanent-text-color)",
             fill: "var(--permanent-text-color)",
@@ -84,6 +85,9 @@ export function MobileSidebar() {
                     location.pathname === "/tasks" ? "page" : undefined
                 }
             ><Text>Tasks</Text></NavItem>
+            <NavItem value="/calender" className={styles.navitem} icon={<CalendarRegular fontSize={24} />} onClick={() => navigate("/calender")}>
+                <span >Calender</span>
+            </NavItem>
             <NavItem
                 value="/settings"
                 className={styles.navitem}
