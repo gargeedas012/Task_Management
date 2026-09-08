@@ -28,12 +28,9 @@ const useStyles = makeStyles({
         "&::-webkit-scrollbar": {
             display: "none",
         },
-        "@media (max-width: 768px)": {
+        "@media (max-width: 800px)": {
             padding: "16px",
-        },
-        "@media (max-width: 600px)": {
-            padding: "20px",
-        },
+        },      
     },
 });
 export function Layout()

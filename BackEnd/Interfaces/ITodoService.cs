@@ -5,9 +5,9 @@ namespace BackEnd.Interfaces
     public interface ITodoService
     {
         Task<List<Todo>> GetAllAsync();
-        Task<Todo?> GetByIdAsync(string id);
+        Task<Todo> GetByIdAsync(string id, string todoid);
         Task CreateAsync(Todo createTodoDto);
-        Task UpdateAsync(string id, UpdateTodoDto updateTodoDto);
+        Task UpdateAsync(string id, Todo updateTodoDto);
         Task DeleteAsync(string id);
         Task<List<InCompleteTodoResponseDto>> GetIncompleteTodos(bool isCompleted);
         Task<List<PriorityCountDto>> GetPriorityCount(string UserId);

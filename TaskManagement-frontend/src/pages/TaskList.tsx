@@ -5,6 +5,8 @@ import { SearchRegular,  ChevronDownRegular,  ChevronRightRegular, FlagRegular, 
 import { useAppSelector } from "../app/hooks";
 import { type ProjectIdNameInfo, type TaskPriorityGroupDto ,type TaskStatus , type Priority} from "../types/TaskListType";
 import { getProjectsNameByUserIdAsync, getTaskPriorityGroup } from "../api/authApi";
+import Task from "./Task";
+import TaskShow from "./Task";
 
 const useStyles = makeStyles({
     pageContainer: {
@@ -399,6 +401,11 @@ export default function TaskList() {
             task.priority === priorityMap[selectedPriority];
         return searchMatch && priorityMatch;
     });
+    const HandleOpenTask=(id:string | undefined)=>{
+            navigate("/viewtask", {
+                state: { taskId: id }
+            });
+    }
     const getPriorityClass = (priority: Priority) => {
         switch (priority) {
             case "Critical":
@@ -645,16 +652,17 @@ export default function TaskList() {
                                                 </div>
 
                                                 {/* ARROW */}
-                                                <div>
-                                                    <ChevronRightRegular className={styles.arrowIcon} />
-                                                </div>
+                                                <ChevronRightRegular
+                                                        className={styles.arrowIcon}
+                                                        onClick={() => HandleOpenTask(task.id)}
+                                                    />
+                                                   
                                             </div>
                                         );
                                     })}
                             </div>
                         );
                     })}
-
                     {filteredTasks.length === 0 && (
                         <div className={styles.emptyState}>
                             No tasks found matching your search or filter.

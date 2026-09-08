@@ -4,10 +4,6 @@ using BackEnd.Interfaces;
 using BackEnd.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Threading.Tasks;
-using static Google.Apis.Requests.BatchRequest;
-
 namespace BackEnd.Controllers
 {
     [Authorize]
@@ -55,14 +51,14 @@ namespace BackEnd.Controllers
             }
             return response;
         }
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<Todo>>> GetByIdAsync(string id)
+        [HttpGet("GetTask")]
+        public async Task<ActionResult<ApiResponse<Todo>>> GetByIdAsync(string id , string todoid)
         {
             var response = new ApiResponse<Todo>();
             _logger.LogWarning("No Todo Record Found");
             try
             {
-                var task = await _todoService.GetByIdAsync(id);
+                var task = await _todoService.GetByIdAsync(id, todoid);
                 if (task == null)
                 {
                     response.Errors.Add(new ApiError
@@ -112,7 +108,7 @@ namespace BackEnd.Controllers
             }
         }
         [HttpPut("{id}")]
-        public async Task<ActionResult<ApiResponse<string>>> Update(string id, UpdateTodoDto dto)
+        public async Task<ActionResult<ApiResponse<string>>> Update(string id, Todo dto)
         {
             var response = new ApiResponse<string>();
             try

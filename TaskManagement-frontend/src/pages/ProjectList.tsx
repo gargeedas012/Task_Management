@@ -314,8 +314,6 @@ function ProjectList() {
                                 </span>
 
                             </div>
-
-
                             <div className={styles.progressBackground}>
                                 <div
                                     className={styles.progressBar}

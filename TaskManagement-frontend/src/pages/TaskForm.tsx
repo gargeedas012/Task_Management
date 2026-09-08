@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Avatar, Card, Dropdown, Input, Option, Toast, ToastBody, ToastTitle, makeStyles, useToastController } from "@fluentui/react-components";
 import { CalendarRegular, ChevronDownRegular, ChevronRightRegular, DismissRegular, TextBoldRegular, TextItalicRegular, TextUnderlineRegular, TextStrikethroughRegular, TextBulletListRegular, TextNumberListLtrRegular, TextQuoteRegular, LinkRegular, } from "@fluentui/react-icons";
-import { data, Link, useNavigate } from "react-router-dom";
+import { data, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector } from "../app/hooks";
-import { createTodo, GetTeamMembersAsync, getProjectsNameByUserIdAsync } from "../api/authApi";
+import { createTodo, GetTeamMembersAsync, getProjectsNameByUserIdAsync, updateTodo } from "../api/authApi";
 import { getApiErrorMessage } from "../api/apiError";
 import type { ProjectIdNameInfo, TeamMember1 } from "../types/TaskListType";
 
@@ -401,6 +401,7 @@ export function TaskForm() {
     const user = useAppSelector((state) => state.auth.user);
     const styles = useStyles();
     const navigate = useNavigate();
+    const location = useLocation();
     const { dispatchToast } = useToastController("app-toaster");
 
     // Form fields
@@ -411,6 +412,7 @@ export function TaskForm() {
     const [status, setStatus] = useState<number>(0);
     const [priority, setPriority] = useState<number>(0);
     const [startDate, setStartDate] = useState<string>(new Date().toISOString().split("T")[0]);
+    const [createdDate, setCreatedDate] = useState<string>(new Date().toISOString().split("T")[0]);
     const [dueDate, setDueDate] = useState<string>(
         new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
     );
@@ -435,13 +437,43 @@ export function TaskForm() {
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const today = new Date();
+
+
+    const [isupdate,setisupdate]=useState(false);
     // Current formatted date for metadata
     const todayFormatted = new Intl.DateTimeFormat("en-US", {
         month: "short",
         day: "numeric",
         year: "numeric",
     }).format(new Date());
-
+    const { id, task } = location.state || {};
+    const formatDate = (date?: string | null) => {
+        if (!date) {
+            return "No due date";
+        }
+        return new Date(date).toLocaleDateString(
+            "en-US",
+            {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+            }
+        );
+    };
+    useEffect(() => {
+        if (task && id) {
+            setisupdate(true);
+            setTitle(task.title || "");
+            setDescription(task.description || "");
+            setStatus(task.status || status)
+            setPriority(task.priority || priority)
+            setStartDate(task.startDate?.split("T")[0] || "");
+            setDueDate(task.dueDate?.split("T")[0] || "");
+            setCreatedDate(formatDate(task.createdDate?.split("T")[0] ) || todayFormatted)
+            setSelectedTeamMember(task.assignedTo || [])
+            setComments(task.comments || [])
+        }
+    }, [task, id]);
     useEffect(() => {
         const fetchTaskFormData = async () => {
             if (!user?.userId) return;
@@ -520,37 +552,66 @@ export function TaskForm() {
             return;
         }
 
-        setIsSubmitting(true);
-        try {
-            await createTodo({
-                title: title.trim(),
-                assignedTo: selectedTeamMember,
-                projectId: selectedProjectId || (projects[0]?.id ?? ""),
-                description: description.trim(),
-                priority: priority,
-                dueDate: dueDate,
-                createdDate: today.toISOString(),
-                updatedDate: today.toISOString(),
-                assignedBy: user?.userId ?? "",
-                status: status,
-                comments: comments,
-                startDate: startDate,
-            });
-            dispatchToast(
-                <Toast>
-                    <ToastTitle>Success</ToastTitle>
-                    <ToastBody>Task has been created successfully!</ToastBody>
-                </Toast>,
-                { intent: "success", timeout: 3000 }
-            );
+        {
+            try {
+                setIsSubmitting(true);
 
-            setTimeout(() => {
-                navigate("/tasks");
-            }, 1000);
+    if (!isupdate) {
+        // CREATE
+                await createTodo({
+                    title: title.trim(),
+                    assignedTo: selectedTeamMember,
+                    projectId: selectedProjectId || (projects[0]?.id ?? ""),
+                    description: description.trim(),
+                    priority,
+                    dueDate,
+                    createdDate: today.toISOString(),
+                    updatedDate: today.toISOString(),
+                    assignedBy: user?.userId ?? "",
+                    status,
+                    comments,
+                    startDate,
+                });
+
+                dispatchToast(
+                    <Toast>
+                        <ToastTitle>Success</ToastTitle>
+                        <ToastBody>Task has been created successfully!</ToastBody>
+                    </Toast>,
+                    { intent: "success", timeout: 3000 }
+                );
+
+            } else {
+                // UPDATE
+                await updateTodo({
+                    id: id,
+                    title: title.trim(),
+                    assignedTo: selectedTeamMember,
+                    projectId: selectedProjectId || (projects[0]?.id ?? ""),
+                    description: description.trim(),
+                    priority,
+                    dueDate,
+                    updatedDate: today.toISOString(),
+                    assignedBy: user?.userId ?? "",
+                    status,
+                    comments,
+                    startDate,
+                    createdDate: task?.createdDate,
+                });
+
+                dispatchToast(
+                    <Toast>
+                        <ToastTitle>Success</ToastTitle>
+                        <ToastBody>Task has been updated successfully!</ToastBody>
+                    </Toast>,
+                    { intent: "success", timeout: 3000 }
+                );
+            }
+            navigate("/tasks");
         } catch (err) {
             dispatchToast(
                 <Toast>
-                    <ToastTitle>Failed to Create Task</ToastTitle>
+                    <ToastTitle>Failed</ToastTitle>
                     <ToastBody>{getApiErrorMessage(err)}</ToastBody>
                 </Toast>,
                 { intent: "error", timeout: 3500 }
@@ -558,6 +619,8 @@ export function TaskForm() {
         } finally {
             setIsSubmitting(false);
         }
+        }
+
     };
 
     return (
@@ -569,7 +632,7 @@ export function TaskForm() {
                         My Tasks
                     </Link>
                     <ChevronRightRegular fontSize={14} style={{ color: "#94a3b8" }} />
-                    <span className={styles.breadcrumbCurrent}>Add New Task</span>
+                    <span className={styles.breadcrumbCurrent}>{!isupdate? "Add new Task": "Edit Task"}</span>
                 </div>
 
                 <div className={styles.headerActions}>
@@ -580,13 +643,16 @@ export function TaskForm() {
                     >
                         Cancel
                     </button>
-                    <button
+                   <button
                         type="button"
                         className={styles.createButton}
                         disabled={isSubmitting}
                         onClick={() => handleSubmit()}
                     >
-                        {isSubmitting ? "Creating..." : "Create Task"}
+                        {isupdate
+                            ? (isSubmitting ? "Updating..." : "Update Task")
+                            : (isSubmitting ? "Creating..." : "Create Task")
+                        }
                     </button>
                 </div>
             </div>
@@ -598,7 +664,9 @@ export function TaskForm() {
                     <h2 className={styles.cardTitle}>Task Details</h2>
 
                     {/* Project */}
-                    <div className={styles.fieldGroup}>
+                    {
+                        !isupdate?(
+                                <div className={styles.fieldGroup}>
                         <label className={styles.fieldLabel}>
                             Project <span className={styles.requiredAsterisk}>*</span>
                         </label>
@@ -629,7 +697,9 @@ export function TaskForm() {
                             <span className={styles.errorText}>{errors.projectId}</span>
                         )}
                     </div>
-
+                        ):null
+                    }
+                    
                     {/* Title */}
                     <div className={styles.fieldGroup}>
                         <label className={styles.fieldLabel}>
@@ -884,7 +954,7 @@ export function TaskForm() {
                                 readOnly
                                 disabled
                                 contentAfter={<CalendarRegular />}
-                                value={todayFormatted}
+                                value={createdDate}
                             />
                         </div>
 

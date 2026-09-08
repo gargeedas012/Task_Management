@@ -32,7 +32,7 @@ const authSlice = createSlice({
         state.loading=false;
     }
     ,
-    logout: (state) => {
+    logout1: (state) => {
       state.user = null;
       state.isAuthenticated = false;
       state.loading=false;
@@ -40,6 +40,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { loginStart,loginSuccess,loginFailure, logout } = authSlice.actions;
+export const { loginStart,loginSuccess,loginFailure, logout1 } = authSlice.actions;
 
 export default authSlice.reducer;

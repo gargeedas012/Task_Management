@@ -2,18 +2,21 @@ import { useAppDispatch, useAppSelector } from "../app/hooks"
 import { Button, Card, Text, Title2, makeStyles ,Avatar ,Title3} from "@fluentui/react-components";
 import { logout } from "../features/auth/authActions";
 import {EditRegular ,DeleteRegular , MailRegular, PersonRegular, ShieldRegular, SignOutRegular} from "@fluentui/react-icons";
+import { useNavigate } from "react-router-dom";
 const useStyles = makeStyles({
     container: {
         minHeight: "100vh",
         padding: "40px",
         boxSizing: "border-box",
+        background: "var(--bg--card)",
         display:"flex",
         flexDirection:"column",
-        gap:"20px"
+        gap:"20px",
     },
     header: {
         display: "flex",
         flexDirection:"column",
+        color:"var(--text-primary)",
         "@media (max-width: 600px)": {
             flexDirection: "column",
             alignItems: "flex-start",
@@ -22,12 +25,14 @@ const useStyles = makeStyles({
     profileCard: {
         padding: "28px",
         borderRadius: "16px",
-        boxShadow: "0 15px 40px rgba(0, 0, 0, 0.08)"
+        background: "var(--bg--card)",
+        border: "1px solid var(--border-color)"
     },
     profileHeader: {
         display: "flex",
         alignItems: "center",
         gap: "15px",
+        color:"var(--text-primary)",
         marginBottom: "25px",
     },
     avatar: {
@@ -42,29 +47,35 @@ const useStyles = makeStyles({
         display: "grid",
         gridTemplateColumns: "repeat(3, 1fr)",
         gap: "15px",
-        "@media (max-width: 700px)": {
+        background: "var(--bg--card)",
+        "@media (max-width: 800px)": {
             gridTemplateColumns: "1fr",
         },
     },
     infoBox: {
         padding: "18px",
         borderRadius: "12px",
-        backgroundColor: "#f7f7fb",
+         background: "var(--bg--card)",
+          border: "1px solid var(--border-color)"
+    },
+    textlabel:{
+         color:"var(--text-primary)",
     },
     infoLabel: {
         display: "block",
-        color: "#777",
+        color: "var(--permanent-text-color)",
         fontSize: "13px",
         marginBottom: "6px",
     }
 });
 export function Settings() {
     const dispatch = useAppDispatch();
+    const navigate=useNavigate();
     const user = useAppSelector(state => state.auth.user);
-    const Handlelogout = () => {
+    const handleLogout = () => {
         dispatch(logout());
-        window.location.reload();
-    }
+        navigate("/login");
+    };
     const styles = useStyles();
 return (
     <div className={styles.container}>
@@ -101,7 +112,7 @@ return (
                     <Text className={styles.infoLabel}>
                         <MailRegular /> Email
                     </Text>
-                    <Text style={{ fontWeight: 600}}>
+                    <Text style={{ fontWeight: 600}} className={styles.textlabel}>
                         {user?.email}
                     </Text>
                 </div>
@@ -109,7 +120,7 @@ return (
                     <Text className={styles.infoLabel}>
                         <PersonRegular /> Username
                     </Text>
-                    <Text style={{ fontWeight: 600}}>
+                    <Text style={{ fontWeight: 600}} className={styles.textlabel}> 
                         {user?.username}
                     </Text>
                 </div>
@@ -117,21 +128,21 @@ return (
                     <Text className={styles.infoLabel}>
                         <ShieldRegular /> Role
                     </Text>
-                    <Text style={{ fontWeight: 600}}>
+                    <Text style={{ fontWeight: 600}} className={styles.textlabel}>
                         {user?.role}
                     </Text>
                 </div>
             </div>
-            <Button appearance="secondary" icon={<EditRegular  />}    style={{marginTop:"25px"}}>
+            <Button appearance="secondary" icon={<EditRegular  />}    style={{marginTop:"25px", background: "var(--bg--card)" ,border: "1px solid var(--border-color)" ,color:"var(--text-primary)"}}>
                 Edit
             </Button>
         </Card>
         <Card className={styles.profileCard}>
-           <Button icon={<DeleteRegular />} style={{borderColor:"red", color:"red"}}>
+           <Button icon={<DeleteRegular />} style={{ background: "var(--bg--card)" ,border: "1px solid var(--border-color)",color:"var(--text-primary)"}}>
                 Delete Account
             </Button>
             {/* Logout */}
-            <Button appearance="secondary" icon={<SignOutRegular />}    style={{marginTop:"25px"}}  onClick={Handlelogout}>
+            <Button appearance="secondary" icon={<SignOutRegular />}    style={{marginTop:"25px" ,background: "var(--bg--card)" ,border: "1px solid var(--border-color)", color:"var(--text-primary)"}}  onClick={handleLogout}>
                 Logout
             </Button>
         </Card>

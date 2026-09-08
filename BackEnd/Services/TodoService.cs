@@ -30,25 +30,14 @@ namespace BackEnd.Services
            return await _repository.GetAllAsync();
         }
 
-        public async Task<Todo?> GetByIdAsync(string id)
+        public async Task<Todo> GetByIdAsync(string id, string todoid)
         {
-           return await _repository.GetByIdAsync(id);
+           return await _repository.GetByIdAsync(id,todoid);
         }
 
-        public async Task UpdateAsync(string id, UpdateTodoDto updateTodoDto)
+        public async Task UpdateAsync(string id, Todo updateTodoDto)
         {
-            var todo = new Todo
-            {
-                Id = id,
-                Title = updateTodoDto.Title,
-               
-                ProjectId=updateTodoDto.ProjectId,
-                Description = updateTodoDto.Description,
-               
-                DueDate = updateTodoDto.DueDate,
-                
-            };
-            await _repository.UpdateAsync(id, todo);
+            await _repository.UpdateAsync(id, updateTodoDto);
         }
 
         public async Task<List<InCompleteTodoResponseDto>> GetIncompleteTodos(bool isCompleted)

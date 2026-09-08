@@ -2,7 +2,7 @@ import { getApiErrorMessage } from "../../api/apiError";
 import { loginUser, logoutUser } from "../../api/authApi";
 import type { AppDispatch } from "../../app/store";
 import type { LoginRequest } from "../../types/auth";
-import { loginFailure, loginStart, loginSuccess } from "./authSlice";
+import { loginFailure, loginStart, loginSuccess , logout1} from "./authSlice";
 
 export const login = (data: LoginRequest) => async (dispatch: AppDispatch) => {
     try {
@@ -28,7 +28,7 @@ export const login = (data: LoginRequest) => async (dispatch: AppDispatch) => {
 export const logout = () => async (dispatch: AppDispatch) => {
     try {
         await logoutUser();
-        dispatch(logout());
+        dispatch(logout1());
     } catch (err) {
         dispatch(loginFailure())
         throw err;

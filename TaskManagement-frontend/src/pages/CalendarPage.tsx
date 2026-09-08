@@ -1,12 +1,16 @@
-import { Badge, Card, Text, makeStyles, mergeClasses, } from "@fluentui/react-components";
+import { Badge, Card, Text, makeStyles } from "@fluentui/react-components";
 import { ClockRegular, ChevronRightRegular, } from "@fluentui/react-icons";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/react/daygrid";
 import "@fullcalendar/react/skeleton.css";
 import "@fullcalendar/react/themes/monarch/theme.css";
 import "@fullcalendar/react/themes/monarch/palettes/purple.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../../css/Calender.css";
+import { useAppSelector } from "../app/hooks";
+import { getTaskPriorityGroup } from "../api/authApi";
+import type { TaskDto, TaskPriorityGroupDto } from "../types/TaskListType";
+import { useNavigate } from "react-router-dom";
 
 const useStyles = makeStyles({
     page: {
@@ -107,103 +111,70 @@ const useStyles = makeStyles({
         textAlign: "center",
         color: "var(--text-primary)",
     },
+        arrowIcon: {
+        color: "var(--permanent-text-color)",
+        fontSize: "16px",
+        cursor: "pointer",
+    },
 });
-interface CalendarTask {
-    id: string;
-    title: string;
-    start: string;
-    end?: string;
-    project: string;
-    priority: "Low" | "Medium" | "High";
-    time?: string;
-}
-const tasks: CalendarTask[] = [
-    {
-        id: "1",
-        title: "Complete Dashboard",
-        start: "2026-09-08",
-        project: "Task Management",
-        priority: "Medium",
-        time: "10:00 AM",
-    },
-    {
-        id: "2",
-        title: "API Integration",
-        start: "2026-09-12",
-        project: "Task Management",
-        priority: "High",
-        time: "11:30 AM",
-    },
-    {
-        id: "3",
-        title: "Create Login Page",
-        start: "2026-09-15",
-        project: "Website Development",
-        priority: "Low",
-        time: "09:00 AM",
-    },
-    {
-        id: "4",
-        title: "Database Optimization",
-        start: "2026-09-18",
-        project: "Backend API",
-        priority: "High",
-        time: "02:00 PM",
-    },
-    {
-        id: "5",
-        title: "Testing",
-        start: "2026-09-20",
-        project: "Task Management",
-        priority: "Medium",
-        time: "03:00 PM",
-    },
-    {
-        id: "6",
-        title: "Deployment",
-        start: "2026-09-25",
-        project: "Task Management",
-        priority: "High",
-        time: "04:00 PM",
-    },
-];
 export function CalendarPage() {
     const styles = useStyles();
+    const user=useAppSelector((state)=>state.auth.user);
+    const [event, setevent]=useState<TaskPriorityGroupDto[]>([]);
+    const [task, settask]=useState<TaskDto[]>([]);
     const [selectedDate, setSelectedDate] = useState<string>(
         "2026-09-08"
     );
+    const navigate=useNavigate();
     const [selectedTaskId, setSelectedTaskId] = useState<string | null>("1");
-
-    const calendarEvents = tasks.map((task) => ({
+    useEffect(()=>{
+        const fetchTaskEvent=async()=>{
+          try{
+                 if (!user?.userId) return;
+                 const response=await getTaskPriorityGroup(user.userId);
+                 setevent(response.result);
+                const filtertask=response.result.flatMap(group=>group.tasks);
+                settask(filtertask);
+          }catch(err)
+          {
+            console.log(err);
+          }
+        }
+        fetchTaskEvent();
+    },[user?.userId])
+    const HandleOpenTask=(id:string | undefined)=>{
+            navigate("/viewtask", {
+                state: { taskId: id }
+            });
+    }
+    const calendarEvents = task.map((task) => ({
         id: task.id,
         title: task.title,
-        start: task.start,
-        end: task.end,
+        start: task.startDate?.split("T")[0],
     }));
-    const selectedTasks = tasks.filter(
-        (task) => task.start === selectedDate
+    const selectedTasks = task.filter(
+        (task) => task.startDate?.split("T")[0]  === selectedDate
     );
     const handleEventClick = (info: any) => {
-        const task = tasks.find(
+        const tasks = task.find(
             (item) => item.id === info.event.id
         );
-
-        if (task) {
-            setSelectedDate(task.start);
-            setSelectedTaskId(task.id);
+        if (tasks) {
+            setSelectedDate(tasks.startDate?.split("T")[0]);
+            setSelectedTaskId(tasks.id || null);
         }
     };
     const getPriorityColor = (
-        priority: CalendarTask["priority"]
+        priority: TaskDto["priority"]
     ) => {
         switch (priority) {
-            case "High":
+            case 3:
                 return "danger";
 
-            case "Medium":
+            case 2:
                 return "warning";
 
-            case "Low":
+            case 1:
                 return "success";
 
             default:
@@ -242,8 +213,6 @@ export function CalendarPage() {
                     events={calendarEvents}
                     eventClick={handleEventClick}
                 />
-
-
             </Card>
             <Card className={styles.tasksCard}>
                 <div className={styles.taskHeader}>
@@ -273,7 +242,6 @@ export function CalendarPage() {
                             date.
                         </Text>
                     </div>
-
                 ) : (
                     selectedTasks.map((task) => {
                         const isSelected = task.id === selectedTaskId;
@@ -281,7 +249,7 @@ export function CalendarPage() {
                             <div
                                 key={task.id}
                                 className={styles.taskRow}
-                                onClick={() => setSelectedTaskId(task.id)}
+                                onClick={() => setSelectedTaskId(task.id || null)}
                             >
                                 <div className={styles.taskLeft}>
                                     <div className={styles.taskIcon} >
@@ -292,25 +260,15 @@ export function CalendarPage() {
                                             {task.title}
                                         </Text>
                                         <Text className={styles.project} >
-                                            {task.project}
+                                            {task.projectName}
                                         </Text>
-                                        {task.time && (<div className={styles.taskTime}  >
-                                            <ClockRegular fontSize={13} />
-                                            {task.time}
-                                        </div>
-                                        )}
                                     </div>
                                 </div>
                                 <div className={styles.taskRight} >
-                                    {isSelected && (
-                                        <Badge appearance="filled" color="brand">
-                                            Selected
-                                        </Badge>
-                                    )}
-                                    <Badge appearance="tint" color={getPriorityColor(task.priority)}  >
-                                        {task.priority}
-                                    </Badge>
-                                    <ChevronRightRegular />
+                                     <ChevronRightRegular
+                                        className={styles.arrowIcon}
+                                        onClick={() => HandleOpenTask(task.id)}
+                                    />
                                 </div>
                             </div>
                         );

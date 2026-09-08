@@ -39,13 +39,8 @@ export const GoogleLoginFun = async (
             withCredentials: true
         }
     );
-
     return response.data;
 };
-
-
-
-
 
 //user
 export const GetProjectInfo = async (userId: string): Promise<ApiResponse<DashboardStats>> => {
@@ -53,15 +48,10 @@ export const GetProjectInfo = async (userId: string): Promise<ApiResponse<Dashbo
     return response.data;
 };
 
-
-
-
-
-
-
 //Todo Funtionality
-export const getTodos = async (data: string): Promise<ApiResponse<Todo[]>> => {
-    const response = await api.get("/Todo/SearchByUserId", { params: { userId: data } });
+export const getTask = async (id: string, todoid:string): Promise<ApiResponse<NewTodo>> => {
+    console.log("edededededf");
+    const response = await api.get("Todo/GetTask", { params: { id: id , todoid:todoid} });
     return response.data;
 };
 export const createTodo = async (data: NewTodo): Promise<ApiResponse<string>> => {
@@ -69,18 +59,8 @@ export const createTodo = async (data: NewTodo): Promise<ApiResponse<string>> =>
     const response = await api.post("/Todo", data);
     return response.data;
 }
-export const updateTodo = async (data: Todo): Promise<ApiResponse<Todo>> => {
-    console.log("come")
-    const response = await api.put(`/Todo/${data.id}`, {
-        title: data.title,
-        userId: data.userId,
-        projectId: data.projectId,
-        description: data.description,
-        priority: data.priority,
-        dueDate: data.dueDate,
-        category: data.category,
-        isCompleted: data.isCompleted
-    });
+export const updateTodo = async (data: NewTodo): Promise<ApiResponse<NewTodo>> => {
+    const response = await api.put(`/Todo/${data.id}`, data);
     return response.data;
 }
 export const deleteTodo = async (id: string): Promise<ApiResponse<string>> => {

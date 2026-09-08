@@ -11,6 +11,7 @@ import "./css/global.css";
 import TaskList from "./src/pages/TaskList";
 import TaskForm from "./src/pages/TaskForm";
 import {CalendarPage} from "./src/pages/CalendarPage";
+import TaskShow from "./src/pages/Task";
 
 function App() {
   return (
@@ -26,7 +27,9 @@ function App() {
                 <Route path="/settings" element={<ProtectedRoute><Settings/></ProtectedRoute>}/>
                 <Route path="/tasks" element={<ProtectedRoute><TaskList/></ProtectedRoute>}/>
                 <Route path="/tasks/new" element={<ProtectedRoute><TaskForm/></ProtectedRoute>}/>
+                <Route path="/tasks/Edit" element={<ProtectedRoute><TaskForm/></ProtectedRoute>}/>
                 <Route path="/calender" element={<ProtectedRoute><CalendarPage/></ProtectedRoute>}/>
+                <Route path="/viewtask" element={<ProtectedRoute><TaskShow/></ProtectedRoute>}/>
             </Route>
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>

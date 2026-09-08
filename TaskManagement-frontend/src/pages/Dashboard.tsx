@@ -4,12 +4,11 @@ import { LayerRegular, ArrowTrendingRegular, TargetRegular, CheckmarkCircleRegul
 import { useEffect, useState } from "react";
 import {  getPriorityCount, getProjectAssigneeInfo, GetProjectInfo, getTodayUpcomingTaskInfo, getWeeklyActivity } from "../api/authApi";
 import { useAppSelector } from "../app/hooks";
-import { Priority, type DashboardStats, type PriorityDistributionDto, type ProjectInfoDto, type TaskDashboardDto, type WeeklyActivityDto } from "../types/ProjectDashboardType";
+import {  type DashboardStats, type PriorityDistributionDto, type ProjectInfoDto, type TaskDashboardDto, type WeeklyActivityDto } from "../types/ProjectDashboardType";
 import ReactECharts from "echarts-for-react";
 
 const useStyle = makeStyles({
     welcomeCard: {
-        width: "100%",
         minHeight: "120px",
         padding: "22px 24px",
         borderRadius: "12px",
@@ -19,6 +18,10 @@ const useStyle = makeStyles({
         background: "linear-gradient(135deg, #4f46e5, #7c22ff)",
         color: "white",
         boxSizing: "border-box",
+         "@media (max-width: 500px)": {
+            display: "flex",
+            flexDirection:"column"
+        },  
     },
     dateBox: {
     minWidth: "100px",
@@ -37,9 +40,7 @@ const useStyle = makeStyles({
         display: "flex",
         flexDirection: "column",
         gap: "20px",
-        width: "90%",
-        marginLeft:"auto",
-        marginRight:"auto",
+
         boxSizing: "border-box",
     },
     card: {
@@ -369,7 +370,6 @@ export function Dashboard() {
                 fontFamily: "Arial",
                 color: "var(--permanent-text-color)"
             },
-
             data: ['To Do', 'In Progress', 'Completed', 'Under Review']
         },
         series: [
@@ -392,7 +392,6 @@ export function Dashboard() {
             itemStyle: {
                 borderColor: "#fff",
                 borderWidth: 4,
-                borderRadius: 0
             },
            data: [
                 { value: response?.todoTasks ?? 0, name: "To Do" },

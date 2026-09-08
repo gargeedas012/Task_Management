@@ -22,9 +22,15 @@ namespace BackEnd.Repositories
             var sort=Builders<Todo>.Sort.Descending(x=>x.CreatedDate);
             return await _todoCollection.Find(FilterDefinition<Todo>.Empty).Sort(sort).ToListAsync();
         }
-        public async Task<Todo?> GetByIdAsync(string id)
+        public async Task<Todo> GetByIdAsync(string id , string todoid)
         {
-            return await _todoCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+            //var filter = Builders<Todo>.Filter.AnyEq(x => x.AssignedTo, id);
+            if(!ObjectId.TryParse(todoid, out var todoObjectId)) return null;
+            var filter = Builders<Todo>.Filter.And(
+                Builders<Todo>.Filter.AnyEq(x=>x.AssignedTo,id),
+                Builders<Todo>.Filter.Eq("_id", todoObjectId)
+                );
+            return await _todoCollection.Aggregate().Match(filter).FirstOrDefaultAsync();
         }
         public async Task CreateAsync(Todo todo)
         {
@@ -32,17 +38,20 @@ namespace BackEnd.Repositories
         }
         public async Task UpdateAsync(string id, Todo todo)
         {
+            var filter = Builders<Todo>.Filter.Eq(x => x.Id, id);
+
             var update = Builders<Todo>.Update
                 .Set(x => x.Title, todo.Title)
                 .Set(x => x.Description, todo.Description)
+                .Set(x=>x.AssignedTo,todo.AssignedTo)
+                .Set(x=>x.Status,todo.Status)
+                .Set(x=>x.StartDate,todo.StartDate)
                 .Set(x => x.Priority, todo.Priority)
-                .Set(x => x.DueDate, todo.DueDate);
+                .Set(x => x.DueDate, todo.DueDate)
+                .Set(x => x.Comments, todo.Comments)
+                .Set(x => x.UpdatedDate, DateTime.UtcNow);
 
-
-            await _todoCollection.UpdateOneAsync(
-                x => x.Id == id,
-                update
-            );
+            await _todoCollection.UpdateOneAsync(filter, update);
         }
         public async Task DeleteAsync(string id)
         {

@@ -58,8 +58,16 @@ export function Navbar() {
             setTitle("My Tasks")
             return;
         }
-        else if (location.pathname === "/tasks/new" || location.pathname === "/addtask") {
+        else if (location.pathname === "/tasks/new") {
             setTitle("Add New Task");
+            return;
+        }
+        else if (location.pathname === "/tasks/Edit") {
+            setTitle("Edit Task");
+            return;
+        }
+        else if (location.pathname === "/viewtask") {
+            setTitle("View Task");
             return;
         }
         else if (location.pathname === "/settings") {
