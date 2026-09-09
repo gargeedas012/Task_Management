@@ -63,7 +63,11 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-                .WithOrigins("http://localhost:5173", "https://task-management-gargee1.vercel.app")
+                .WithOrigins(
+                 "http://localhost:5173",
+                "https://task-management-gargee1.vercel.app",
+                "https://task-management-p25xsa1v0-gargee1.vercel.app"
+                )
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
