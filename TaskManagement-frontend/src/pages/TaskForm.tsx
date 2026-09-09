@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Avatar, Card, Dropdown, Input, Option, Toast, ToastBody, ToastTitle, makeStyles, useToastController } from "@fluentui/react-components";
 import { CalendarRegular, ChevronDownRegular, ChevronRightRegular, DismissRegular, TextBoldRegular, TextItalicRegular, TextUnderlineRegular, TextStrikethroughRegular, TextBulletListRegular, TextNumberListLtrRegular, TextQuoteRegular, LinkRegular, } from "@fluentui/react-icons";
-import { data, Link, useLocation, useNavigate } from "react-router-dom";
+import {  Link, useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector } from "../app/hooks";
 import { createTodo, GetTeamMembersAsync, getProjectsNameByUserIdAsync, updateTodo } from "../api/authApi";
 import { getApiErrorMessage } from "../api/apiError";
@@ -727,10 +727,10 @@ export function TaskForm() {
 
                         <div className={styles.editorContainer}>
                             <div className={styles.editorToolbar}>
-                                {/* <button type="button" className={styles.toolbarDropdown}>
+                                <button type="button" className={styles.toolbarDropdown}>
                                     <span>Normal</span>
                                     <ChevronDownRegular fontSize={12} />
-                                </button> */}
+                                </button>
 
                                 <div className={styles.toolbarDivider} />
 
@@ -750,7 +750,7 @@ export function TaskForm() {
                                 >
                                     <TextItalicRegular fontSize={14} />
                                 </button>
-                                {/* <button
+                                <button
                                     type="button"
                                     className={`${styles.toolbarButton} ${isUnderline ? styles.toolbarButtonActive : ""}`}
                                     onClick={() => setIsUnderline(!isUnderline)}
@@ -767,9 +767,9 @@ export function TaskForm() {
                                     <TextStrikethroughRegular fontSize={14} />
                                 </button>
 
-                                <div className={styles.toolbarDivider} /> */}
+                                <div className={styles.toolbarDivider} />
 
-                                {/* <button
+                                <button
                                     type="button"
                                     className={styles.toolbarButton}
                                     title="Bullet List"
@@ -799,7 +799,7 @@ export function TaskForm() {
                                     title="Insert Link"
                                 >
                                     <LinkRegular fontSize={14} />
-                                </button> */}
+                                </button>
                             </div>
 
                             <textarea
@@ -1089,12 +1089,6 @@ export function TaskForm() {
                                 placeholder="Add a comment..."
                                 value={newCommentText}
                                 onChange={(e) => { setNewCommentText(e.target.value) }}
-                            // onKeyDown={(e) => {
-                            //     if (e.key === "Enter") {
-                            //         e.preventDefault();
-                            //         handlePostComment();
-                            //     }
-                            // }}
                             />
                             <button
                                 type="button"

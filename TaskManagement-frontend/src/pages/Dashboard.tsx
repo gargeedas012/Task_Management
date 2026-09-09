@@ -668,8 +668,6 @@ export function Dashboard() {
 
         fetchDashboardData();
     }, [user?.userId]);
-
-
     return (
         <div className={styles.container}>
             {/* Greeting */}

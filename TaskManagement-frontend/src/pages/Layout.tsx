@@ -9,7 +9,6 @@ const useStyles = makeStyles({
     container: {
         display: "flex",
         height: "100vh",
-        //overflow: "hidden",
     },
     content:{
         display:"flex",

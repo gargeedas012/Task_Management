@@ -5,8 +5,6 @@ import { SearchRegular,  ChevronDownRegular,  ChevronRightRegular, FlagRegular, 
 import { useAppSelector } from "../app/hooks";
 import { type ProjectIdNameInfo, type TaskPriorityGroupDto ,type TaskStatus , type Priority} from "../types/TaskListType";
 import { getProjectsNameByUserIdAsync, getTaskPriorityGroup } from "../api/authApi";
-import Task from "./Task";
-import TaskShow from "./Task";
 
 const useStyles = makeStyles({
     pageContainer: {

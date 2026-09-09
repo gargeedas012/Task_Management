@@ -6,7 +6,7 @@ import { FluentProvider, webLightTheme } from "@fluentui/react-components";
 import AuthInitializer from './src/components/AuthInitializer.tsx'
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import {ThemeProvider } from "./context/ThemeContext.tsx";
-
+import "./css/index.css";
 
 const clientID=import.meta.env.VITE_GOOGLE_CLIENT_ID;
 

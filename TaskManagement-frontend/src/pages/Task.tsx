@@ -3,7 +3,6 @@ import {
     Badge,
     Button,
     Card,
-    Slider,
     Text,
     makeStyles,
 } from "@fluentui/react-components";
@@ -11,8 +10,6 @@ import {
 import {
     CheckmarkCircleRegular,
     ChatRegular,
-    ClockRegular,
-    SendRegular,
 } from "@fluentui/react-icons";
 import React, { useEffect } from "react";
 import { useState } from "react";

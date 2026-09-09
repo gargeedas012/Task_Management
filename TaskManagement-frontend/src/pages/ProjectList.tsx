@@ -12,7 +12,6 @@ import { useAppSelector } from "../app/hooks";
 
 import {
     CalendarRegular,
-    PeopleRegular,
     PersonRegular,
 } from "@fluentui/react-icons";
 
