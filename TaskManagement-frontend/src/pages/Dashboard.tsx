@@ -8,21 +8,24 @@ import {  type DashboardStats, type PriorityDistributionDto, type ProjectInfoDto
 import ReactECharts from "echarts-for-react";
 
 const useStyle = makeStyles({
-    welcomeCard: {
-        minHeight: "120px",
-        padding: "22px 24px",
-        borderRadius: "12px",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        background: "linear-gradient(135deg, #4f46e5, #7c22ff)",
-        color: "white",
-        boxSizing: "border-box",
-         "@media (max-width: 500px)": {
-            display: "flex",
-            flexDirection:"column"
-        },  
+welcomeCard: {
+    width: "100%",
+    minWidth: 0,
+    minHeight: "120px",
+    padding: "22px 24px",
+    borderRadius: "12px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    background: "linear-gradient(135deg, #4f46e5, #7c22ff)",
+    color: "white",
+    boxSizing: "border-box",
+
+    "@media (max-width: 500px)": {
+        flexDirection: "column",
+        gap: "10px",
     },
+},
     dateBox: {
     minWidth: "100px",
     padding: "10px 14px",
@@ -37,16 +40,17 @@ const useStyle = makeStyles({
   },
   //4cards
     container: {
-        display: "flex",
-        flexDirection: "column",
-        gap: "20px",
-
-        boxSizing: "border-box",
+    width: "100%",
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px",
+    boxSizing: "border-box",
     },
     card: {
         backgroundColor: "var(--bg--card)",
         minHeight: "120px",
-        minWidth:"120px",
+        minWidth: 0, 
         display: "flex",
         flexDirection: "column",
         alignItems: "flex-start",
@@ -66,19 +70,21 @@ const useStyle = makeStyles({
         color: "white",
         background: "#e6e3fc"
     },
-    cards: {
-        display: "grid",
-        gridTemplateColumns: "repeat(4, 1fr)",
-        gap: "12px",
+cards: {
+    width: "100%",
+    minWidth: 0,
+    display: "grid",
+    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+    gap: "12px",
 
-        "@media (max-width: 1024px)": {
-            gridTemplateColumns: "repeat(2, 1fr)",
-        },
-
-        "@media (max-width: 600px)": {
-            gridTemplateColumns: "1fr",
-        },
+    "@media (max-width: 1024px)": {
+        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
     },
+
+    "@media (max-width: 600px)": {
+        gridTemplateColumns: "minmax(0, 1fr)",
+    },
+},
     primaryText:{
         color:"var(--text-primary)"
     },
@@ -205,6 +211,9 @@ const useStyle = makeStyles({
         color: "var(--permanent-text-color)",
         borderBottom: "1px solid var(--border-color)",
         fontWeight: 500,
+          "@media (max-width: 600px)": {
+        gridTemplateColumns: "1fr 30px",
+    },
         },
 
         projectRow: {
@@ -222,6 +231,9 @@ const useStyle = makeStyles({
         "&:hover": {
             backgroundColor: "var(--nav-hover-bg)",
         },
+         "@media (max-width: 600px)": {
+        gridTemplateColumns: "1fr 30px",
+    },
         },
 
         projectName: {
