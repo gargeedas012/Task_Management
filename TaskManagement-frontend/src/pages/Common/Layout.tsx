@@ -1,9 +1,9 @@
 import { Outlet } from "react-router-dom";
-import { Sidebar } from "./Sidebar";
+import { Sidebar } from "../Common/Sidebar/Sidebar";
 import { makeStyles } from "@fluentui/react-components";
-import { Navbar } from "./Navbar";
-import {MobileSidebar} from "./MobileSidebar";
-import { useIsMobile } from "./useIsMobile";
+import { Navbar } from "../Common/Navber/Navbar";
+import {MobileSidebar} from "../Common/Sidebar/MobileSidebar";
+import { useIsMobile } from "../useIsMobile";
 
 const useStyles = makeStyles({
     container: {

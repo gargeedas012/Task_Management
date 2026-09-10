@@ -1,6 +1,6 @@
-import { useAppDispatch, useAppSelector } from "../app/hooks"
+import { useAppDispatch, useAppSelector } from "../../app/hooks"
 import { Button, Card, Text, Title2, makeStyles ,Avatar ,Title3} from "@fluentui/react-components";
-import { logout } from "../features/auth/authActions";
+import { logout } from "../../features/auth/authActions";
 import {EditRegular ,DeleteRegular , MailRegular, PersonRegular, ShieldRegular, SignOutRegular} from "@fluentui/react-icons";
 import { useNavigate } from "react-router-dom";
 const useStyles = makeStyles({

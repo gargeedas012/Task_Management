@@ -6,11 +6,12 @@ import "@fullcalendar/react/skeleton.css";
 import "@fullcalendar/react/themes/monarch/theme.css";
 import "@fullcalendar/react/themes/monarch/palettes/purple.css";
 import { useEffect, useState } from "react";
-import "../../css/Calender.css";
-import { useAppSelector } from "../app/hooks";
-import { getTaskPriorityGroup } from "../api/authApi";
-import type { TaskDto } from "../types/TaskListType";
+import "../../../css/Calender.css";
+import { useAppSelector } from "../../app/hooks";
+import { getTaskPriorityGroup } from "../../api/authApi";
+import type { TaskDto } from "../../types/TaskListType";
 import { useNavigate } from "react-router-dom";
+import { Loading } from "../Common/Loading/Loading";
 
 const useStyles = makeStyles({
     page: {
@@ -121,12 +122,14 @@ export function CalendarPage() {
     const styles = useStyles();
     const user=useAppSelector((state)=>state.auth.user);
     const [task, settask]=useState<TaskDto[]>([]);
+    const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState<string>(
-        "2026-09-08"
+       new Date().toISOString().split("T")[0]
     );
     const navigate=useNavigate();
     useEffect(()=>{
         const fetchTaskEvent=async()=>{
+            setLoading(true)
           try{
                  if (!user?.userId) return;
                  const response=await getTaskPriorityGroup(user.userId);
@@ -135,10 +138,15 @@ export function CalendarPage() {
           }catch(err)
           {
             console.log(err);
+          }finally{
+            setLoading(false)
           }
         }
         fetchTaskEvent();
     },[user?.userId])
+    if (loading) {
+        return <Loading message="Loading Calender..." />;
+    }
     const HandleOpenTask=(id:string | undefined)=>{
             navigate("/viewtask", {
                 state: { taskId: id }

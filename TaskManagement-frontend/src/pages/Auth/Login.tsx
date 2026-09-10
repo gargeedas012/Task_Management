@@ -1,12 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useState } from "react";
-import { login } from '../features/auth/authActions';
+import { login } from '../../features/auth/authActions';
 import { Button, Card, Field, Input, Text, Title3, Toast, ToastBody, ToastTitle, useToastController } from "@fluentui/react-components";
-import { getApiErrorMessage } from "../api/apiError";
+import { getApiErrorMessage } from "../../api/apiError";
 import { GoogleLogin } from "@react-oauth/google";
-import { GoogleLoginFun } from "../api/authApi";
-import { loginSuccess } from "../features/auth/authSlice";
+import { GoogleLoginFun } from "../../api/authApi";
+import { loginSuccess } from "../../features/auth/authSlice";
 import { MailRegular ,LockClosedRegular , EyeRegular, EyeOffRegular,} from "@fluentui/react-icons";
 import { Avatar ,makeStyles} from "@fluentui/react-components";
 

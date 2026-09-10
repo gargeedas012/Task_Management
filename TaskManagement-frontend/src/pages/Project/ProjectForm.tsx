@@ -12,10 +12,10 @@ import {
 } from "@fluentui/react-components";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import type { Project } from "../types/project";
-import { useAppSelector } from "../app/hooks";
-import { createProject, updateProject } from "../api/authApi";
-import { getApiErrorMessage } from "../api/apiError";
+import type { Project } from "../../types/project";
+import { useAppSelector } from "../../app/hooks";
+import { createProject, updateProject } from "../../api/authApi";
+import { getApiErrorMessage } from "../../api/apiError";
 import { useLocation, useNavigate } from "react-router-dom";
 
 

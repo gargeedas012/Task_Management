@@ -11,6 +11,7 @@ import {
     getCurrentUser,
     refreshToken,
 } from "../api/authApi";
+import { Loading } from "../pages/Common/Loading/Loading";
 
 interface AuthInitializerProps {
     children: React.ReactNode;
@@ -64,7 +65,7 @@ function AuthInitializer({
     }, [dispatch]);
 
     if (loading) {
-        return <div>Checking authentication...</div>;
+        return <Loading message="Checking authentication..." />;
     }
 
     return <>{children}</>;

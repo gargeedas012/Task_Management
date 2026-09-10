@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Avatar, Card, Dropdown, Input, Option, Toast, ToastBody, ToastTitle, makeStyles, useToastController } from "@fluentui/react-components";
 import { CalendarRegular, ChevronDownRegular, ChevronRightRegular, DismissRegular, TextBoldRegular, TextItalicRegular, TextUnderlineRegular, TextStrikethroughRegular, TextBulletListRegular, TextNumberListLtrRegular, TextQuoteRegular, LinkRegular, } from "@fluentui/react-icons";
 import {  Link, useLocation, useNavigate } from "react-router-dom";
-import { useAppSelector } from "../app/hooks";
-import { createTodo, GetTeamMembersAsync, getProjectsNameByUserIdAsync, updateTodo } from "../api/authApi";
-import { getApiErrorMessage } from "../api/apiError";
-import type { ProjectIdNameInfo, TeamMember1 } from "../types/TaskListType";
+import { useAppSelector } from "../../app/hooks";
+import { createTodo, GetTeamMembersAsync, getProjectsNameByUserIdAsync, updateTodo } from "../../api/authApi";
+import { getApiErrorMessage } from "../../api/apiError";
+import type { ProjectIdNameInfo, TeamMember1 } from "../../types/TaskListType";
 
 interface CommentItem {
     id: string;
@@ -519,8 +519,6 @@ export function TaskForm() {
             timestamp: new Date().toISOString(),
             text: newCommentText.trim(),
         };
-
-
         setComments((prev) => [...(prev || []), newComment]);
         console.log("comment", comments);
         setNewCommentText("");
@@ -558,28 +556,39 @@ export function TaskForm() {
 
     if (!isupdate) {
         // CREATE
-                await createTodo({
-                    title: title.trim(),
-                    assignedTo: selectedTeamMember,
-                    projectId: selectedProjectId || (projects[0]?.id ?? ""),
-                    description: description.trim(),
-                    priority,
-                    dueDate,
-                    createdDate: today.toISOString(),
-                    updatedDate: today.toISOString(),
-                    assignedBy: user?.userId ?? "",
-                    status,
-                    comments,
-                    startDate,
-                });
-
-                dispatchToast(
+               if(selectedProjectId==="")
+                {
+                     dispatchToast(
+                    <Toast>
+                        <ToastTitle>No Project</ToastTitle>
+                        <ToastBody>No project is assigned</ToastBody>
+                    </Toast>,
+                    { intent: "error", timeout: 3000 }
+                );
+                }else{
+                        await createTodo({
+                        title: title.trim(),
+                        assignedTo: selectedTeamMember,
+                        projectId: selectedProjectId || (projects[0]?.id ?? ""),
+                        description: description.trim(),
+                        priority,
+                        dueDate,
+                        createdDate: today.toISOString(),
+                        updatedDate: today.toISOString(),
+                        assignedBy: user?.userId ?? "",
+                        status,
+                        comments,
+                        startDate,
+                    });
+                    dispatchToast(
                     <Toast>
                         <ToastTitle>Success</ToastTitle>
                         <ToastBody>Task has been created successfully!</ToastBody>
                     </Toast>,
                     { intent: "success", timeout: 3000 }
                 );
+                } 
+                
 
             } else {
                 // UPDATE

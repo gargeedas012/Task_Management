@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Button, Card,Field,Input,Text, Title3, Toast, ToastBody, ToastTitle, useToastController,  Avatar, makeStyles} from "@fluentui/react-components";
 import { Link } from "react-router-dom";
-import { registerUser } from "../api/authApi";
-import { getApiErrorMessage } from "../api/apiError";
-import { useAppDispatch } from "../app/hooks";
-import { login } from "../features/auth/authActions";
+import { registerUser } from "../../api/authApi";
+import { getApiErrorMessage } from "../../api/apiError";
+import { useAppDispatch } from "../../app/hooks";
+import { login } from "../../features/auth/authActions";
 import { PersonRegular, MailRegular, LockClosedRegular, EyeRegular, EyeOffRegular} from "@fluentui/react-icons";
 
 const useStyles = makeStyles({

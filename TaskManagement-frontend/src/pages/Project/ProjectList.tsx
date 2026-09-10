@@ -5,15 +5,18 @@ import {
     makeStyles,
 } from "@fluentui/react-components";
 
-import type { NewProject } from "../types/project";
+import type { NewProject } from "../../types/project";
 import { useEffect, useState } from "react";
-import { getAllProjects } from "../api/authApi";
-import { useAppSelector } from "../app/hooks";
+import { getAllProjects } from "../../api/authApi";
+import { useAppSelector } from "../../app/hooks";
 
 import {
     CalendarRegular,
+    FolderOpenRegular,
     PersonRegular,
 } from "@fluentui/react-icons";
+import { Loading } from "../Common/Loading/Loading";
+
 
 
 const useStyles = makeStyles({
@@ -171,28 +174,79 @@ const useStyles = makeStyles({
         color: "#2563EB",
         border: "1px solid #BFDBFE",
     },
+      emptyProjectState: {
+        minHeight: "220px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+        padding: "32px 20px",
+        backgroundColor: "var(--bg--card)",
+        border: "1px solid var(--border-color)",
+        borderRadius: "12px",
+       gridColumn: "1 / -1",
+    },
+
+    emptyProjectIcon: {
+        width: "52px",
+        height: "52px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: "50%",
+        backgroundColor: "var(--bg--secondary)",
+        color: "var(--primary-color)",
+        marginBottom: "14px",
+    },
+
+    emptyProjectTitle: {
+        fontSize: "16px",
+        fontWeight: 600,
+        color: "var(--permanent-text-color)",
+        marginBottom: "6px",
+    },
+
+    emptyProjectText: {
+        fontSize: "13px",
+       color: "var(--permanent-text-color)",
+        maxWidth: "320px",
+        lineHeight: 1.5,
+    },
 });
 
 
 function ProjectList() {
 
     const [project, setProjects] = useState<NewProject[]>([]);
+    const [loading, setLoading] = useState(true);
     const user = useAppSelector(
         state => state.auth.user
     );
     const styles = useStyles();
     useEffect(() => {
         const loadProjects = async () => {
-            const response = await getAllProjects(
+                setLoading(true);
+            try{
+                const response = await getAllProjects(
                 user?.userId ?? ""
-            );
-            setProjects(response.result);
+                );
+                setProjects(response.result);
+            }catch(err)
+            {
+                 console.error("Failed to load Project data", err);
+            }finally{
+                setLoading(false)
+            }
         };
         if (user?.userId) {
             loadProjects();
         }
     }, [user?.userId]);
 
+    if (loading) {
+        return <Loading message="Loading projects..." />;
+    }
 
     const formatDate = (date?: string | null) => {
         if (!date) {
@@ -253,7 +307,24 @@ function ProjectList() {
 
     return (
         <div className={styles.grid}>
-            {project.map((item) => {
+            {
+                project.length <=0 ?(
+                     <div className={styles.emptyProjectState}>
+                    <div className={styles.emptyProjectIcon}>
+                        <FolderOpenRegular fontSize={26} />
+                    </div>
+
+                    <div className={styles.emptyProjectTitle}>
+                        No Projects Assigned
+                    </div>
+
+                    <div className={styles.emptyProjectText}>
+                        You don't have any projects assigned to you yet.
+                    </div>
+                </div>
+                ):(
+                    <>
+                     {project.map((item) => {
                 const progress = ( item.completedTask>0?Math.round((item.completedTask/item.totalTask)*100):0 );
                 return (
                     <Card key={item.id} className={styles.card} style={{borderTop:`5px solid ${getStatusColor(item.status)}`}}>
@@ -379,6 +450,10 @@ function ProjectList() {
 
             })}
 
+                    </>
+                )
+            }
+           
         </div>
     );
 }

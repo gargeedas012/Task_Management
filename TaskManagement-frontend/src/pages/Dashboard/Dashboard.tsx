@@ -2,10 +2,11 @@ import { Avatar, makeStyles } from "@fluentui/react-components"
 import {  Button,  Text } from "@fluentui/react-components";
 import { LayerRegular, ArrowTrendingRegular, TargetRegular, CheckmarkCircleRegular,CalendarRegular, ChevronRightRegular  } from "@fluentui/react-icons";
 import { useEffect, useState } from "react";
-import {  getPriorityCount, getProjectAssigneeInfo, GetProjectInfo, getTodayUpcomingTaskInfo, getWeeklyActivity } from "../api/authApi";
-import { useAppSelector } from "../app/hooks";
-import {  type DashboardStats, type PriorityDistributionDto, type ProjectInfoDto, type TaskDashboardDto, type WeeklyActivityDto } from "../types/ProjectDashboardType";
+import {  getPriorityCount, getProjectAssigneeInfo, GetProjectInfo, getTodayUpcomingTaskInfo, getWeeklyActivity } from "../../api/authApi";
+import { useAppSelector } from "../../app/hooks";
+import {  type DashboardStats, type PriorityDistributionDto, type ProjectInfoDto, type TaskDashboardDto, type WeeklyActivityDto } from "../../types/ProjectDashboardType";
 import ReactECharts from "echarts-for-react";
+import { Loading } from "../Common/Loading/Loading";
 
 const useStyle = makeStyles({
 welcomeCard: {
@@ -212,7 +213,7 @@ cards: {
         borderBottom: "1px solid var(--border-color)",
         fontWeight: 500,
           "@media (max-width: 600px)": {
-        gridTemplateColumns: "1fr 30px",
+        gridTemplateColumns: "1fr 1fr",
     },
         },
 
@@ -232,7 +233,7 @@ cards: {
             backgroundColor: "var(--nav-hover-bg)",
         },
          "@media (max-width: 600px)": {
-        gridTemplateColumns: "1fr 30px",
+        gridTemplateColumns: "1fr 1fr",
     },
         },
 
@@ -337,6 +338,11 @@ export function Dashboard() {
     const [tasks, setTasks] = useState<TaskDashboardDto | null>(null);
     const [priorityDistribution, setPriorityDistribution] = useState<PriorityDistributionDto[]>([]);
     const [loading, setLoading] = useState(true);
+    const [projectLoading, setProjectLoading] = useState(true);
+    const [taskLoading, setTaskLoading] = useState(true);
+    const [assigneeLoading, setAssigneeLoading] = useState(true);
+    const [weeklyLoading, setWeeklyLoading] = useState(true);
+    const [priorityLoading, setPriorityLoading] = useState(true);
     const now = new Date();
     const hour = now.getHours();
 
@@ -412,7 +418,63 @@ export function Dashboard() {
                 { value: response?.reviewTasks ?? 0, name: "Under Review" },
             ]
             }
-        ]
+        ],
+          media: [
+        {
+            // Screen <= 600px
+            query: {
+                maxWidth: 600,
+            },
+
+            option: {
+                legend: {
+                    orient: "horizontal",
+                    left: "center",
+                    right: "auto",
+                    top: "auto",
+                    bottom: "0%",
+                    itemGap: 10,
+
+                    textStyle: {
+                        fontSize: 10,
+                    },
+                },
+
+                series: [
+                    {
+                        radius: ["40%", "60%"],
+                        center: ["50%", "42%"],
+                    },
+                ],
+            },
+        },
+
+        {
+            // Screen <= 400px
+            query: {
+                maxWidth: 400,
+            },
+
+            option: {
+                legend: {
+                    orient: "horizontal",
+                    left: "center",
+                    bottom: "0%",
+
+                    textStyle: {
+                        fontSize: 9,
+                    },
+                },
+
+                series: [
+                    {
+                        radius: ["35%", "55%"],
+                        center: ["50%", "38%"],
+                    },
+                ],
+            },
+        },
+    ],
         };
     const weekActivity = {
         xAxis: {
@@ -644,30 +706,60 @@ export function Dashboard() {
     useEffect(() => {
         const fetchDashboardData = async () => {
             if (!user?.userId) return;
-            setLoading(true);
-            try {
-                const [projectInfo, taskInfo, assigneeInfo, weeklyActivity, priorityDistribution] = await Promise.all([
-                    GetProjectInfo(user.userId).catch(() => null),
-                    getTodayUpcomingTaskInfo(user.userId).catch(() => null),
-                    getProjectAssigneeInfo(user.userId).catch(() => null),
-                    getWeeklyActivity(user.userId).catch(() => null),
-                    getPriorityCount(user.userId).catch(() => null)
+            setLoading(true)
+            setProjectLoading(true);
+            setTaskLoading(true);
+            setAssigneeLoading(true);
+            setWeeklyLoading(true);
+            setPriorityLoading(true);
+            try{
+                const results = await Promise.allSettled([
+                    GetProjectInfo(user.userId),
+                    getTodayUpcomingTaskInfo(user.userId),
+                    getProjectAssigneeInfo(user.userId),
+                    getWeeklyActivity(user.userId),
+                    getPriorityCount(user.userId)
                 ]);
-
-                if (projectInfo) setResponse(projectInfo.result);
-                if (taskInfo) setTasks(taskInfo.result);
-                if (assigneeInfo) setProjects(assigneeInfo.result || []);
-                if (weeklyActivity) setWeeklyActivity(weeklyActivity.result || []);
-                if (priorityDistribution) setPriorityDistribution(priorityDistribution.result || []);
-            } catch (err) {
-                console.error("Failed to load dashboard data", err);
-            } finally {
-                setLoading(false);
+                // Project Info
+                if (results[0].status === "fulfilled") {
+                    setResponse(results[0].value.result);
+                }
+                setProjectLoading(false);
+                // Task Info
+                if (results[1].status === "fulfilled") {
+                    setTasks(results[1].value.result);
+                }
+                setTaskLoading(false);
+                // Assignee Info
+                if (results[2].status === "fulfilled") {
+                    setProjects(results[2].value.result || []);
+                }
+                setAssigneeLoading(false);
+                // Weekly Activity
+                if (results[3].status === "fulfilled") {
+                    setWeeklyActivity(results[3].value.result || []);
+                }
+                setWeeklyLoading(false);
+                // Priority Distribution
+                if (results[4].status === "fulfilled") {
+                    setPriorityDistribution(
+                        results[4].value.result || []
+                    );
+                }
+                setPriorityLoading(false);
+            }catch(err)
+            {
+                console.log(err)
+            }finally{
+                setLoading(false)
             }
         };
-
         fetchDashboardData();
     }, [user?.userId]);
+
+    if (loading) {
+        return <Loading message="Loading dashboard..." />;
+    }
     return (
         <div className={styles.container}>
             {/* Greeting */}
@@ -690,80 +782,96 @@ export function Dashboard() {
             </div>
             {/* 4 cards */}
             <div className={styles.cards}>
-                <div className={styles.card}>
-                    <div className={styles.logo}>
-                        <LayerRegular fontSize={30} style={{color:"#4F39F6"}}/>
-                    </div>
-                    <Text size={400} weight="semibold"  style={{color:"var(--permanent-text-color)", fontSize:"12"}}>Assigned Project</Text>
-                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.assignedProjects ?? 0}</Text>
-                </div>
-                <div className={styles.card}>
-                    <div className={styles.logo} style={{ background: "#d4f5ea" }}>
-                        <ArrowTrendingRegular fontSize={30} style={{color:"#009966"}}/>
-                    </div>
-                    <Text size={400} weight="semibold" style={{color:"var(--permanent-text-color)", fontSize:"12"}} >Assigned Tasks</Text>
-                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.assignedTasks ?? 0}</Text>
-                </div>
-                <div className={styles.card}>
-                    <div className={styles.logo} style={{ background: "#d6ebf7"}}>
-                        <TargetRegular fontSize={30} style={{color:"#0084D1"}}/>
-                    </div>
-                    <Text size={400} weight="semibold" style={{color:"var(--permanent-text-color)",fontSize:"12"}} >In Progress Tasks</Text>
-                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.inProgressTasks ?? 0}</Text>
-                </div>
-                <div className={styles.card}>
-                    <div className={styles.logo} style={{ background: "#e3d9f0", }}>
-                        <CheckmarkCircleRegular fontSize={30} style={{color:"#7F22FE"}}/>
-                    </div>
-                    <Text size={400} weight="semibold" style={{color:"var(--permanent-text-color)",fontSize:"12"}}>Completed Tasks</Text>
-                    <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.completedTasks ?? 0}</Text>
-                </div>
+                {
+                    projectLoading ? (
+                        <Loading message="Loading..." />
+                    ):(
+                        <>
+                        <div className={styles.card}>
+                            <div className={styles.logo}>
+                                <LayerRegular fontSize={30} style={{color:"#4F39F6"}}/>
+                            </div>
+                            <Text size={400} weight="semibold"  style={{color:"var(--permanent-text-color)", fontSize:"12"}}>Assigned Project</Text>
+                            <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.assignedProjects ?? 0}</Text>
+                        </div>
+                        <div className={styles.card}>
+                            <div className={styles.logo} style={{ background: "#d4f5ea" }}>
+                                <ArrowTrendingRegular fontSize={30} style={{color:"#009966"}}/>
+                            </div>
+                            <Text size={400} weight="semibold" style={{color:"var(--permanent-text-color)", fontSize:"12"}} >Assigned Tasks</Text>
+                            <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.assignedTasks ?? 0}</Text>
+                        </div>
+                        <div className={styles.card}>
+                            <div className={styles.logo} style={{ background: "#d6ebf7"}}>
+                                <TargetRegular fontSize={30} style={{color:"#0084D1"}}/>
+                            </div>
+                            <Text size={400} weight="semibold" style={{color:"var(--permanent-text-color)",fontSize:"12"}} >In Progress Tasks</Text>
+                            <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.inProgressTasks ?? 0}</Text>
+                        </div>
+                        <div className={styles.card}>
+                            <div className={styles.logo} style={{ background: "#e3d9f0", }}>
+                                <CheckmarkCircleRegular fontSize={30} style={{color:"#7F22FE"}}/>
+                            </div>
+                            <Text size={400} weight="semibold" style={{color:"var(--permanent-text-color)",fontSize:"12"}}>Completed Tasks</Text>
+                            <Text size={800} weight="bold" className={styles.primaryText} style={{fontSize:"24"}}>{response?.completedTasks ?? 0}</Text>
+                        </div>
+                        </>
+                    )
+                }
             </div>
             {/* upcoming and in-progress tasks */}
             <div className={styles.taskSection}>
-            <div>
-                <div className={styles.sectionHeader}>
-                    <Text weight="semibold" style={{fontSize:"15px"}}>
-                        Today's Tasks
-                    </Text>
-                    <Text size={200} className={styles.secondaryText} weight="semibold">
-                        {formattedDate}
-                    </Text>
-                </div>
-                <div className={`${styles.card1} ${styles.todayCard}`}>
-                        {loading ? (
-                            <div className={styles.emptyTask}>
-                                <span className={styles.secondaryText}>Loading tasks...</span>
+                {
+                    taskLoading?(
+                        <Loading message="Loading..." />
+                    ):(
+                        <>
+                        <div>
+                            <div className={styles.sectionHeader}>
+                                <Text weight="semibold" style={{fontSize:"15px"}}>
+                                    Today's Tasks
+                                </Text>
+                                <Text size={200} className={styles.secondaryText} weight="semibold">
+                                    {formattedDate}
+                                </Text>
                             </div>
-                        ) : !tasks?.todayTasks || tasks.todayTasks.length === 0 ? (
-                            <div className={styles.emptyTask}>
-                                <CheckmarkCircleRegular fontSize={30} style={{color:"#11d100"}}/>
-                                <span className={styles.secondaryText}>No tasks due today</span>
+                            <div className={`${styles.card1} ${styles.todayCard}`}>
+                                    {loading ? (
+                                        <div className={styles.emptyTask}>
+                                            <span className={styles.secondaryText}>Loading tasks...</span>
+                                        </div>
+                                    ) : !tasks?.todayTasks || tasks.todayTasks.length === 0 ? (
+                                        <div className={styles.emptyTask}>
+                                            <CheckmarkCircleRegular fontSize={30} style={{color:"#11d100"}}/>
+                                            <span className={styles.secondaryText}>No tasks due today</span>
+                                        </div>
+                                    ) : (
+                                        tasks?.todayTasks?.map(task => (
+                                            <div
+                                                key={task.id}
+                                                className={styles.deadline}
+                                            >
+                                                <div className={styles.deadlineInfo}>
+                                                    <span className={styles.title}>
+                                                        {task.title}
+                                                    </span>
+
+                                                    <span className={styles.project}>
+                                                        {task.projectName}
+                                                    </span>
+                                                </div>
+
+                                                <ChevronRightRegular
+                                                    className={styles.icon}
+                                                />
+                                            </div>
+                                        ))
+                                    )}
                             </div>
-                        ) : (
-                            tasks?.todayTasks?.map(task => (
-                                <div
-                                    key={task.id}
-                                    className={styles.deadline}
-                                >
-                                    <div className={styles.deadlineInfo}>
-                                        <span className={styles.title}>
-                                            {task.title}
-                                        </span>
-
-                                        <span className={styles.project}>
-                                            {task.projectName}
-                                        </span>
-                                    </div>
-
-                                    <ChevronRightRegular
-                                        className={styles.icon}
-                                    />
-                                </div>
-                            ))
-                        )}
-                </div>
-            </div>
+                        </div>
+                        </>
+                    )
+                }
             <div>
                 <div className={styles.sectionHeader}>
                     <Text weight="semibold" style={{fontSize:"15px"}}> Upcoming Deadlines</Text>
@@ -816,7 +924,12 @@ export function Dashboard() {
             </div>
             {/* project progress with assignee */}
             <div className={styles.projectProgressSection}>
-                    <div className={styles.sectionHeader}>
+                {
+                    assigneeLoading?(
+                         <Loading message="Loading..." />
+                    ):(
+                        <>
+                                            <div className={styles.sectionHeader}>
                         <Text weight="semibold" style={{fontSize:"15px"}}> Project Progress </Text>
                         <Button appearance="subtle">
                         View all projects
@@ -910,40 +1023,61 @@ export function Dashboard() {
                         </div>
                         )))}
                     </div>
+                        </>
+                    )
+                }
+
             </div>
             {/*ask Status Distribution and Weekly Activity */}
             <div className={styles.analytics}>
-                <div className={styles.card}>
-                    <Text weight="semibold" style={{fontSize:"15px", color:"var(--text-primary)"}}>Task Status Distribution</Text>
-                    <span style={{fontSize:"12px", color:"var(--permanent-text-color)"}}>Breakdown of all {response?.assignedTasks ?? 0} assigned tasks</span>
-                    <ReactECharts option={taskStatus}
-                        style={{ height: "300px", width: "100%" }}
-                    />
-                </div>
-                <div className={styles.card}>
-                    <Text weight="semibold" style={{fontSize:"15px", color:"var(--text-primary)"}}>Weekly Activity</Text>
-                    <span style={{fontSize:"12px", color:"var(--permanent-text-color)"}}>Tasks completed vs. started — last 8 weeks</span>
-                    <ReactECharts option={weekActivity}
-                        style={{ height: "300px", width: "100%" }}
-                    />
-                </div>
+                {
+                    weeklyLoading?(
+                        <Loading message="Loading..." />
+                    ):(
+                        <>
+                        <div className={styles.card}>
+                            <Text weight="semibold" style={{fontSize:"15px", color:"var(--text-primary)"}}>Task Status Distribution</Text>
+                            <span style={{fontSize:"12px", color:"var(--permanent-text-color)"}}>Breakdown of all {response?.assignedTasks ?? 0} assigned tasks</span>
+                            <ReactECharts option={taskStatus}
+                                style={{ height: "300px", width: "100%" }}
+                            />
+                        </div>
+                        <div className={styles.card}>
+                            <Text weight="semibold" style={{fontSize:"15px", color:"var(--text-primary)"}}>Weekly Activity</Text>
+                            <span style={{fontSize:"12px", color:"var(--permanent-text-color)"}}>Tasks completed vs. started — last 8 weeks</span>
+                            <ReactECharts option={weekActivity}
+                                style={{ height: "300px", width: "100%" }}
+                            />
+                        </div>
+                        </>
+                    )
+                }
             </div>
             {/* prority and status distribution */}
             <div className={styles.Priorityanalytics}>
-                <div className={styles.card}>
-                    <Text weight="semibold" style={{fontSize:"15px", color:"var(--text-primary)"}}>Priority Breakdown</Text>
-                    <span style={{fontSize:"12px", color:"var(--permanent-text-color)"}}>Number of tasks by urgency level</span>
-                    <ReactECharts option={priorityDistributionOption}
-                        style={{ height: "300px", width: "100%" }}
-                    />
-                </div>
-                <div className={styles.card}>
-                    <Text weight="semibold" style={{fontSize:"15px", color:"var(--text-primary)"}}>Project Workload Distribution</Text>
-                    <span style={{fontSize:"12px", color:"var(--permanent-text-color)"}}>Tasks assigned to each project</span>
-                    <ReactECharts option={workloadDistributionOption}
-                        style={{ height: "300px", width: "100%" }}
-                    />
-                </div>
+                {
+                    priorityLoading?(
+                        <Loading message="Loading..." />
+                    ):(
+                        <>
+                          <div className={styles.card}>
+                            <Text weight="semibold" style={{fontSize:"15px", color:"var(--text-primary)"}}>Priority Breakdown</Text>
+                            <span style={{fontSize:"12px", color:"var(--permanent-text-color)"}}>Number of tasks by urgency level</span>
+                            <ReactECharts option={priorityDistributionOption}
+                                style={{ height: "300px", width: "100%" }}
+                            />
+                        </div>
+                        <div className={styles.card}>
+                            <Text weight="semibold" style={{fontSize:"15px", color:"var(--text-primary)"}}>Project Workload Distribution</Text>
+                            <span style={{fontSize:"12px", color:"var(--permanent-text-color)"}}>Tasks assigned to each project</span>
+                            <ReactECharts option={workloadDistributionOption}
+                                style={{ height: "300px", width: "100%" }}
+                            />
+                        </div>
+                        </>
+                    )
+                }
+
             </div>
         </div>
     );

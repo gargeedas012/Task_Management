@@ -14,9 +14,9 @@ import {
 import React, { useEffect } from "react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAppSelector } from "../app/hooks";
-import { getTask } from "../api/authApi";
-import { type NewTodo } from "../types/todo";
+import { useAppSelector } from "../../app/hooks";
+import { getTask } from "../../api/authApi";
+import { type NewTodo } from "../../types/todo";
 
 const useStyles = makeStyles({
     page: {

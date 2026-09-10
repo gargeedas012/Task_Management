@@ -18,8 +18,8 @@ api.interceptors.response.use(
 
             try {
                 // Call refresh token endpoint
-                await axios.post(
-                    "http://localhost:5148/api/Auth/refresh",
+               await axios.post(
+                    `${import.meta.env.VITE_API_URL}/Auth/refresh`,
                     {},
                     { withCredentials: true }
                 );
