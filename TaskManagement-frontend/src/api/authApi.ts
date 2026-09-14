@@ -7,8 +7,15 @@ import type { NewTodo, Todo, TodoByDateDto, TodoListResponse, TodoResponse } fro
 import api from './axios'
 
 
-export const registerUser = async (data: RegisterRequest): Promise<ApiResponse<TokenResponseDto>> => {
-    const response = await api.post("/Auth/register", data);
+export const registerUser = async (data: RegisterRequest ,ProfilePic?:File |null ): Promise<ApiResponse<TokenResponseDto>> => {
+    const formData=new FormData();
+    formData.append("Username", data.username);
+    formData.append("Email", data.email);
+    formData.append("Password", data.password);
+    if (ProfilePic) {
+        formData.append("Image", ProfilePic);
+    }
+    const response = await api.post("/Auth/register", formData );
     return response.data;
 };
 export const loginUser = async (data: LoginRequest): Promise<ApiResponse<TokenResponseDto>> => {

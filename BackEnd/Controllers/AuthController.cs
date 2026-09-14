@@ -1,6 +1,7 @@
 using BackEnd.Common;
 using BackEnd.DTOs;
 using BackEnd.Interfaces;
+using BackEnd.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BackEnd.Controllers
@@ -10,21 +11,29 @@ namespace BackEnd.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        public AuthController(IAuthService authService)
+        private readonly CloudinaryImageStorageService _imageStorageService;
+        public AuthController(IAuthService authService , CloudinaryImageStorageService imageStorage)
         {
             _authService = authService;
+            _imageStorageService = imageStorage;
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<ApiResponse<TokenResponseDto>>> Register(RegisterDto register)
+        public async Task<ActionResult<ApiResponse<TokenResponseDto>>> Register([FromForm] RegisterDto register,IFormFile? Image )
         {
             var response = new ApiResponse<TokenResponseDto>();
             try
             {
-               var result= await _authService.RegisterAsync(register);
+                string? profilepicurl = null;
+                if (Image != null && Image.Length >0)
+                {
+                    profilepicurl=await _imageStorageService.UploadImage(Image);
+
+                }
+                var result= await _authService.RegisterAsync(register,profilepicurl);
                 response.Result = result;
                 return Ok(response);
-            }
+            } 
             catch (Exception ex)
             {
                 response.Status = false;

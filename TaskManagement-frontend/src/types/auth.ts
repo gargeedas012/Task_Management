@@ -25,6 +25,7 @@ export interface TokenResponseDto {
   username: string;
   userId : string;
   email: string;
+  profilePic:string;
   role: string;
 }
 

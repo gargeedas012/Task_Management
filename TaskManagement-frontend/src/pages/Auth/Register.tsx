@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button, Card,Field,Input,Text, Title3, Toast, ToastBody, ToastTitle, useToastController,  Avatar, makeStyles} from "@fluentui/react-components";
 import { Link } from "react-router-dom";
 import { registerUser } from "../../api/authApi";
 import { getApiErrorMessage } from "../../api/apiError";
 import { useAppDispatch } from "../../app/hooks";
 import { login } from "../../features/auth/authActions";
-import { PersonRegular, MailRegular, LockClosedRegular, EyeRegular, EyeOffRegular} from "@fluentui/react-icons";
+import { PersonRegular, MailRegular, LockClosedRegular, EyeRegular, EyeOffRegular, Attach24Regular} from "@fluentui/react-icons";
 
 const useStyles = makeStyles({
     container: {
@@ -109,6 +109,8 @@ function Register() {
     const { dispatchToast  }= useToastController("app-toaster")
     const dispatch=useAppDispatch()
     const styles = useStyles();
+    const [profilePicture, setProfilePicture] = useState<File | null>(null);
+    const fileInputRef= useRef<HTMLInputElement>(null);
     const HandleError = (message: string) => {
         dispatchToast(
             <Toast>
@@ -138,13 +140,14 @@ function Register() {
     ) => {
         e.preventDefault();
         setSuccess("");
+        console.log(profilePicture);
         try {
             setLoading(true);
             const response=await registerUser({
                 username,
                 email,
                 password,
-            });
+            },profilePicture);
             setSuccess("Registration successful!");
             HandleSuccess("You Have Successfully Register")
             await dispatch(login({ 
@@ -216,6 +219,27 @@ function Register() {
                             {success}
                         </Text>
                     )}
+                    <Field label="Upload Profile Pic" className={styles.field}>
+                         <Button icon={<Attach24Regular/>}  onClick={() => fileInputRef.current?.click()}>
+                          {
+                            profilePicture ? (
+                                profilePicture.name
+                            ):(" Click Here to Upload")
+                          }
+                     <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                                setProfilePicture(file);
+                            }
+                            }}
+                        />
+                    </Button>
+                    </Field>
                     <Button appearance="primary" type="submit"  disabled={loading} className={styles.registerButton}>
                         {loading ? "Creating Account..." : "Register" }
                     </Button>

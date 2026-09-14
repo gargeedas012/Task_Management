@@ -92,9 +92,13 @@ return (
         <Card className={styles.profileCard}>
             <div className={styles.profileHeader}>
                 <Avatar
-                    image={{
-                        src: "https://api.dicebear.com/9.x/thumbs/svg?seed=user1",
-                    }}
+                image={
+                        user?.profilePic
+                            ? { src: user.profilePic }
+                            : {
+                                src: "https://api.dicebear.com/9.x/thumbs/svg?seed=user1"
+                            }
+                    }
                     className={styles.avatar}
                 />
                 <div className={styles.userInfo}>

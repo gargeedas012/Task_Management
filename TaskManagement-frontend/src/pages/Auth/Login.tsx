@@ -104,6 +104,7 @@ export function Login() {
                 username: response.result.username,
                 userId: response.result.userId,
                 email: response.result.email,
+                profilePic:response.result.profilePic,
                 role: response.result.role
             }))
             setTimeout(() => {

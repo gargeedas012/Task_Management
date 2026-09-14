@@ -53,7 +53,7 @@ namespace BackEnd.DTOs
         public int TodoTasks { get; set; }
         public int ReviewTasks { get; set; }
         public string Status { get; set; } = string.Empty;
-        public List<string> Members { get; set; } = new();
+        public List<string> Members { get; set; } = [];
     }
 
     public class ProjectIdNameInfo
@@ -67,9 +67,9 @@ namespace BackEnd.DTOs
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
-        public string Username { get; set; }
-        public string Role { get; set; }
+        public string? Id { get; set; }
+        public  string? Username { get; set; }
+        public  string? Role { get; set; }
     }
 
     public class GetAllProjectsInfo

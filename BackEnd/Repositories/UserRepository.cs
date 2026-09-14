@@ -2,6 +2,7 @@
 using BackEnd.Interfaces;
 using BackEnd.Models;
 using BackEnd.Settings;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -40,14 +41,11 @@ namespace BackEnd.Repositories
                     t => t.Token == refreshToken
                 ))
                 .FirstOrDefaultAsync();
-            if (user == null)
-            {
-                return null;
-            }
+            
             return user;
         }
 
-        public async Task<ProjectCountDto?> GetProjectInfo(string UserId)
+        public async Task<ProjectCountDto> GetProjectInfo(string UserId)
         {
             var result = await _usersCollection
                 .Aggregate().Match(new BsonDocument{

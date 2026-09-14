@@ -77,6 +77,7 @@ namespace BackEnd.Services
                 Username=user.Username,
                 UserId=user.Id.ToString(),
                 Email=user.Email,
+                ProfilePic=user.ProfilePicUrl,
                 Role=user.Role
             };
 
@@ -146,7 +147,7 @@ namespace BackEnd.Services
             return newAccessToken;
         }
 
-        public async Task<TokenResponseDto> RegisterAsync(RegisterDto register)
+        public async Task<TokenResponseDto> RegisterAsync(RegisterDto register, string? Image)
         {
             var existing = await _userService.GetByEmailAsync(register.Email);
             if (existing != null)
@@ -157,11 +158,10 @@ namespace BackEnd.Services
             {
                 Username = register.Username,
                 Email = register.Email,
-
                 Password = BCrypt.Net.BCrypt.HashPassword(
                     register.Password
                 ),
-
+                ProfilePicUrl=Image,
                 Role = "User"
             };
             await _userService.CreateAsync(user);
@@ -173,12 +173,6 @@ namespace BackEnd.Services
                 Email = finduser.Email,
                 Role = finduser.Role
             };
-            //var login = new LoginDto
-            //{
-            //    Email = register.Email,
-            //    Password = register.Password
-            //};
-            //await LoginAsync(login);
         }
 
         public async Task<TokenResponseDto> GetCurrentUserAsync()
@@ -303,6 +297,7 @@ namespace BackEnd.Services
                     Username = payload.Name,
                     Email = payload.Email,
                     Password = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()),
+                    ProfilePicUrl=payload.Picture,
                     Role = "User"
                 };
                 await _userService.CreateAsync(user);
@@ -353,6 +348,7 @@ namespace BackEnd.Services
                 Username = user.Username,
                 UserId = user.Id.ToString(),
                 Email = user.Email,
+                ProfilePic=user.ProfilePicUrl,
                 Role = user.Role
             };
         }

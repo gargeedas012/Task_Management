@@ -48,14 +48,14 @@ namespace BackEnd.DTOs
     public class TodoByDateDto
     {
         public string Date { get; set; } = string.Empty;
-        public List<Todo> Tasks { get; set; } = new();
+        public List<Todo> Tasks { get; set; } = [];
         public long TotalTaskCount { get; set; }
     }
 
     [BsonIgnoreExtraElements]
     public class TodoListResponse
     {
-        public List<Todo> Todos { get; set; } = new();
+        public List<Todo> Todos { get; set; } = [];
         public long TotalCount { get; set; }
     }
 
@@ -89,8 +89,8 @@ namespace BackEnd.DTOs
 
     public class TaskDashboardDto
     {
-        public List<TaskInfoDto> TodayTasks { get; set; } = new();
-        public List<TaskInfoDto> UpcomingTasks { get; set; } = new();
+        public List<TaskInfoDto> TodayTasks { get; set; } = [];
+        public List<TaskInfoDto> UpcomingTasks { get; set; } = [];
     }
 
     public class WeeklyActivityDto
@@ -105,19 +105,19 @@ namespace BackEnd.DTOs
     public class TaskPriorityGroupDto
     {
         public int Status { get; set; }
-        public List<TaskDto> Tasks { get; set; } = new();
+        public List<TaskDto> Tasks { get; set; } = [];
     }
     public class TaskDto
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
+        public  string Title { get; set; }= string.Empty;
+        public  string Description { get; set; }=string.Empty;
         public TaskStatus Status { get; set; }
         public TaskPriority Priority { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime DueDate { get; set; }
-        public string ProjectName { get; set; }
+        public string ProjectName { get; set; } = string.Empty;
     }
 }

@@ -56,6 +56,7 @@ namespace BackEnd.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<ApiResponse<string>>> CreateAsync(Project project)
         {

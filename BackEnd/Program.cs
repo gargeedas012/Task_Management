@@ -9,9 +9,6 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 
-
-
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services
@@ -31,6 +28,8 @@ builder.Services.Configure<TodoDatabaseSettings>(
     builder.Configuration.GetSection("TodoDatabase"));
 // Google Settings
 builder.Services.Configure<GoogleSettings>(builder.Configuration.GetSection("Google"));
+//cloudinary Settings
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 
 
 // Dependency Injection
@@ -42,6 +41,7 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<CloudinaryImageStorageService>();
 builder.Services.AddHttpContextAccessor();
 
 
