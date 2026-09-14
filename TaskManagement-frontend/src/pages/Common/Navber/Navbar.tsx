@@ -3,6 +3,7 @@ import { WeatherMoonRegular, AlertRegular, WeatherSunnyRegular } from "@fluentui
 import { useTheme } from "../../../../context/ThemeContext";
 import { useLocation } from "react-router-dom";
 import { useLayoutEffect, useState } from "react";
+import { useAppSelector } from "../../../app/hooks";
 
 const useStyles = makeStyles({
     navbar: {
@@ -40,7 +41,8 @@ const useStyles = makeStyles({
 export function Navbar() {
     const styles = useStyles();
     const {theme, toggleTheme}=useTheme();
-    const [ title, setTitle ] = useState("DashBoard");   
+    const [ title, setTitle ] = useState("DashBoard");  
+    const user=useAppSelector((state)=>state.auth.user)
     const location = useLocation();
     useLayoutEffect(() => {
         contentchecker();
@@ -87,7 +89,17 @@ export function Navbar() {
             <div className={styles.actions}>
                 <Button appearance="subtle" icon={theme==="light"? <WeatherSunnyRegular /> : <WeatherMoonRegular />} className={styles.iconButton}  onClick={toggleTheme}/>
                 <Button appearance="subtle" icon={<AlertRegular />}  className={styles.iconButton}/>
-                <Avatar name="AJ" className={styles.avatar} />
+                <Avatar
+                image={
+                    user?.profilePic ? (
+                    {
+                        src: user.profilePic
+                    }
+                    ):{
+                        src:"https://api.dicebear.com/9.x/thumbs/svg?seed=user1"
+                    }
+                }
+                />
             </div>
         </nav>
     );

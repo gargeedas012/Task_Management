@@ -131,7 +131,17 @@ export function Sidebar() {
             </NavDrawerBody>
             <div style={{ borderTop: "1px solid var(--border-color)", padding: "18px 16px", display: "flex", alignItems: "center", gap: "12px" }} >
                 {/* Avatar */}
-                <Avatar image={{ src: "https://api.dicebear.com/9.x/thumbs/svg?seed=user1" }} className={styles.logo} />
+                 <Avatar className={styles.logo}
+                image={
+                    user?.profilePic ? (
+                    {
+                        src: user.profilePic
+                    }
+                    ):{
+                        src:"https://api.dicebear.com/9.x/thumbs/svg?seed=user1"
+                    }
+                }
+                />
                 {/* User Information */}
                 <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
                     <span style={{ fontSize: "13px", fontWeight: 600 , color:"var(--permanent-text-color)"}}>
