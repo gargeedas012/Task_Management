@@ -35,6 +35,7 @@ function AuthInitializer({
                         username: user.result.username,
                         userId:user.result.userId,
                         email: user.result.email,
+                        profilePic:user.result.profilePic,
                         role: user.result.role,
                     })
                 );
@@ -49,6 +50,7 @@ function AuthInitializer({
                             username: user.result.username,
                             userId:user.result.userId,
                             email: user.result.email,
+                            profilePic:user.result.profilePic,
                             role: user.result.role,
                         })
                     );
