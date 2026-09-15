@@ -4,7 +4,7 @@ import { useState } from "react";
 import { login } from '../../features/auth/authActions';
 import { Button, Card, Field, Input, Text, Title3, Toast, ToastBody, ToastTitle, useToastController } from "@fluentui/react-components";
 import { getApiErrorMessage } from "../../api/apiError";
-import { GoogleLogin } from "@react-oauth/google";
+import {  useGoogleLogin } from "@react-oauth/google";
 import { GoogleLoginFun } from "../../api/authApi";
 import { loginSuccess } from "../../features/auth/authSlice";
 import { MailRegular ,LockClosedRegular , EyeRegular, EyeOffRegular,} from "@fluentui/react-icons";
@@ -93,13 +93,18 @@ export function Login() {
              seterror("Email and Password is required");
         }
     };
-    const handleGoogleLogin = async (credentialResponse: any) => {
-        try {
-            const response = await GoogleLoginFun(credentialResponse);
 
-            console.log(response);
+    const googleLogin = useGoogleLogin({
+    flow: "auth-code",
+    scope: "openid email profile",
 
-            HandleSuccess("You successfully logged in with Google");
+    onSuccess: async (codeResponse) => {
+        console.log(codeResponse.code);
+
+        // Send authorization code to your backend
+        const response = await GoogleLoginFun(codeResponse.code);
+        console.log("Google response:", response);
+         HandleSuccess("You successfully logged in with Google");
             dispatch(loginSuccess({
                 username: response.result.username,
                 userId: response.result.userId,
@@ -110,11 +115,12 @@ export function Login() {
             setTimeout(() => {
                 navigate("/dashboard");
             }, 3000);
+    },
 
-        } catch (error: any) {
-            HandleError(getApiErrorMessage(error));
-        }
-    };
+    onError: () => {
+        HandleError("Google login failed");
+    }
+});
     return (
         <div className={styles.container} >
             <Card className={styles.card}>
@@ -188,7 +194,7 @@ export function Login() {
                 </div>
                 {/* Google Login */}
                 <div style={{ display: "flex",justifyContent: "center",marginBottom: "25px" }}>
-                    <GoogleLogin onSuccess={handleGoogleLogin}
+                    {/* <GoogleLogin onSuccess={handleGoogleLogin}
                         onError={() => {
                             HandleError("Google login failed");
                         }}
@@ -196,7 +202,10 @@ export function Login() {
                         size="large"
                         text="continue_with"
                         shape="rectangular"
-                    />
+                    /> */}
+                    <button onClick={() => googleLogin()}>
+                        Continue with Google
+                    </button>
                 </div>
                 {/* Register */}
                 <div style={{ textAlign: "center", paddingTop: "5px", }}>

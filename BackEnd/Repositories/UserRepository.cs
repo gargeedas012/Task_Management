@@ -2,7 +2,6 @@
 using BackEnd.Interfaces;
 using BackEnd.Models;
 using BackEnd.Settings;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -32,6 +31,12 @@ namespace BackEnd.Repositories
                 x => x.Id == id,
                 user
             );
+        }
+        public async Task UpdateUserRefreshToken(string id, RefreshTokenResponseDto refreshTokenRequest)
+        {
+            var update=Builders<User>.Update.Push(X=>X.RefreshTokens, refreshTokenRequest);
+            await _usersCollection.UpdateOneAsync(x=>x.Id==id, update);
+
         }
         public async Task<User> GetByRefreshTokenAsync(string refreshToken)
         {

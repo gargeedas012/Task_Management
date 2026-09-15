@@ -1,5 +1,5 @@
 import { makeStyles, Avatar, NavDrawer, NavDrawerBody, NavDrawerHeader, NavItem, Text } from "@fluentui/react-components";
-import { HomeRegular, FolderRegular, TaskListSquareAddRegular, SettingsRegular, LayerRegular, CalendarRegular } from "@fluentui/react-icons";
+import { HomeRegular, FolderRegular, TaskListSquareAddRegular, SettingsRegular, LayerRegular, CalendarRegular, PeopleRegular, DataBarVerticalRegular } from "@fluentui/react-icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../../app/hooks";
 
@@ -113,21 +113,44 @@ export function Sidebar() {
                 <div style={{ padding: "8px 16px", fontSize: "10px", fontWeight: "bold", color: "#6b7280", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "4px" }}>
                     Main Menu
                 </div>
-                <NavItem value="/dashboard" className={styles.navitem} icon={<HomeRegular fontSize={24} />} onClick={() => navigate("/dashboard")}>
-                    <span>Dashboard</span>
-                </NavItem>
-                <NavItem value="/projects" className={styles.navitem} icon={<FolderRegular fontSize={24} />} onClick={() => navigate("/projects")} >
-                    <span>Projects</span>
-                </NavItem>
-                <NavItem value="/tasks" className={styles.navitem} icon={<TaskListSquareAddRegular fontSize={24} />} onClick={() => navigate("/tasks")} >
-                    <span >Tasks</span>
-                </NavItem>
-                <NavItem value="/calender" className={styles.navitem} icon={<CalendarRegular  fontSize={24} />} onClick={() => navigate("/calender")}>
-                    <span >Calender</span>
-                </NavItem>
-                <NavItem value="/settings" className={styles.navitem} icon={<SettingsRegular fontSize={24} />} onClick={() => navigate("/settings")}>
-                    <span >Settings</span>
-                </NavItem>
+                {
+                    user?.role==="Admin"?(
+                        <>
+                           <NavItem value="/dashboard" className={styles.navitem}  icon={<HomeRegular fontSize={24} />} onClick={() => navigate("/dashboard")} >
+                                <span>Dashboard</span>
+                            </NavItem>
+                            <NavItem value="/users" className={styles.navitem} icon={<PeopleRegular fontSize={24} />}  onClick={() => navigate("/users")} >
+                                <span>Users</span>
+                            </NavItem>
+                            <NavItem value="/projects" className={styles.navitem} icon={<FolderRegular fontSize={24} />}  onClick={() => navigate("/projects")} >
+                                <span>Projects</span>
+                            </NavItem>
+                            <NavItem value="/reports" className={styles.navitem}  icon={<DataBarVerticalRegular fontSize={24} />}  onClick={() => navigate("/reports")} >
+                                <span>Reports</span>
+                            </NavItem>
+                            <NavItem value="/settings" className={styles.navitem}  icon={<SettingsRegular fontSize={24} />}  onClick={() => navigate("/settings")}  aria-current={  location.pathname === "/settings" ? "page" : undefined } ><Text>Settings</Text>
+                            </NavItem>
+                        </>
+                    ):(
+                        <>
+                         <NavItem value="/dashboard" className={styles.navitem} icon={<HomeRegular fontSize={24} />} onClick={() => navigate("/dashboard")}>
+                            <span>Dashboard</span>
+                        </NavItem>
+                        <NavItem value="/projects" className={styles.navitem} icon={<FolderRegular fontSize={24} />} onClick={() => navigate("/projects")} >
+                            <span>Projects</span>
+                        </NavItem>
+                        <NavItem value="/tasks" className={styles.navitem} icon={<TaskListSquareAddRegular fontSize={24} />} onClick={() => navigate("/tasks")} >
+                            <span >Tasks</span>
+                        </NavItem>
+                        <NavItem value="/calender" className={styles.navitem} icon={<CalendarRegular  fontSize={24} />} onClick={() => navigate("/calender")}>
+                            <span >Calender</span>
+                        </NavItem>
+                        <NavItem value="/settings" className={styles.navitem} icon={<SettingsRegular fontSize={24} />} onClick={() => navigate("/settings")}>
+                            <span >Settings</span>
+                        </NavItem>
+                        </>
+                    )
+                }              
             </NavDrawerBody>
             <div style={{ borderTop: "1px solid var(--border-color)", padding: "18px 16px", display: "flex", alignItems: "center", gap: "12px" }} >
                 {/* Avatar */}
@@ -136,6 +159,7 @@ export function Sidebar() {
                     user?.profilePic ? (
                     {
                         src: user.profilePic
+
                     }
                     ):{
                         src:"https://api.dicebear.com/9.x/thumbs/svg?seed=user1"

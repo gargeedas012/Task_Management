@@ -1,6 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Login } from "./src/pages/Auth/Login";
-import { Dashboard } from "./src/pages/Dashboard/Dashboard";
 import { ProtectedRoute, PublicRoute } from "./src/components/ProtectedRoute";
 import Register from "./src/pages/Auth/Register";
 import { Toaster } from "@fluentui/react-components";
@@ -12,6 +11,7 @@ import TaskList from "./src/pages/Task/TaskList";
 import TaskForm from "./src/pages/Task/TaskForm";
 import {CalendarPage} from "./src/pages/Task/CalendarPage";
 import TaskShow from "./src/pages/Task/Task";
+import { DashboardRedirect } from "./src/components/DashboardRedirect";
 
 function App() {
   return (
@@ -22,7 +22,7 @@ function App() {
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
            <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
             <Route element={<Layout/>}>
-                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/dashboard" element={<ProtectedRoute><DashboardRedirect /></ProtectedRoute>} />
                 <Route path="/projects" element={<ProtectedRoute><ProjectList/></ProtectedRoute>}/>
                 <Route path="/settings" element={<ProtectedRoute><Settings/></ProtectedRoute>}/>
                 <Route path="/tasks" element={<ProtectedRoute><TaskList/></ProtectedRoute>}/>
