@@ -10,5 +10,6 @@ namespace BackEnd.Interfaces
         Task UpdateAsync(string id, User user);
         Task<User> GetByRefreshTokenAsync(string refreshToken);
         Task<ProjectCountDto> GetProjectInfo(string UserId);
+        Task UpdateUserRefreshToken(string id, RefreshTokenResponseDto refreshTokenRequest);
     }
 }

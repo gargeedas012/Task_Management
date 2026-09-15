@@ -34,18 +34,19 @@ export const logoutUser = async (): Promise<void> => {
     await api.post("/Auth/logout");
 };
 export const GoogleLoginFun = async (
-    credentialResponse: any
+    code: string
 ): Promise<ApiResponse<TokenResponseDto>> => {
 
     const response = await api.post(
         "/Auth/google",
         {
-            idToken: credentialResponse.credential
+            code: code
         },
         {
             withCredentials: true
         }
     );
+
     return response.data;
 };
 

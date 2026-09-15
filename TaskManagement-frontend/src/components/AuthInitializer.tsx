@@ -29,7 +29,6 @@ function AuthInitializer({
             try {
                 // First check existing access token
                 const user = await getCurrentUser();
-
                 dispatch(
                     loginSuccess({
                         username: user.result.username,
@@ -44,7 +43,6 @@ function AuthInitializer({
                     // Access token may be expired.
                     // Try refresh token.
                     const user = await refreshToken();
-
                     dispatch(
                         loginSuccess({
                             username: user.result.username,
@@ -69,7 +67,6 @@ function AuthInitializer({
     if (loading) {
         return <Loading message="Checking authentication..." />;
     }
-
     return <>{children}</>;
 }
 

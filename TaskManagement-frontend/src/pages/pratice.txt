@@ -428,3 +428,76 @@ var result = await movies.Aggregate()
     .ToListAsync();
 
   Q11. Find the number of movies for each genre.
+
+
+//redux
+import { configureStore } from '@reduxjs/toolkit';
+import counterReducer from './counterSlice';
+export const store = configureStore({
+  reducer: {
+    counter: counterReducer,
+  },
+});
+
+import { createSlice } from '@reduxjs/toolkit';
+const initialState = {
+  count: 1,
+};
+export const counterSlice = createSlice({
+  name: 'counter',
+  initialState,
+  reducers: {
+    increment: (state) => {
+      state.count += 1;
+    },
+    decrement: (state) => {
+      state.count -= 1;
+    },
+    seecount: (state, action) => {
+      state.count = action.payload;
+    },
+  },
+});
+
+export const { increment, decrement, seecount } = counterSlice.actions;
+export default counterSlice.reducer;
+
+import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { increment, decrement } from './store/counterSlice';
+const Counter = () => {
+  const dispatch = useDispatch();
+  const count = useSelector((state) => state.counter.count);
+  const HandleInClick = () => {
+    dispatch(increment());
+  };
+  const HandleDeClick = () => {
+    dispatch(decrement());
+  };
+  return (
+    <div>
+      <h1>{count}</h1>
+      <button onClick={HandleInClick}>increment</button>
+      <button onClick={HandleDeClick}>Decrement</button>
+    </div>
+  );
+};
+export default Counter;
+
+import React from 'react';
+import './style.css';
+import { store } from './store';
+import { Provider } from 'react-redux';
+import Counter from './Counter';
+import DashBoard from './Dashboard';
+export default function App() {
+  return (
+    <Provider store={store}>
+      <div>
+        <h1>Hello App!</h1>
+        <Counter></Counter>
+        <DashBoard/>
+      </div>
+    </Provider>
+  );
+}

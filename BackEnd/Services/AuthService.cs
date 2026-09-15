@@ -2,9 +2,10 @@
 using BackEnd.Interfaces;
 using BackEnd.Models;
 using BackEnd.Settings;
-using Google.Apis.Auth;
 using Microsoft.Extensions.Options;
-using Microsoft.Win32;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth;
+using Google.Apis.Auth.OAuth2.Flows;
 
 namespace BackEnd.Services
 {
@@ -47,9 +48,8 @@ namespace BackEnd.Services
                 IpAddress = ipAddress ?? ""
 
             };
-            user.RefreshTokens.Add(refreshToken);
-            await _userService.UpdateAsync(user.Id, user);
-                        var httpContext = _httpContextAccessor.HttpContext;
+            await _userService.UpdateUserRefreshToken(user.Id, refreshToken);
+            var httpContext = _httpContextAccessor.HttpContext;
 
             httpContext?.Response.Cookies.Append(
                 "accessToken",
@@ -223,6 +223,7 @@ namespace BackEnd.Services
                 Username = user.Username,
                 UserId = user.Id.ToString(),
                 Email = user.Email,
+                ProfilePic=user.ProfilePicUrl,
                 Role = user.Role
             };
         }
@@ -280,15 +281,38 @@ namespace BackEnd.Services
         }
         public async Task<TokenResponseDto> GoogleLoginAsync(GoogleLoginDto request)
         {
-            var payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken,
+            var flow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
+            {
+                ClientSecrets = new ClientSecrets
+                {
+                    ClientId = _googleSettings.ClientId,
+                    ClientSecret = _googleSettings.ClientSecret,
+                },
+                Scopes = new[]
+                {
+                    "openid",
+                    "email",
+                    "profile"
+                }
+            });
+            var tokenResponse = await flow.ExchangeCodeForTokenAsync(
+                "user",
+                request.Code,
+                _googleSettings.RedirectUri,
+                CancellationToken.None);
+
+            var payload = await GoogleJsonWebSignature.ValidateAsync(
+                tokenResponse.IdToken,
                 new GoogleJsonWebSignature.ValidationSettings
                 {
-                    Audience = new[] { _googleSettings.ClientId }
+                     Audience = new[] { _googleSettings.ClientId }
                 });
-            if(payload == null)
+
+            if (payload == null)
             {
                 throw new Exception("Invalid Google token");
             }
+
             var user= await _userService.GetByEmailAsync(payload.Email);
             if(user == null)
             {
@@ -307,6 +331,11 @@ namespace BackEnd.Services
                 {
                     throw new Exception("Failed to create Google user");
                 }                              
+            }
+            else
+            {
+                // Update Google profile picture for existing user
+                user.ProfilePicUrl = payload.Picture;
             }
             // Generate your application's JWT
             var token = _jwtService.GenerateToken(user);

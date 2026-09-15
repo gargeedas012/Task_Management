@@ -34,5 +34,10 @@ namespace BackEnd.Services
         {
             return _repository.GetProjectInfo(UserId);
         }
+
+        public Task UpdateUserRefreshToken(string id, RefreshTokenResponseDto refreshTokenRequest)
+        {
+            return _repository.UpdateUserRefreshToken(id, refreshTokenRequest);
+        }
     }
 }
