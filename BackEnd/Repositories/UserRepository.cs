@@ -17,6 +17,11 @@ namespace BackEnd.Repositories
             var database = client.GetDatabase(databaseSettings.Value.DatabaseName);
             _usersCollection = database.GetCollection<User>(databaseSettings.Value.UserCollectionName);
         }
+        public async Task<User> GetUserInfo(string userId)
+        {
+            var result=await _usersCollection.Find(x=>x.Id==userId).FirstOrDefaultAsync();
+            return result;
+        }
         public async Task CreateAsync(User user)
         {
             await _usersCollection.InsertOneAsync(user);

@@ -21,6 +21,10 @@ namespace BackEnd.Services
             var claims = new[]
             {
                 new Claim(
+                    "userId",
+                    user.Id
+                ),
+                new Claim(
                     JwtRegisteredClaimNames.Email,
                     user.Email
                     ),

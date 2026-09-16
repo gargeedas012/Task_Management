@@ -1,4 +1,6 @@
 using BackEnd.Authentication;
+using BackEnd.Chatbot.Hubs;
+using BackEnd.Chatbot.Service;
 using BackEnd.DTOs;
 using BackEnd.Interfaces;
 using BackEnd.Repositories;
@@ -22,6 +24,8 @@ builder.Services.AddScoped<IValidator<CreateTodoDto>, CreateTodoValidator>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// SingleR
+builder.Services.AddSignalR();
 
 // MongoDB Settings
 builder.Services.Configure<TodoDatabaseSettings>(
@@ -42,6 +46,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<CloudinaryImageStorageService>();
+builder.Services.AddScoped<ChatService>();
 builder.Services.AddHttpContextAccessor();
 
 
@@ -85,12 +90,11 @@ var app = builder.Build();
 
 app.UseCors("AllowReact");
 
-
 //app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
+app.MapHub<ChatHub>("/chatHub");
 
 app.Run();

@@ -49,7 +49,6 @@ export const GoogleLoginFun = async (
 
     return response.data;
 };
-
 //user
 export const GetProjectInfo = async (userId: string): Promise<ApiResponse<DashboardStats>> => {
     const response = await api.get("/User/GetProjectInfo", { params: { userId } });

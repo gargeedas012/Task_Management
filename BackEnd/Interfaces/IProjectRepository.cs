@@ -14,5 +14,6 @@ namespace BackEnd.Interfaces
         Task<List<ProjectInfoDto>> GetProjectAssigneInfo(string userId);
         Task<List<ProjectIdNameInfo>> GetProjectsNameByUserIdAsync(string userId);
         Task<List<TeamMemberDto>> GetTeamMembersAsync(string projectId, string memberId);
+        Task<Project> GetProjectInfo(string projectId);
     }
 }

@@ -18,6 +18,11 @@ namespace BackEnd.Repositories
             var database= client.GetDatabase(databaseSettings.Value.DatabaseName);
             _projectCollection= database.GetCollection<Project>(databaseSettings.Value.ProjectCollectionName);
         }
+        public async Task<Project> GetProjectInfo(string projectId)
+        {
+            var project = await _projectCollection.Find(x => x.Id == projectId).FirstOrDefaultAsync();
+            return project;
+        }
         public async Task CreateProjectAsync(Project project)
         {
             await _projectCollection.InsertOneAsync(project);
@@ -175,8 +180,6 @@ namespace BackEnd.Repositories
                 .ToListAsync();
             return result;
         }
-
-
         public async Task<List<ProjectInfoDto>> GetProjectAssigneInfo(string userId)
                 {
                     var filter = Builders<Project>.Filter.AnyEq(x => x.ProjectMemberId, userId);

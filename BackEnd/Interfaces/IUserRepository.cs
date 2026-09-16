@@ -5,6 +5,7 @@ namespace BackEnd.Interfaces
 {
     public interface IUserRepository
     {
+        Task<User> GetUserInfo(string userId);
         Task CreateAsync(User user);
         Task<User> GetByEmailAsync(string email);
         Task UpdateAsync(string id, User user);
